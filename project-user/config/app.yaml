@@ -1,0 +1,23 @@
+server:
+  name: "project-user"
+  addr: "127.0.0.1:8080"
+zap:
+  debugFileName: "E:\\闭关\\项目\\gin管理系统\\ms_project\\log_dir\\debug\\project-debug.log"
+  infoFileName: "E:\\闭关\\项目\\gin管理系统\\ms_project\\log_dir\\info\\project-info.log"
+  warnFileName: "E:\\闭关\\项目\\gin管理系统\\ms_project\\log_dir\\error\\project-error.log"
+  maxSize: 500,
+  maxAge: 28,
+  MaxBackups: 3
+redis:
+  host: "localhost"
+  port: 6379
+  password: ""
+  db: 0
+grpc:
+  addr: "127.0.0.1:8881"
+  name: "login"
+  version: "1.0.0"
+  weight: 2
+etcd:
+  addrs:
+    - "127.0.0.1:2379"

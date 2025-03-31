@@ -1,0 +1,28 @@
+{"level":"INFO","time":"2025-03-27T14:56:55.126+0800","caller":"login/handler.go:39","msg":"调用短信平台发送短信"}
+{"level":"INFO","time":"2025-03-27T14:56:55.141+0800","caller":"login/handler.go:45","msg":"发送短信成功"}
+{"level":"INFO","time":"2025-03-27T16:05:17.090+0800","caller":"login/handler.go:39","msg":"调用短信平台发送短信"}
+{"level":"INFO","time":"2025-03-27T16:05:17.102+0800","caller":"login/handler.go:45","msg":"发送短信成功"}
+{"level":"INFO","time":"2025-03-28T14:41:39.020+0800","caller":"login.service.v1/login_service.go:31","msg":"调用短信平台发送短信"}
+{"level":"WARN","time":"2025-03-28T14:41:39.021+0800","caller":"login.service.v1/login_service.go:33","msg":"调用短信平台发送短信warn"}
+{"level":"ERROR","time":"2025-03-28T14:41:39.022+0800","caller":"login.service.v1/login_service.go:34","msg":"调用短信平台发送短信error"}
+{"level":"INFO","time":"2025-03-29T13:51:39.390+0800","caller":"login.service.v1/login_service.go:30","msg":"调用短信平台发送短信"}
+{"level":"WARN","time":"2025-03-29T13:51:39.391+0800","caller":"login.service.v1/login_service.go:32","msg":"调用短信平台发送短信warn"}
+{"level":"ERROR","time":"2025-03-29T13:51:39.391+0800","caller":"login.service.v1/login_service.go:33","msg":"调用短信平台发送短信error"}
+{"level":"INFO","time":"2025-03-30T18:40:53.757+0800","caller":"login.service.v1/login_service.go:31","msg":"调用短信平台发送短信"}
+{"level":"WARN","time":"2025-03-30T18:40:53.757+0800","caller":"login.service.v1/login_service.go:33","msg":"调用短信平台发送短信warn"}
+{"level":"ERROR","time":"2025-03-30T18:40:53.758+0800","caller":"login.service.v1/login_service.go:34","msg":"调用短信平台发送短信error"}
+{"level":"INFO","time":"2025-03-30T19:57:55.809+0800","caller":"login.service.v1/login_service.go:31","msg":"调用短信平台发送短信"}
+{"level":"WARN","time":"2025-03-30T19:57:55.810+0800","caller":"login.service.v1/login_service.go:33","msg":"调用短信平台发送短信warn"}
+{"level":"ERROR","time":"2025-03-30T19:57:55.810+0800","caller":"login.service.v1/login_service.go:34","msg":"调用短信平台发送短信error"}
+{"level":"ERROR","time":"2025-03-31T01:15:30.607+0800","caller":"discovery/discovery.go:120","msg":"register failed","error":"context deadline exceeded"}
+{"level":"ERROR","time":"2025-03-31T01:15:33.610+0800","caller":"discovery/discovery.go:120","msg":"register failed","error":"context deadline exceeded"}
+{"level":"ERROR","time":"2025-03-31T01:15:36.611+0800","caller":"discovery/discovery.go:120","msg":"register failed","error":"context deadline exceeded"}
+{"level":"INFO","time":"2025-03-31T15:30:05.338+0800","caller":"login.service.v1/login_service.go:31","msg":"调用短信平台发送短信"}
+{"level":"WARN","time":"2025-03-31T15:30:05.354+0800","caller":"login.service.v1/login_service.go:33","msg":"调用短信平台发送短信warn"}
+{"level":"ERROR","time":"2025-03-31T15:30:05.359+0800","caller":"login.service.v1/login_service.go:34","msg":"调用短信平台发送短信error"}
+{"level":"INFO","time":"2025-04-01T00:39:51.364+0800","caller":"login.service.v1/login_service.go:31","msg":"调用短信平台发送短信"}
+{"level":"WARN","time":"2025-04-01T00:39:51.365+0800","caller":"login.service.v1/login_service.go:33","msg":"调用短信平台发送短信warn"}
+{"level":"ERROR","time":"2025-04-01T00:39:51.365+0800","caller":"login.service.v1/login_service.go:34","msg":"调用短信平台发送短信error"}
+{"level":"INFO","time":"2025-04-01T00:46:44.459+0800","caller":"login.service.v1/login_service.go:31","msg":"调用短信平台发送短信"}
+{"level":"WARN","time":"2025-04-01T00:46:44.460+0800","caller":"login.service.v1/login_service.go:33","msg":"调用短信平台发送短信warn"}
+{"level":"ERROR","time":"2025-04-01T00:46:44.460+0800","caller":"login.service.v1/login_service.go:34","msg":"调用短信平台发送短信error"}
