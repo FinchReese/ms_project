@@ -39,7 +39,7 @@ func (er *etcdResolver) ResolveNow(resolver.ResolveNowOptions) {
 		addrs = append(addrs, addr)
 	}
 	er.cc.UpdateState(resolver.State{Addresses: addrs})
-	log.Printf("ResolveNow addrs: %v", addrs)
+	log.Printf("ResolveNow addrs: %v\n", addrs)
 }
 
 // Close closes the resolver.
@@ -103,6 +103,7 @@ func (er *etcdResolver) watch() {
 			er.cc.UpdateState(resolver.State{
 				Addresses: addrs,
 			})
+			log.Printf("update addrs: %v\n", addrs)
 		}
 	}
 }

@@ -1,5 +1,5 @@
 server:
-  name: "project-user"
+  name: "project-api"
   addr: "127.0.0.1:80"
 zap:
   debugFileName: "E:\\闭关\\项目\\gin管理系统\\ms_project\\log_dir\\debug\\project-debug.log"

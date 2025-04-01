@@ -15,3 +15,9 @@
 {"level":"ERROR","time":"2025-04-01T00:39:51.365+0800","caller":"login.service.v1/login_service.go:34","msg":"调用短信平台发送短信error"}
 {"level":"WARN","time":"2025-04-01T00:46:44.460+0800","caller":"login.service.v1/login_service.go:33","msg":"调用短信平台发送短信warn"}
 {"level":"ERROR","time":"2025-04-01T00:46:44.460+0800","caller":"login.service.v1/login_service.go:34","msg":"调用短信平台发送短信error"}
+{"level":"WARN","time":"2025-04-01T13:51:42.766+0800","caller":"login.service.v1/login_service.go:33","msg":"调用短信平台发送短信warn"}
+{"level":"ERROR","time":"2025-04-01T13:51:42.771+0800","caller":"login.service.v1/login_service.go:34","msg":"调用短信平台发送短信error"}
+{"level":"WARN","time":"2025-04-01T13:56:04.327+0800","caller":"login.service.v1/login_service.go:33","msg":"调用短信平台发送短信warn"}
+{"level":"ERROR","time":"2025-04-01T13:56:04.328+0800","caller":"login.service.v1/login_service.go:34","msg":"调用短信平台发送短信error"}
+{"level":"WARN","time":"2025-04-01T14:02:59.409+0800","caller":"login.service.v1/login_service.go:33","msg":"调用短信平台发送短信warn"}
+{"level":"ERROR","time":"2025-04-01T14:02:59.409+0800","caller":"login.service.v1/login_service.go:34","msg":"调用短信平台发送短信error"}
