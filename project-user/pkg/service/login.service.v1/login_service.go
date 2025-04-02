@@ -2,21 +2,23 @@ package login_service_v1
 
 import (
 	"context"
-	"go.uber.org/zap"
 	"log"
-	"test.com/project-common"
-	"test.com/project-user/pkg/repo"
-	"test.com/project-user/pkg/model"
-	"test.com/project-common/errs"
 	"time"
+
+	"go.uber.org/zap"
+	common "test.com/project-common"
+	"test.com/project-common/errs"
+	"test.com/project-grpc/user/login"
+	"test.com/project-user/pkg/model"
+	"test.com/project-user/pkg/repo"
 )
 
 type LoginService struct {
-	UnimplementedLoginServiceServer
+	login.UnimplementedLoginServiceServer
 	Cache repo.Cache
 }
 
-func (ls *LoginService) GetCaptcha(ctx context.Context, msg *CaptchaMessage) (*CaptchaResponse, error) {
+func (ls *LoginService) GetCaptcha(ctx context.Context, msg *login.CaptchaMessage) (*login.CaptchaResponse, error) {
 	//1. 获取参数
 	mobile := msg.GetMobile()
 	//2. 验证手机合法性
@@ -39,5 +41,5 @@ func (ls *LoginService) GetCaptcha(ctx context.Context, msg *CaptchaMessage) (*C
 		}
 		log.Println("发送短信成功")
 	}()
-	return &CaptchaResponse{Code: code}, nil
+	return &login.CaptchaResponse{Code: code}, nil
 }

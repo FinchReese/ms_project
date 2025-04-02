@@ -7,10 +7,10 @@ import (
 	"google.golang.org/grpc/resolver"
 	"test.com/project-api/config"
 	"test.com/project-common/service_discover"
-	login_service_v1 "test.com/project-user/pkg/service/login.service.v1"
+	"test.com/project-grpc/user/login"
 )
 
-var LoginServiceClient login_service_v1.LoginServiceClient
+var LoginServiceClient login.LoginServiceClient
 
 func InitUserRpc() {
 	resolver.Register(service_discover.NewEtcdBuilder(config.AppConf.EtcdConf.Addrs))
@@ -18,5 +18,5 @@ func InitUserRpc() {
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
-	LoginServiceClient = login_service_v1.NewLoginServiceClient(conn)
+	LoginServiceClient = login.NewLoginServiceClient(conn)
 }

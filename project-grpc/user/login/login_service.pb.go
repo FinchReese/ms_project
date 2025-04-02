@@ -4,7 +4,7 @@
 // 	protoc        v3.21.9
 // source: login_service.proto
 
-package login_service_v1
+package login
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"

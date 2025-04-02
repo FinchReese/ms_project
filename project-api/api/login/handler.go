@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	common "test.com/project-common"
 	"test.com/project-common/errs"
-	login_service_v1 "test.com/project-user/pkg/service/login.service.v1"
+	"test.com/project-grpc/user/login"
 )
 
 func GetCaptcha(ctx *gin.Context) {
@@ -17,7 +17,7 @@ func GetCaptcha(ctx *gin.Context) {
 	mobile := ctx.PostForm("mobile")
 	c, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
-	rsp, err := LoginServiceClient.GetCaptcha(c, &login_service_v1.CaptchaMessage{Mobile: mobile})
+	rsp, err := LoginServiceClient.GetCaptcha(c, &login.CaptchaMessage{Mobile: mobile})
 	if err != nil {
 		fmt.Printf("err: %v\n", err)
 		code, msg := errs.ParseGrpcError(err)

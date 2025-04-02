@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
 	"test.com/project-common/service_discover"
+	"test.com/project-grpc/user/login"
 	"test.com/project-user/config"
 	"test.com/project-user/pkg/dao"
 	login_service_v1 "test.com/project-user/pkg/service/login.service.v1"
@@ -34,7 +35,7 @@ func InitRouter(r *gin.Engine) {
 
 func RegisterGrpc() *grpc.Server {
 	s := grpc.NewServer()
-	login_service_v1.RegisterLoginServiceServer(s, &login_service_v1.LoginService{Cache: dao.Rc})
+	login.RegisterLoginServiceServer(s, &login_service_v1.LoginService{Cache: dao.Rc})
 	lis, err := net.Listen("tcp", config.AppConf.GrpcConf.Addr)
 	if err != nil {
 		log.Println("cannot listen")

@@ -4,7 +4,7 @@
 // - protoc             v3.21.9
 // source: login_service.proto
 
-package login_service_v1
+package login
 
 import (
 	context "context"
