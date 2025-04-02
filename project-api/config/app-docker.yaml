@@ -1,6 +1,6 @@
 server:
   name: "project-api"
-  addr: "0.0.0.0:80"
+  addr: "project-api:80"
 zap:
   debugFileName: "/logs/debug/project-debug.log"
   infoFileName: "/logs/info/project-info.log"
