@@ -1,5 +1,5 @@
 # 运行项目
-在根目录下打开bash,执行以下命令编译得到可执行文件
+在根目录下打开git bash，执行以下命令编译得到可执行文件
 ```shell
 GOOS=linux GOARCH=amd64 go build -o project-api/target/project-api project-api/main.go
 GOOS=linux GOARCH=amd64 go build -o project-user/target/project-user project-user/main.go
