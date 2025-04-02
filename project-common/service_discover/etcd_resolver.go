@@ -117,12 +117,10 @@ func NewEtcdBuilder(etcdEndpoints []string) *EtcdBuilder {
 }
 
 func (eb *EtcdBuilder) Scheme() string {
-	fmt.Println("call Scheme")
 	return etcdScheme
 }
 
 func (eb *EtcdBuilder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
-	fmt.Println("call Build, target:", target)
 	er := &etcdResolver{
 		target:        target,
 		cc:            cc,
