@@ -13,7 +13,6 @@ import (
 )
 
 func GetCaptcha(ctx *gin.Context) {
-	fmt.Printf("call GetCaptcha\n")
 	result := &common.Result{}
 	mobile := ctx.PostForm("mobile")
 	c, cancel := context.WithTimeout(context.Background(), 2*time.Second)
