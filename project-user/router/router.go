@@ -35,7 +35,7 @@ func InitRouter(r *gin.Engine) {
 
 func RegisterGrpc() *grpc.Server {
 	s := grpc.NewServer()
-	login.RegisterLoginServiceServer(s, &login_service_v1.LoginService{Cache: dao.Rc})
+	login.RegisterLoginServiceServer(s, &login_service_v1.LoginService{Cache: dao.Rc, MemberRepo: dao.MDao, OrganizationRepo: dao.ODao})
 	lis, err := net.Listen("tcp", config.AppConf.GrpcConf.Addr)
 	if err != nil {
 		log.Println("cannot listen")

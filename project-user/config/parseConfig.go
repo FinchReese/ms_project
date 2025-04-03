@@ -1,10 +1,11 @@
 package config
 
 import (
-	"github.com/go-redis/redis/v8"
-	"github.com/spf13/viper"
 	"log"
 	"os"
+
+	"github.com/go-redis/redis/v8"
+	"github.com/spf13/viper"
 	"test.com/project-common/logs"
 )
 
@@ -24,11 +25,20 @@ type EtcdConfig struct {
 	Addrs []string
 }
 
+type MysqlConfig struct {
+	UserName string
+	Password string
+	Host     string
+	Port     int64
+	Db       string
+}
+
 type Config struct {
 	viper      *viper.Viper
 	ServerConf *ServerConfig
 	GrpcConf   *GrpcConfig
-	EtcdConf *EtcdConfig
+	EtcdConf   *EtcdConfig
+	MysqlConf  *MysqlConfig
 }
 
 var AppConf = initConfig()
@@ -49,6 +59,7 @@ func initConfig() *Config {
 	conf.ReadGrpcConfig()
 	conf.ReadServerConfig()
 	conf.ReadEtcdConfig()
+	conf.ReadMysqlConfig()
 	return conf
 }
 
@@ -101,4 +112,14 @@ func (c *Config) ReadEtcdConfig() {
 	}
 	ec.Addrs = addrs
 	c.EtcdConf = ec
+}
+
+func (c *Config) ReadMysqlConfig() {
+	mc := &MysqlConfig{}
+	mc.UserName = c.viper.GetString("mysql.username")
+	mc.Password = c.viper.GetString("mysql.password")
+	mc.Host = c.viper.GetString("mysql.host")
+	mc.Port = c.viper.GetInt64("mysql.port")
+	mc.Db = c.viper.GetString("mysql.db")
+	c.MysqlConf = mc
 }

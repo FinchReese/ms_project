@@ -21,3 +21,11 @@
 {"level":"ERROR","time":"2025-04-01T13:56:04.328+0800","caller":"login.service.v1/login_service.go:34","msg":"调用短信平台发送短信error"}
 {"level":"WARN","time":"2025-04-01T14:02:59.409+0800","caller":"login.service.v1/login_service.go:33","msg":"调用短信平台发送短信warn"}
 {"level":"ERROR","time":"2025-04-01T14:02:59.409+0800","caller":"login.service.v1/login_service.go:34","msg":"调用短信平台发送短信error"}
+{"level":"WARN","time":"2025-04-02T17:10:42.179+0800","caller":"login.service.v1/login_service.go:35","msg":"调用短信平台发送短信warn"}
+{"level":"ERROR","time":"2025-04-02T17:10:42.180+0800","caller":"login.service.v1/login_service.go:36","msg":"调用短信平台发送短信error"}
+{"level":"WARN","time":"2025-04-03T19:42:14.841+0800","caller":"login.service.v1/login_service.go:47","msg":"调用短信平台发送短信warn"}
+{"level":"ERROR","time":"2025-04-03T19:42:14.846+0800","caller":"login.service.v1/login_service.go:48","msg":"调用短信平台发送短信error"}
+{"level":"ERROR","time":"2025-04-03T19:43:36.704+0800","caller":"login.service.v1/login_service.go:69","msg":"获取手机验证码缓存失败","手机号":"13003810726"}
+{"level":"ERROR","time":"2025-04-03T21:51:30.993+0800","caller":"login.service.v1/login_service.go:69","msg":"获取手机验证码缓存失败","手机号":"13003810726"}
+{"level":"WARN","time":"2025-04-03T21:51:45.763+0800","caller":"login.service.v1/login_service.go:47","msg":"调用短信平台发送短信warn"}
+{"level":"ERROR","time":"2025-04-03T21:51:45.763+0800","caller":"login.service.v1/login_service.go:48","msg":"调用短信平台发送短信error"}
