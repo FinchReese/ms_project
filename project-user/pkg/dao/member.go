@@ -16,7 +16,7 @@ var MDao *MemberDao
 
 func init() {
 	MDao = &MemberDao{
-		conn: database_gorm.MysqlConn,
+		conn: database_gorm.NewMysqlConn().Db,
 	}
 }
 
@@ -38,6 +38,6 @@ func (md *MemberDao) IsMobileRegistered(ctx context.Context, mobile string) (boo
 	return count > 0, err
 }
 
-func (md *MemberDao) RegisterMember(ctx context.Context, member *member.Member) error {
-	return md.conn.Session(&gorm.Session{Context: ctx}).Create(member).Error
+func (md *MemberDao) RegisterMember(ctx context.Context, member *member.Member, db *gorm.DB) error {
+	return db.Session(&gorm.Session{Context: ctx}).Create(member).Error
 }

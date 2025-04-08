@@ -16,11 +16,11 @@ var ODao *OrganizationDao
 
 func init() {
 	ODao = &OrganizationDao{
-		conn: database_gorm.MysqlConn,
+		conn: database_gorm.NewMysqlConn().Db,
 	}
 }
 
-func (oDao *OrganizationDao) RegisterOrganization(ctx context.Context, org *organization.Organization) error {
-	err := oDao.conn.Session(&gorm.Session{Context: ctx}).Create(org).Error
+func (oDao *OrganizationDao) RegisterOrganization(ctx context.Context, org *organization.Organization, db *gorm.DB) error {
+	err := db.Session(&gorm.Session{Context: ctx}).Create(org).Error
 	return err
 }

@@ -10,6 +10,7 @@ import (
 	"test.com/project-grpc/user/login"
 	"test.com/project-user/config"
 	"test.com/project-user/pkg/dao"
+	tran "test.com/project-user/pkg/database/trans"
 	login_service_v1 "test.com/project-user/pkg/service/login.service.v1"
 )
 
@@ -35,7 +36,12 @@ func InitRouter(r *gin.Engine) {
 
 func RegisterGrpc() *grpc.Server {
 	s := grpc.NewServer()
-	login.RegisterLoginServiceServer(s, &login_service_v1.LoginService{Cache: dao.Rc, MemberRepo: dao.MDao, OrganizationRepo: dao.ODao})
+	login.RegisterLoginServiceServer(s, &login_service_v1.LoginService{
+		Cache:            dao.Rc,
+		MemberRepo:       dao.MDao,
+		OrganizationRepo: dao.ODao,
+		Tran:             tran.NewTransaction(),
+	})
 	lis, err := net.Listen("tcp", config.AppConf.GrpcConf.Addr)
 	if err != nil {
 		log.Println("cannot listen")

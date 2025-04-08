@@ -12,6 +12,8 @@ import (
 	"test.com/project-grpc/user/login"
 	"test.com/project-user/pkg/data/member"
 	"test.com/project-user/pkg/data/organization"
+	"test.com/project-user/pkg/database/gorm"
+	tran "test.com/project-user/pkg/database/trans"
 	"test.com/project-user/pkg/model"
 	"test.com/project-user/pkg/repo"
 )
@@ -21,6 +23,7 @@ type LoginService struct {
 	Cache            repo.Cache
 	MemberRepo       repo.Member
 	OrganizationRepo repo.OrganizationRepo
+	Tran             *tran.TransactionImpl
 }
 
 const (
@@ -106,36 +109,42 @@ func (ls *LoginService) Register(ctx context.Context, msg *login.RegisterMessage
 		zap.L().Error("手机号已存在", zap.String("手机号", mobile))
 		return nil, errs.GrpcError(model.MobileExist)
 	}
-	// 如果前面校验通过，则把数据存入成员表
-	pwd := encrypt.Md5(msg.GetPassword())
-	member := &member.Member{
-		Account:       msg.Name,
-		Password:      pwd,
-		Name:          msg.Name,
-		Mobile:        msg.Mobile,
-		Email:         msg.Email,
-		CreateTime:    time.Now().UnixMilli(),
-		LastLoginTime: time.Now().UnixMilli(),
-		Status:        member.MemberStatusNormal,
-	}
-	err = ls.MemberRepo.RegisterMember(c, member)
-	if err != nil {
-		zap.L().Error("register member err", zap.Error(err))
-		return nil, errs.GrpcError(model.RegisterMemberError)
-	}
-	// 存入组织表
-	//存入组织
-	org := &organization.Organization{
-		Name:       member.Name + "个人组织",
-		MemberId:   member.Id,
-		CreateTime: time.Now().UnixMilli(),
-		Personal:   organization.OrganizationPersion,
-		Avatar:     "https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fc-ssl.dtstatic.com%2Fuploads%2Fblog%2F202103%2F31%2F20210331160001_9a852.thumb.1000_0.jpg&refer=http%3A%2F%2Fc-ssl.dtstatic.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1673017724&t=ced22fc74624e6940fd6a89a21d30cc5",
-	}
-	err = ls.OrganizationRepo.RegisterOrganization(c, org)
-	if err != nil {
-		zap.L().Error("register SaveOrganization err", zap.Error(err))
-		return nil, errs.GrpcError(model.RegisterOrganizationError)
-	}
-	return &login.RegisterResponse{}, nil
+	err = ls.Tran.ExecTran(func(dbConn tran.DbConn) error {
+
+		// 如果前面校验通过，则把数据存入成员表
+		pwd := encrypt.Md5(msg.GetPassword())
+		member := &member.Member{
+			Account:       msg.Name,
+			Password:      pwd,
+			Name:          msg.Name,
+			Mobile:        msg.Mobile,
+			Email:         msg.Email,
+			CreateTime:    time.Now().UnixMilli(),
+			LastLoginTime: time.Now().UnixMilli(),
+			Status:        member.MemberStatusNormal,
+		}
+		conn := dbConn.(*gorm.MysqlConn)
+		err = ls.MemberRepo.RegisterMember(c, member, conn.TranDb)
+		if err != nil {
+			zap.L().Error("register member err", zap.Error(err))
+			return errs.GrpcError(model.RegisterMemberError)
+		}
+		// 存入组织表
+		//存入组织
+		org := &organization.Organization{
+			Name:       member.Name + "个人组织",
+			MemberId:   member.Id,
+			CreateTime: time.Now().UnixMilli(),
+			Personal:   organization.OrganizationPersion,
+			Avatar:     "https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fc-ssl.dtstatic.com%2Fuploads%2Fblog%2F202103%2F31%2F20210331160001_9a852.thumb.1000_0.jpg&refer=http%3A%2F%2Fc-ssl.dtstatic.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1673017724&t=ced22fc74624e6940fd6a89a21d30cc5",
+		}
+		err = ls.OrganizationRepo.RegisterOrganization(c, org, conn.TranDb)
+		if err != nil {
+			zap.L().Error("register SaveOrganization err", zap.Error(err))
+			return errs.GrpcError(model.RegisterOrganizationError)
+		}
+		return nil
+	})
+
+	return &login.RegisterResponse{}, err
 }
