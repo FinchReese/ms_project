@@ -9,4 +9,5 @@ import (
 
 type OrganizationRepo interface {
 	RegisterOrganization(ctx context.Context, org *organization.Organization, db *gorm.DB) error
+	GetOrganizationByMemberId(ctx context.Context, memberId int64) ([]*organization.Organization, error)
 }

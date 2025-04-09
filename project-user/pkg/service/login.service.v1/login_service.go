@@ -5,11 +5,14 @@ import (
 	"log"
 	"time"
 
+	"github.com/jinzhu/copier"
 	"go.uber.org/zap"
 	common "test.com/project-common"
 	"test.com/project-common/encrypt"
 	"test.com/project-common/errs"
+	"test.com/project-common/jwts"
 	"test.com/project-grpc/user/login"
+	"test.com/project-user/config"
 	"test.com/project-user/pkg/data/member"
 	"test.com/project-user/pkg/data/organization"
 	"test.com/project-user/pkg/database/gorm"
@@ -77,9 +80,8 @@ func (ls *LoginService) Register(ctx context.Context, msg *login.RegisterMessage
 		return nil, errs.GrpcError(model.CaptchaError)
 	}
 	// 校验账号是否已经被注册
-	c := context.TODO()
 	account := msg.GetName()
-	ret, err := ls.MemberRepo.IsAccountRegistered(c, account)
+	ret, err := ls.MemberRepo.IsAccountRegistered(ctx, account)
 	if err != nil {
 		zap.L().Error("数据库查询账号异常", zap.String("账号", account))
 		return nil, errs.GrpcError(model.QueryDbError)
@@ -90,7 +92,7 @@ func (ls *LoginService) Register(ctx context.Context, msg *login.RegisterMessage
 	}
 	// 校验邮箱是否已经被注册
 	email := msg.GetEmail()
-	ret, err = ls.MemberRepo.IsEmailRegistered(c, email)
+	ret, err = ls.MemberRepo.IsEmailRegistered(ctx, email)
 	if err != nil {
 		zap.L().Error("数据库查询邮箱异常", zap.String("邮箱", email))
 		return nil, errs.GrpcError(model.QueryDbError)
@@ -100,7 +102,7 @@ func (ls *LoginService) Register(ctx context.Context, msg *login.RegisterMessage
 		return nil, errs.GrpcError(model.EmailExist)
 	}
 	// 校验手机号是否已经被注册
-	ret, err = ls.MemberRepo.IsMobileRegistered(c, mobile)
+	ret, err = ls.MemberRepo.IsMobileRegistered(ctx, mobile)
 	if err != nil {
 		zap.L().Error("数据库查询手机号异常", zap.String("手机号", mobile))
 		return nil, errs.GrpcError(model.QueryDbError)
@@ -124,7 +126,7 @@ func (ls *LoginService) Register(ctx context.Context, msg *login.RegisterMessage
 			Status:        member.MemberStatusNormal,
 		}
 		conn := dbConn.(*gorm.MysqlConn)
-		err = ls.MemberRepo.RegisterMember(c, member, conn.TranDb)
+		err = ls.MemberRepo.RegisterMember(ctx, member, conn.TranDb)
 		if err != nil {
 			zap.L().Error("register member err", zap.Error(err))
 			return errs.GrpcError(model.RegisterMemberError)
@@ -138,7 +140,7 @@ func (ls *LoginService) Register(ctx context.Context, msg *login.RegisterMessage
 			Personal:   organization.OrganizationPersion,
 			Avatar:     "https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fc-ssl.dtstatic.com%2Fuploads%2Fblog%2F202103%2F31%2F20210331160001_9a852.thumb.1000_0.jpg&refer=http%3A%2F%2Fc-ssl.dtstatic.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1673017724&t=ced22fc74624e6940fd6a89a21d30cc5",
 		}
-		err = ls.OrganizationRepo.RegisterOrganization(c, org, conn.TranDb)
+		err = ls.OrganizationRepo.RegisterOrganization(ctx, org, conn.TranDb)
 		if err != nil {
 			zap.L().Error("register SaveOrganization err", zap.Error(err))
 			return errs.GrpcError(model.RegisterOrganizationError)
@@ -147,4 +149,50 @@ func (ls *LoginService) Register(ctx context.Context, msg *login.RegisterMessage
 	})
 
 	return &login.RegisterResponse{}, err
+}
+
+func (ls *LoginService) Login(ctx context.Context, msg *login.LoginMessage) (*login.LoginResponse, error) {
+	account := msg.GetAccount()
+	pwd := encrypt.Md5(msg.GetPassword())
+	member, err := ls.MemberRepo.LoginVerify(ctx, account, pwd)
+	if err != nil {
+		zap.L().Error("login vefiry err", zap.Error(err))
+		return nil, errs.GrpcError(model.AccountOrPwdError)
+	}
+
+	memMsg := &login.MemberMessage{}
+	err = copier.Copy(&memMsg, &member)
+	if err != nil {
+		zap.L().Error("copy member msg err", zap.Error(err))
+		return nil, errs.GrpcError(model.CopyMemberMsgError)
+	}
+
+	orgs, err := ls.OrganizationRepo.GetOrganizationByMemberId(ctx, member.Id)
+	if err != nil {
+		zap.L().Error("get organization msg err", zap.Error(err))
+		return nil, errs.GrpcError(model.GetOrganizationMsgError)
+	}
+	orgMsg := []*login.OrganizationMessage{}
+	err = copier.Copy(&orgMsg, &orgs)
+	if err != nil {
+		zap.L().Error("copy organization msg err", zap.Error(err))
+		return nil, errs.GrpcError(model.CopyOrganizationMsgError)
+	}
+	exp := time.Duration(config.AppConf.JwtConf.AccessExp*3600*24) * time.Second
+	rExp := time.Duration(config.AppConf.JwtConf.RefreshExp*3600*24) * time.Second
+	token := jwts.CreateToken(int(member.Id), exp, config.AppConf.JwtConf.AccessSecret, rExp, config.AppConf.JwtConf.RefreshSecret)
+	tokenMsg := &login.TokenMessage{
+		AccessToken:    token.AccessToken,
+		RefreshToken:   token.RefreshToken,
+		AccessTokenExp: token.AccessExp,
+		TokenType:      "bearer",
+	}
+
+	resp := &login.LoginResponse{
+		Member:           memMsg,
+		OrganizationList: orgMsg,
+		TokenList:        tokenMsg,
+	}
+
+	return resp, nil
 }

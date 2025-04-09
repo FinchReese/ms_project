@@ -41,3 +41,12 @@ func (md *MemberDao) IsMobileRegistered(ctx context.Context, mobile string) (boo
 func (md *MemberDao) RegisterMember(ctx context.Context, member *member.Member, db *gorm.DB) error {
 	return db.Session(&gorm.Session{Context: ctx}).Create(member).Error
 }
+
+func (md *MemberDao) LoginVerify(ctx context.Context, account string, pwd string) (*member.Member, error) {
+	var mem *member.Member
+	err := md.conn.Session(&gorm.Session{Context: ctx}).Model(&member.Member{}).Where("account=? and password=?", account, pwd).First(&mem).Error
+	if err != nil {
+		return nil, err
+	}
+	return mem, nil
+}

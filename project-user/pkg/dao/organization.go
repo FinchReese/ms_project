@@ -24,3 +24,9 @@ func (oDao *OrganizationDao) RegisterOrganization(ctx context.Context, org *orga
 	err := db.Session(&gorm.Session{Context: ctx}).Create(org).Error
 	return err
 }
+
+func (oDao *OrganizationDao) GetOrganizationByMemberId(ctx context.Context, memberId int64) ([]*organization.Organization, error) {
+	var orgs []*organization.Organization
+	err := oDao.conn.Session(&gorm.Session{Context: ctx}).Model(&organization.Organization{}).Where("member_id=?", memberId).Find(&orgs).Error
+	return orgs, err
+}

@@ -12,4 +12,5 @@ type Member interface {
 	IsAccountRegistered(ctx context.Context, account string) (bool, error)
 	IsMobileRegistered(ctx context.Context, mobile string) (bool, error)
 	RegisterMember(ctx context.Context, member *member.Member, db *gorm.DB) error
+	LoginVerify(ctx context.Context, account string, pwd string) (*member.Member, error)
 }

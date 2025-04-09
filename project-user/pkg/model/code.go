@@ -14,4 +14,8 @@ var (
 	QueryDbError              = errs.NewError(2007, "查询数据库错误")
 	RegisterMemberError       = errs.NewError(2008, "注册成员失败")
 	RegisterOrganizationError = errs.NewError(2009, "注册组织失败")
+	AccountOrPwdError         = errs.NewError(2010, "账号或者密码错误")
+	CopyMemberMsgError        = errs.NewError(2011, "复制成员信息出错")
+	GetOrganizationMsgError   = errs.NewError(2012, "获取组织信息出错")
+	CopyOrganizationMsgError  = errs.NewError(2013, "复制组织信息出错")
 )
