@@ -34,6 +34,7 @@ const (
 	redisPutTimeout             = 2  // redis Put操作超时时间设置为2秒
 	redisGetTimeout             = 2  // redis Get操作超时时间设置为2秒
 	captchaRedisCacheMin        = 15 // 验证码在Redis的缓存时间设置为15分钟
+	aesKey                      = "sdfgyrhgbxcdgryfhgywertd"
 )
 
 func (ls *LoginService) GetCaptcha(ctx context.Context, msg *login.CaptchaMessage) (*login.CaptchaResponse, error) {
@@ -166,18 +167,31 @@ func (ls *LoginService) Login(ctx context.Context, msg *login.LoginMessage) (*lo
 		zap.L().Error("copy member msg err", zap.Error(err))
 		return nil, errs.GrpcError(model.CopyMemberMsgError)
 	}
+	memMsg.Code, err = encrypt.EncryptInt64(memMsg.Id, aesKey)
+	if err != nil {
+		zap.L().Error("encrypt member id error", zap.Error(err))
+		return nil, errs.GrpcError(model.EncryptMemberIdError)
+	}
 
 	orgs, err := ls.OrganizationRepo.GetOrganizationByMemberId(ctx, member.Id)
 	if err != nil {
 		zap.L().Error("get organization msg err", zap.Error(err))
 		return nil, errs.GrpcError(model.GetOrganizationMsgError)
 	}
-	orgMsg := []*login.OrganizationMessage{}
-	err = copier.Copy(&orgMsg, &orgs)
+	orgMsgs := []*login.OrganizationMessage{}
+	err = copier.Copy(&orgMsgs, &orgs)
 	if err != nil {
 		zap.L().Error("copy organization msg err", zap.Error(err))
 		return nil, errs.GrpcError(model.CopyOrganizationMsgError)
 	}
+	for _, orgMsg := range orgMsgs {
+		orgMsg.Code, err = encrypt.EncryptInt64(orgMsg.Id, aesKey)
+		if err != nil {
+			zap.L().Error("encrypt member id error", zap.Error(err))
+			return nil, errs.GrpcError(model.EncryptOrganizationIdError)
+		}
+	}
+
 	exp := time.Duration(config.AppConf.JwtConf.AccessExp*3600*24) * time.Second
 	rExp := time.Duration(config.AppConf.JwtConf.RefreshExp*3600*24) * time.Second
 	token := jwts.CreateToken(int(member.Id), exp, config.AppConf.JwtConf.AccessSecret, rExp, config.AppConf.JwtConf.RefreshSecret)
@@ -190,7 +204,7 @@ func (ls *LoginService) Login(ctx context.Context, msg *login.LoginMessage) (*lo
 
 	resp := &login.LoginResponse{
 		Member:           memMsg,
-		OrganizationList: orgMsg,
+		OrganizationList: orgMsgs,
 		TokenList:        tokenMsg,
 	}
 
