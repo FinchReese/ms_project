@@ -1,10 +1,12 @@
 package jwts
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"go.uber.org/zap"
 )
 
 type JwtToken struct {
@@ -14,7 +16,7 @@ type JwtToken struct {
 	RefreshExp   int64
 }
 
-func CreateToken(val int, exp time.Duration, secret string, refreshExp time.Duration, refreshSecret string) *JwtToken {
+func CreateToken(val int64, exp time.Duration, secret string, refreshExp time.Duration, refreshSecret string) *JwtToken {
 	aExp := time.Now().Add(exp).Unix()
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"token": val,
@@ -35,7 +37,7 @@ func CreateToken(val int, exp time.Duration, secret string, refreshExp time.Dura
 	}
 }
 
-func ParseToken(tokenString string, secret string) {
+func ParseToken(tokenString string, secret string) (int64, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Don't forget to validate the alg is what you expect:
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -45,10 +47,18 @@ func ParseToken(tokenString string, secret string) {
 		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
 		return []byte(secret), nil
 	})
+	if err != nil {
+		zap.L().Error("jwt.Parse error", zap.Error(err), zap.String("tokenString", tokenString))
+		return 0, err
+	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		fmt.Printf("%v \n", claims)
-	} else {
-		fmt.Println(err)
+		val := int64(claims["token"].(float64))
+		exp := int64(claims["exp"].(float64))
+		if exp < time.Now().Unix() {
+			return 0, errors.New("token过期")
+		}
+		return val, nil
 	}
+	return 0, fmt.Errorf("Token invalid")
 }

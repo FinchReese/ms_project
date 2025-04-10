@@ -3,6 +3,7 @@ package login_service_v1
 import (
 	"context"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/jinzhu/copier"
@@ -35,6 +36,7 @@ const (
 	redisGetTimeout             = 2  // redis Get操作超时时间设置为2秒
 	captchaRedisCacheMin        = 15 // 验证码在Redis的缓存时间设置为15分钟
 	aesKey                      = "sdfgyrhgbxcdgryfhgywertd"
+	tokenType                   = "bearer"
 )
 
 func (ls *LoginService) GetCaptcha(ctx context.Context, msg *login.CaptchaMessage) (*login.CaptchaResponse, error) {
@@ -194,12 +196,12 @@ func (ls *LoginService) Login(ctx context.Context, msg *login.LoginMessage) (*lo
 
 	exp := time.Duration(config.AppConf.JwtConf.AccessExp*3600*24) * time.Second
 	rExp := time.Duration(config.AppConf.JwtConf.RefreshExp*3600*24) * time.Second
-	token := jwts.CreateToken(int(member.Id), exp, config.AppConf.JwtConf.AccessSecret, rExp, config.AppConf.JwtConf.RefreshSecret)
+	token := jwts.CreateToken(member.Id, exp, config.AppConf.JwtConf.AccessSecret, rExp, config.AppConf.JwtConf.RefreshSecret)
 	tokenMsg := &login.TokenMessage{
 		AccessToken:    token.AccessToken,
 		RefreshToken:   token.RefreshToken,
 		AccessTokenExp: token.AccessExp,
-		TokenType:      "bearer",
+		TokenType:      tokenType,
 	}
 
 	resp := &login.LoginResponse{
@@ -208,5 +210,20 @@ func (ls *LoginService) Login(ctx context.Context, msg *login.LoginMessage) (*lo
 		TokenList:        tokenMsg,
 	}
 
+	return resp, nil
+}
+
+func (ls *LoginService) VerifyToken(ctx context.Context, req *login.VerifyTokenReq) (*login.VerifyTokenResp, error) {
+	// 解析请求消息获得token
+	token := req.GetToken()
+	if strings.Contains(token, tokenType) {
+		token = strings.ReplaceAll(token, tokenType+" ", "")
+	}
+	memberId, err := jwts.ParseToken(token, config.AppConf.JwtConf.AccessSecret)
+	if err != nil {
+		zap.L().Error("verify token error", zap.Error(err))
+		return nil, errs.GrpcError(model.VerifyTokenError)
+	}
+	resp := &login.VerifyTokenResp{MemberId: memberId}
 	return resp, nil
 }

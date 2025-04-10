@@ -20,4 +20,5 @@ var (
 	CopyOrganizationMsgError   = errs.NewError(2013, "复制组织信息出错")
 	EncryptMemberIdError       = errs.NewError(2014, "对成员id加密失败")
 	EncryptOrganizationIdError = errs.NewError(2014, "对组织id加密失败")
+	VerifyTokenError           = errs.NewError(2015, "校验token失败")
 )

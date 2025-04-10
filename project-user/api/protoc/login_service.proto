@@ -63,8 +63,17 @@ message TokenMessage{
   int64 accessTokenExp = 4;
 }
 
+message VerifyTokenReq {
+  string token = 1;
+}
+
+message VerifyTokenResp {
+  int64 memberId = 1;
+}
+
 service LoginService {
   rpc GetCaptcha(CaptchaMessage) returns (CaptchaResponse) {}
   rpc Register(RegisterMessage) returns (RegisterResponse) {}
   rpc Login(LoginMessage) returns (LoginResponse) {}
+  rpc VerifyToken(VerifyTokenReq) returns (VerifyTokenResp) {}
 }

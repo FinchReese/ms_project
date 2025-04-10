@@ -25,6 +25,7 @@ type LoginServiceClient interface {
 	GetCaptcha(ctx context.Context, in *CaptchaMessage, opts ...grpc.CallOption) (*CaptchaResponse, error)
 	Register(ctx context.Context, in *RegisterMessage, opts ...grpc.CallOption) (*RegisterResponse, error)
 	Login(ctx context.Context, in *LoginMessage, opts ...grpc.CallOption) (*LoginResponse, error)
+	VerifyToken(ctx context.Context, in *VerifyTokenReq, opts ...grpc.CallOption) (*VerifyTokenResp, error)
 }
 
 type loginServiceClient struct {
@@ -62,6 +63,15 @@ func (c *loginServiceClient) Login(ctx context.Context, in *LoginMessage, opts .
 	return out, nil
 }
 
+func (c *loginServiceClient) VerifyToken(ctx context.Context, in *VerifyTokenReq, opts ...grpc.CallOption) (*VerifyTokenResp, error) {
+	out := new(VerifyTokenResp)
+	err := c.cc.Invoke(ctx, "/login.service.v1.LoginService/VerifyToken", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LoginServiceServer is the server API for LoginService service.
 // All implementations must embed UnimplementedLoginServiceServer
 // for forward compatibility
@@ -69,6 +79,7 @@ type LoginServiceServer interface {
 	GetCaptcha(context.Context, *CaptchaMessage) (*CaptchaResponse, error)
 	Register(context.Context, *RegisterMessage) (*RegisterResponse, error)
 	Login(context.Context, *LoginMessage) (*LoginResponse, error)
+	VerifyToken(context.Context, *VerifyTokenReq) (*VerifyTokenResp, error)
 	mustEmbedUnimplementedLoginServiceServer()
 }
 
@@ -84,6 +95,9 @@ func (UnimplementedLoginServiceServer) Register(context.Context, *RegisterMessag
 }
 func (UnimplementedLoginServiceServer) Login(context.Context, *LoginMessage) (*LoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+}
+func (UnimplementedLoginServiceServer) VerifyToken(context.Context, *VerifyTokenReq) (*VerifyTokenResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VerifyToken not implemented")
 }
 func (UnimplementedLoginServiceServer) mustEmbedUnimplementedLoginServiceServer() {}
 
@@ -152,6 +166,24 @@ func _LoginService_Login_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LoginService_VerifyToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VerifyTokenReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoginServiceServer).VerifyToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/login.service.v1.LoginService/VerifyToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoginServiceServer).VerifyToken(ctx, req.(*VerifyTokenReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // LoginService_ServiceDesc is the grpc.ServiceDesc for LoginService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -170,6 +202,10 @@ var LoginService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Login",
 			Handler:    _LoginService_Login_Handler,
+		},
+		{
+			MethodName: "VerifyToken",
+			Handler:    _LoginService_VerifyToken_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

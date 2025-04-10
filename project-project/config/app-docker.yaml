@@ -1,0 +1,29 @@
+server:
+  name: "project-project"
+  addr: "project-project:8082"
+zap:
+  debugFileName: "/logs/debug/project-debug.log"
+  infoFileName: "/log/sinfo/project-info.log"
+  warnFileName: "/log/serror/project-error.log"
+  maxSize: 500,
+  maxAge: 28,
+  MaxBackups: 3
+redis:
+  host: "redis6"
+  port: 6379
+  password: ""
+  db: 0
+grpc:
+  addr: "project-project:8882"
+  name: "login"
+  version: "1.0.0"
+  weight: 2
+etcd:
+  addrs:
+    - "etcd3:2379"
+mysql:
+  username: root
+  password: root
+  host: mysql8
+  port: 3309
+  db: msproject
