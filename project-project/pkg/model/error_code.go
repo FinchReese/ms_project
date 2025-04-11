@@ -5,5 +5,6 @@ import (
 )
 
 var (
-	GetAllMenusError = errs.NewError(2000, "获取菜单失败")
+	GetAllMenusError    = errs.NewError(2000, "获取菜单出错")
+	GetProjectListError = errs.NewError(2001, "获取项目列表出错")
 )

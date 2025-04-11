@@ -81,7 +81,7 @@ docker run -d -p 8080:8080 -p 8881:8881 project-user:latest
 
 
 # 新增GRPC服务流程
-1、切换到project-user\api\protoc目录下，创建服务的proto文件，然后执行以下命令在gen目录下生成对应的go文件（将命令中的login_service.proto替换为新服务的proto文件名）：
+1、在微服务目录的api/protoc目录下，创建服务的proto文件，然后执行以下命令在gen目录下生成对应的go文件（将命令中的login_service.proto替换为新服务的proto文件名）：
 ```shell
 protoc --go_out=./gen --go_opt=paths=source_relative --go-grpc_out=./gen --go-grpc_opt=paths=source_relative  login_service.proto
 ```

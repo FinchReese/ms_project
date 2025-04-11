@@ -35,7 +35,7 @@ func InitRouter(r *gin.Engine) {
 
 func RegisterGrpc() *grpc.Server {
 	s := grpc.NewServer()
-	projectService := project_service_v1.NewProjectService(dao.NewMenuDAO())
+	projectService := project_service_v1.NewProjectService(dao.NewMenuDAO(), dao.NewProjectMemberDAO())
 	project.RegisterProjectServiceServer(s, projectService)
 	lis, err := net.Listen("tcp", config.AppConf.GrpcConf.Addr)
 	if err != nil {
