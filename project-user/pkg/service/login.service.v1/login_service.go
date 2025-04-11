@@ -227,3 +227,29 @@ func (ls *LoginService) VerifyToken(ctx context.Context, req *login.VerifyTokenR
 	resp := &login.VerifyTokenResp{MemberId: memberId}
 	return resp, nil
 }
+
+func (ls *LoginService) GetOrganizationList(ctx context.Context, req *login.GetOrganizationListReq) (*login.GetOrganizationListResp, error) {
+	memberId := req.GetMemberId()
+	orgs, err := ls.OrganizationRepo.GetOrganizationByMemberId(ctx, memberId)
+	if err != nil {
+		zap.L().Error("get organization msg err", zap.Error(err))
+		return nil, errs.GrpcError(model.GetOrganizationMsgError)
+	}
+	orgMsgs := []*login.OrganizationMessage{}
+	err = copier.Copy(&orgMsgs, &orgs)
+	if err != nil {
+		zap.L().Error("copy organization msg err", zap.Error(err))
+		return nil, errs.GrpcError(model.CopyOrganizationMsgError)
+	}
+	for _, orgMsg := range orgMsgs {
+		orgMsg.Code, err = encrypt.EncryptInt64(orgMsg.Id, aesKey)
+		if err != nil {
+			zap.L().Error("encrypt member id error", zap.Error(err))
+			return nil, errs.GrpcError(model.EncryptOrganizationIdError)
+		}
+	}
+	resp := &login.GetOrganizationListResp{
+		OrgList: orgMsgs,
+	}
+	return resp, nil
+}

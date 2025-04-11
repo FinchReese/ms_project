@@ -71,9 +71,18 @@ message VerifyTokenResp {
   int64 memberId = 1;
 }
 
+message GetOrganizationListReq {
+  int64 memberId = 1;
+}
+
+message GetOrganizationListResp {
+  repeated OrganizationMessage orgList = 1;
+}
+
 service LoginService {
   rpc GetCaptcha(CaptchaMessage) returns (CaptchaResponse) {}
   rpc Register(RegisterMessage) returns (RegisterResponse) {}
   rpc Login(LoginMessage) returns (LoginResponse) {}
   rpc VerifyToken(VerifyTokenReq) returns (VerifyTokenResp) {}
+  rpc GetOrganizationList(GetOrganizationListReq) returns (GetOrganizationListResp) {}
 }

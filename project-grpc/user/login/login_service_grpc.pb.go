@@ -26,6 +26,7 @@ type LoginServiceClient interface {
 	Register(ctx context.Context, in *RegisterMessage, opts ...grpc.CallOption) (*RegisterResponse, error)
 	Login(ctx context.Context, in *LoginMessage, opts ...grpc.CallOption) (*LoginResponse, error)
 	VerifyToken(ctx context.Context, in *VerifyTokenReq, opts ...grpc.CallOption) (*VerifyTokenResp, error)
+	GetOrganizationList(ctx context.Context, in *GetOrganizationListReq, opts ...grpc.CallOption) (*GetOrganizationListResp, error)
 }
 
 type loginServiceClient struct {
@@ -72,6 +73,15 @@ func (c *loginServiceClient) VerifyToken(ctx context.Context, in *VerifyTokenReq
 	return out, nil
 }
 
+func (c *loginServiceClient) GetOrganizationList(ctx context.Context, in *GetOrganizationListReq, opts ...grpc.CallOption) (*GetOrganizationListResp, error) {
+	out := new(GetOrganizationListResp)
+	err := c.cc.Invoke(ctx, "/login.service.v1.LoginService/GetOrganizationList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LoginServiceServer is the server API for LoginService service.
 // All implementations must embed UnimplementedLoginServiceServer
 // for forward compatibility
@@ -80,6 +90,7 @@ type LoginServiceServer interface {
 	Register(context.Context, *RegisterMessage) (*RegisterResponse, error)
 	Login(context.Context, *LoginMessage) (*LoginResponse, error)
 	VerifyToken(context.Context, *VerifyTokenReq) (*VerifyTokenResp, error)
+	GetOrganizationList(context.Context, *GetOrganizationListReq) (*GetOrganizationListResp, error)
 	mustEmbedUnimplementedLoginServiceServer()
 }
 
@@ -98,6 +109,9 @@ func (UnimplementedLoginServiceServer) Login(context.Context, *LoginMessage) (*L
 }
 func (UnimplementedLoginServiceServer) VerifyToken(context.Context, *VerifyTokenReq) (*VerifyTokenResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VerifyToken not implemented")
+}
+func (UnimplementedLoginServiceServer) GetOrganizationList(context.Context, *GetOrganizationListReq) (*GetOrganizationListResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetOrganizationList not implemented")
 }
 func (UnimplementedLoginServiceServer) mustEmbedUnimplementedLoginServiceServer() {}
 
@@ -184,6 +198,24 @@ func _LoginService_VerifyToken_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LoginService_GetOrganizationList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetOrganizationListReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoginServiceServer).GetOrganizationList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/login.service.v1.LoginService/GetOrganizationList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoginServiceServer).GetOrganizationList(ctx, req.(*GetOrganizationListReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // LoginService_ServiceDesc is the grpc.ServiceDesc for LoginService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -206,6 +238,10 @@ var LoginService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "VerifyToken",
 			Handler:    _LoginService_VerifyToken_Handler,
+		},
+		{
+			MethodName: "GetOrganizationList",
+			Handler:    _LoginService_GetOrganizationList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

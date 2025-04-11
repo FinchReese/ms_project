@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	api_login "test.com/project-api/api/login"
+	"test.com/project-api/api/rpc"
 	common "test.com/project-common"
 	"test.com/project-common/errs"
 	"test.com/project-grpc/user/login"
@@ -23,7 +23,7 @@ func VerifyToken() gin.HandlerFunc {
 		// 调用grpc接口校验token
 		ctx, cancelFunc := context.WithTimeout(context.Background(), verifyTokenTimeout*time.Second)
 		defer cancelFunc()
-		resp, err := api_login.LoginServiceClient.VerifyToken(ctx, &login.VerifyTokenReq{Token: token})
+		resp, err := rpc.LoginServiceClient.VerifyToken(ctx, &login.VerifyTokenReq{Token: token})
 		// 根据校验token结果处理
 		result := &common.Result{}
 		if err != nil {
