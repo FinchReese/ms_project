@@ -12,6 +12,7 @@ import (
 	"test.com/project-common/encrypt"
 	"test.com/project-common/errs"
 	"test.com/project-common/jwts"
+	"test.com/project-common/time_format"
 	"test.com/project-grpc/user/login"
 	"test.com/project-user/config"
 	"test.com/project-user/pkg/data/member"
@@ -174,6 +175,8 @@ func (ls *LoginService) Login(ctx context.Context, msg *login.LoginMessage) (*lo
 		zap.L().Error("encrypt member id error", zap.Error(err))
 		return nil, errs.GrpcError(model.EncryptMemberIdError)
 	}
+	memMsg.LastLoginTime = time_format.ConvertMsecToString(member.LastLoginTime)
+	memMsg.CreateTime = time_format.ConvertMsecToString(member.CreateTime)
 
 	orgs, err := ls.OrganizationRepo.GetOrganizationByMemberId(ctx, member.Id)
 	if err != nil {
@@ -181,7 +184,15 @@ func (ls *LoginService) Login(ctx context.Context, msg *login.LoginMessage) (*lo
 		return nil, errs.GrpcError(model.GetOrganizationMsgError)
 	}
 	orgMsgs := []*login.OrganizationMessage{}
-	err = copier.Copy(&orgMsgs, &orgs)
+	err = copier.CopyWithOption(&orgMsgs, &orgs, copier.Option{
+		FieldNameMapping: []copier.FieldNameMapping{
+			{
+				SrcType: orgs,
+				DstType: orgMsgs,
+				Mapping: map[string]string{"CreateTime": "IntCreateTime"},
+			},
+		},
+	})
 	if err != nil {
 		zap.L().Error("copy organization msg err", zap.Error(err))
 		return nil, errs.GrpcError(model.CopyOrganizationMsgError)
@@ -192,6 +203,11 @@ func (ls *LoginService) Login(ctx context.Context, msg *login.LoginMessage) (*lo
 			zap.L().Error("encrypt member id error", zap.Error(err))
 			return nil, errs.GrpcError(model.EncryptOrganizationIdError)
 		}
+		orgMsg.OwnerCode = memMsg.Code
+		orgMsg.CreateTime = time_format.ConvertMsecToString(orgMsg.IntCreateTime)
+	}
+	if len(orgMsgs) > 0 {
+		memMsg.OrganizationCode = orgMsgs[0].Code
 	}
 
 	exp := time.Duration(config.AppConf.JwtConf.AccessExp*3600*24) * time.Second
