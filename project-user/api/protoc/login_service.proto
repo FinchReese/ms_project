@@ -52,7 +52,7 @@ message OrganizationMessage {
   string avatar = 3;
   string description = 4;
   int64 memberId = 5;
-  string createTime = 6;
+  string createTimeStr = 6;
   int32 personal = 7;
   string address = 8;
   int32 province = 9;
@@ -60,7 +60,6 @@ message OrganizationMessage {
   int32 area = 11;
   string code = 12;
   string ownerCode = 13;
-  int64 intCreateTime = 14;
 }
 
 message TokenMessage{
@@ -75,7 +74,7 @@ message VerifyTokenReq {
 }
 
 message VerifyTokenResp {
-  int64 memberId = 1;
+  MemberMessage member = 1;
 }
 
 message GetOrganizationListReq {

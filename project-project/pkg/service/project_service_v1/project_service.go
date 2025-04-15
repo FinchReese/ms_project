@@ -43,6 +43,9 @@ func (p *ProjectService) GetProjectList(ctx context.Context, req *project.GetPro
 	}
 	resp := &project.GetProjectListResp{}
 	copier.Copy(&resp.ProjectList, projectList)
+	for _, project := range resp.ProjectList {
+		project.OwnerName = req.MemberName
+	}
 	resp.Total = total
 	return resp, nil
 }

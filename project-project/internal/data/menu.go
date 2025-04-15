@@ -29,13 +29,21 @@ func (*ProjectMenu) TableName() string {
 
 type ProjectMenuNode struct {
 	ProjectMenu
-	Children []*ProjectMenuNode
+	StatusText string
+	InnerText  string
+	FullUrl    string
+	Children   []*ProjectMenuNode
 }
 
 func ConvertMenuListToTreeList(menuList []*ProjectMenu) []*ProjectMenuNode {
 	// 先把所有节点创建出来
 	nodeList := []*ProjectMenuNode{}
 	copier.Copy(&nodeList, menuList)
+	for _, node := range nodeList {
+		node.StatusText = getStatus(node.Status)
+		node.InnerText = getInnerText(node.IsInner)
+		node.FullUrl = getFullUrl(node.Url, node.Params, node.Values)
+	}
 	// 找出根节点，可能有多个
 	rootNodeList := []*ProjectMenuNode{}
 
@@ -63,4 +71,31 @@ func getChildrenOfNode(target *ProjectMenuNode, nodeList []*ProjectMenuNode) {
 			target.Children = append(target.Children, node)
 		}
 	}
+}
+
+func getFullUrl(url string, params string, values string) string {
+	if values != "" {
+		return url + "/" + values
+	}
+	return url
+}
+
+func getInnerText(inner int) string {
+	if inner == 0 {
+		return "导航"
+	}
+	if inner == 1 {
+		return "内页"
+	}
+	return ""
+}
+
+func getStatus(status int) string {
+	if status == 0 {
+		return "禁用"
+	}
+	if status == 1 {
+		return "使用中"
+	}
+	return ""
 }

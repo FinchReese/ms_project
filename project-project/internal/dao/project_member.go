@@ -23,7 +23,7 @@ func (p *ProjectMemberDAO) GetProjectListByMemberId(ctx context.Context, memberI
 	start := size * (page - 1)
 	var projectList []*data.ProjectAndProjectMember
 	session := p.conn.Db.Session(&gorm.Session{Context: ctx})
-	err := session.Raw("select * from ms_project AS p, ms_project_member AS pm where p.id = pm.member_code and pm.member_code = ? limit ?,?",
+	err := session.Raw("select * from ms_project AS p, ms_project_member AS pm where p.id = pm.member_code and pm.member_code = ? order by `order` limit ?,?",
 		memberId, start, size).Scan(&projectList).Error
 	if err != nil {
 		zap.L().Error("Get project list error.", zap.Error(err))

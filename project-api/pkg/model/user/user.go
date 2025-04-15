@@ -60,7 +60,7 @@ type OrganizationList struct {
 	Avatar      string `json:"avatar"`
 	Description string `json:"description"`
 	OwnerCode   string `json:"owner_code"`
-	CreateTime  string `json:"create_time"`
+	CreateTime  string `json:"create_time" copier:"CreateTimeStr"`
 	Personal    int32  `json:"personal"`
 	Address     string `json:"address"`
 	Province    int32  `json:"province"`

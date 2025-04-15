@@ -27,7 +27,9 @@ func index(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, result.Fail(code, msg))
 		return
 	}
-	ctx.JSON(http.StatusOK, result.Success(indexResponse.Menus))
+	var resp []*model_project.Menu
+	copier.Copy(&resp, indexResponse.Menus)
+	ctx.JSON(http.StatusOK, result.Success(resp))
 }
 
 func selfList(ctx *gin.Context) {
@@ -42,7 +44,8 @@ func selfList(ctx *gin.Context) {
 	memberId := val.(int64)
 	grpcCtx, cancelFunc := context.WithTimeout(context.Background(), serviceTimeOut*time.Second)
 	defer cancelFunc()
-	resp, err := projectServiceClient.GetProjectList(grpcCtx, &project.GetProjectListReq{MemberId: memberId, Page: req.Page, Size: req.PageSize})
+	memberName := ctx.GetString("memberName")
+	resp, err := projectServiceClient.GetProjectList(grpcCtx, &project.GetProjectListReq{MemberId: memberId, MemberName: memberName, Page: req.Page, Size: req.PageSize})
 	if err != nil {
 		code, msg := errs.ParseGrpcError(err)
 		ctx.JSON(http.StatusInternalServerError, result.Fail(code, msg))

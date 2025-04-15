@@ -1,5 +1,7 @@
 package organization
 
+import "test.com/project-common/time_format"
+
 const (
 	OrganizationPersion = 1
 	OrganizationPublic  = 2
@@ -19,6 +21,10 @@ type Organization struct {
 	Area        int32
 }
 
-func (*Organization) TableName() string {
+func (o *Organization) TableName() string {
 	return "ms_organization"
+}
+
+func (o *Organization) CreateTimeStr() string {
+	return time_format.ConvertMsecToString(o.CreateTime)
 }

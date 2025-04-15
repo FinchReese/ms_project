@@ -21,4 +21,5 @@ var (
 	EncryptMemberIdError       = errs.NewError(2014, "对成员id加密失败")
 	EncryptOrganizationIdError = errs.NewError(2014, "对组织id加密失败")
 	VerifyTokenError           = errs.NewError(2015, "校验token失败")
+	FindMemberByIdError        = errs.NewError(2016, "根据id查找成员错误")
 )

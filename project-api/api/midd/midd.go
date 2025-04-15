@@ -24,6 +24,7 @@ func VerifyToken() gin.HandlerFunc {
 		ctx, cancelFunc := context.WithTimeout(context.Background(), verifyTokenTimeout*time.Second)
 		defer cancelFunc()
 		resp, err := rpc.LoginServiceClient.VerifyToken(ctx, &login.VerifyTokenReq{Token: token})
+
 		// 根据校验token结果处理
 		result := &common.Result{}
 		if err != nil {
@@ -32,7 +33,8 @@ func VerifyToken() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		c.Set("memberId", resp.GetMemberId())
+		c.Set("memberId", resp.Member.Id)
+		c.Set("memberName", resp.Member.Name)
 		// 继续处理请求
 		c.Next()
 	}

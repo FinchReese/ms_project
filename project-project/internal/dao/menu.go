@@ -19,6 +19,6 @@ func NewMenuDAO() *MenuDAO {
 }
 
 func (md *MenuDAO) GetAllMenus(ctx context.Context) (menuList []*data.ProjectMenu, err error) {
-	err = md.conn.Db.Session(&gorm.Session{Context: ctx}).Model(&data.ProjectMenu{}).Find(&menuList).Error
+	err = md.conn.Db.Session(&gorm.Session{Context: ctx}).Model(&data.ProjectMenu{}).Order("pid,sort asc, id asc").Find(&menuList).Error
 	return
 }

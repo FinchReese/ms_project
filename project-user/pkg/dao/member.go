@@ -3,6 +3,7 @@ package dao
 import (
 	"context"
 
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"test.com/project-user/pkg/data/member"
 	database_gorm "test.com/project-user/pkg/database/gorm"
@@ -46,6 +47,17 @@ func (md *MemberDao) LoginVerify(ctx context.Context, account string, pwd string
 	var mem *member.Member
 	err := md.conn.Session(&gorm.Session{Context: ctx}).Model(&member.Member{}).Where("account=? and password=?", account, pwd).First(&mem).Error
 	if err != nil {
+		zap.L().Error("find member by id error", zap.String("account", account), zap.Error(err))
+		return nil, err
+	}
+	return mem, nil
+}
+
+func (md *MemberDao) FindMemberById(ctx context.Context, id int64) (*member.Member, error) {
+	var mem *member.Member
+	err := md.conn.Session(&gorm.Session{Context: ctx}).Model(&member.Member{}).Where("id=?", id).First(&mem).Error
+	if err != nil {
+		zap.L().Error("find member by id error", zap.Int64("id", id), zap.Error(err))
 		return nil, err
 	}
 	return mem, nil

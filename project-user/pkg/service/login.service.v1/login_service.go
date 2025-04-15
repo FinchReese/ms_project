@@ -184,15 +184,7 @@ func (ls *LoginService) Login(ctx context.Context, msg *login.LoginMessage) (*lo
 		return nil, errs.GrpcError(model.GetOrganizationMsgError)
 	}
 	orgMsgs := []*login.OrganizationMessage{}
-	err = copier.CopyWithOption(&orgMsgs, &orgs, copier.Option{
-		FieldNameMapping: []copier.FieldNameMapping{
-			{
-				SrcType: orgs,
-				DstType: orgMsgs,
-				Mapping: map[string]string{"CreateTime": "IntCreateTime"},
-			},
-		},
-	})
+	err = copier.Copy(&orgMsgs, &orgs)
 	if err != nil {
 		zap.L().Error("copy organization msg err", zap.Error(err))
 		return nil, errs.GrpcError(model.CopyOrganizationMsgError)
@@ -204,7 +196,6 @@ func (ls *LoginService) Login(ctx context.Context, msg *login.LoginMessage) (*lo
 			return nil, errs.GrpcError(model.EncryptOrganizationIdError)
 		}
 		orgMsg.OwnerCode = memMsg.Code
-		orgMsg.CreateTime = time_format.ConvertMsecToString(orgMsg.IntCreateTime)
 	}
 	if len(orgMsgs) > 0 {
 		memMsg.OrganizationCode = orgMsgs[0].Code
@@ -240,7 +231,15 @@ func (ls *LoginService) VerifyToken(ctx context.Context, req *login.VerifyTokenR
 		zap.L().Error("verify token error", zap.Error(err))
 		return nil, errs.GrpcError(model.VerifyTokenError)
 	}
-	resp := &login.VerifyTokenResp{MemberId: memberId}
+	// 调用grpc接口获取member
+	member, err := ls.MemberRepo.FindMemberById(ctx, memberId)
+	if err != nil {
+		zap.L().Error("find member by id err", zap.Error(err))
+		return nil, errs.GrpcError(model.FindMemberByIdError)
+	}
+	memMsg := login.MemberMessage{}
+	copier.Copy(&memMsg, member)
+	resp := &login.VerifyTokenResp{Member: &memMsg}
 	return resp, nil
 }
 

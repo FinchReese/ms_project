@@ -11,7 +11,7 @@ type Project struct {
 	Deleted            int
 	TemplateCode       string
 	Schedule           float64
-	CreateTime         string
+	CreateTime         int64
 	OrganizationCode   int64
 	DeletedTime        string
 	Private            int
@@ -27,6 +27,6 @@ type Project struct {
 	AutoUpdateSchedule int
 }
 
-func (*Project) TableName() string {
+func (p *Project) TableName() string {
 	return "ms_project"
 }
