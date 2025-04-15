@@ -2,9 +2,9 @@ server:
   name: "project-api"
   addr: "127.0.0.1:80"
 zap:
-  debugFileName: "E:\\闭关\\项目\\gin管理系统\\ms_project\\log_dir\\debug\\project-debug.log"
-  infoFileName: "E:\\闭关\\项目\\gin管理系统\\ms_project\\log_dir\\info\\project-info.log"
-  warnFileName: "E:\\闭关\\项目\\gin管理系统\\ms_project\\log_dir\\error\\project-error.log"
+  debugFileName: "E:\\闭关\\项目\\gin管理系统\\ms_project\\project-api\\log_dir\\debug\\project-debug.log"
+  infoFileName: "E:\\闭关\\项目\\gin管理系统\\ms_project\\project-api\\log_dir\\info\\project-info.log"
+  warnFileName: "E:\\闭关\\项目\\gin管理系统\\ms_project\\project-api\\log_dir\\error\\project-error.log"
   maxSize: 500,
   maxAge: 28,
   MaxBackups: 3
