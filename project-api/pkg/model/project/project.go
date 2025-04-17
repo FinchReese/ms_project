@@ -1,8 +1,9 @@
 package project
 
 type SelfListReq struct {
-	Page     int64 `json:"page" form:"page"`
-	PageSize int64 `json:"pageSize" form:"pageSize"`
+	SelectBy string `json:"selectBy" form:"selectBy"`
+	Page     int64  `json:"page" form:"page"`
+	PageSize int64  `json:"pageSize" form:"pageSize"`
 }
 
 type Project struct {
@@ -72,4 +73,46 @@ type Menu struct {
 	InnerText  string  `json:"innerText"`
 	FullUrl    string  `json:"fullUrl"`
 	Children   []*Menu `json:"children"`
+}
+
+type GetProjectTemplateReq struct {
+	ViewType int32 `json:"viewType" form:"viewType"`
+	Page     int64 `json:"page" form:"page"`
+	PageSize int64 `json:"pageSize" form:"pageSize"`
+}
+
+type ProjectTemplate struct {
+	Id               int                   `json:"id"`
+	Name             string                `json:"name"`
+	Description      string                `json:"description"`
+	Sort             int                   `json:"sort"`
+	CreateTime       string                `json:"create_time"`
+	OrganizationCode string                `json:"organization_code"`
+	Cover            string                `json:"cover"`
+	MemberCode       string                `json:"member_code"`
+	IsSystem         int                   `json:"is_system"`
+	TaskStages       []*TaskStagesOnlyName `json:"task_stages"`
+	Code             string                `json:"code"`
+}
+
+type TaskStagesOnlyName struct {
+	Name string `json:"name"`
+}
+
+type SaveProjectReq struct {
+	Name         string `json:"name" form:"name"`
+	TemplateCode string `json:"templateCode" form:"templateCode"`
+	Description  string `json:"description" form:"description"`
+	Id           int    `json:"id" form:"id"`
+}
+
+type SaveProjectResp struct {
+	Id               int64  `json:"id"`
+	Cover            string `json:"cover"`
+	Name             string `json:"name"`
+	Description      string `json:"description"`
+	Code             string `json:"code"`
+	CreateTime       string `json:"create_time"`
+	TaskBoardTheme   string `json:"task_board_theme"`
+	OrganizationCode string `json:"organization_code"`
 }

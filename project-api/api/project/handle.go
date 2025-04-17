@@ -40,12 +40,24 @@ func selfList(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, result.Fail(http.StatusBadRequest, "参数传递有误"))
 		return
 	}
+	if req.Page == 0 {
+		req.Page = 1
+	}
+	if req.PageSize == 0 {
+		req.PageSize = 10
+	}
 	val, _ := ctx.Get("memberId")
 	memberId := val.(int64)
 	grpcCtx, cancelFunc := context.WithTimeout(context.Background(), serviceTimeOut*time.Second)
 	defer cancelFunc()
 	memberName := ctx.GetString("memberName")
-	resp, err := projectServiceClient.GetProjectList(grpcCtx, &project.GetProjectListReq{MemberId: memberId, MemberName: memberName, Page: req.Page, Size: req.PageSize})
+	resp, err := projectServiceClient.GetProjectList(grpcCtx, &project.GetProjectListReq{
+		MemberId:   memberId,
+		MemberName: memberName,
+		SelectBy:   req.SelectBy,
+		Page:       req.Page,
+		Size:       req.PageSize,
+	})
 	if err != nil {
 		code, msg := errs.ParseGrpcError(err)
 		ctx.JSON(http.StatusInternalServerError, result.Fail(code, msg))
@@ -61,4 +73,76 @@ func selfList(ctx *gin.Context) {
 		"list":  projectList,
 		"total": resp.Total,
 	}))
+}
+
+func projectTemplate(ctx *gin.Context) {
+	result := &common.Result{}
+	//1. 获取参数
+	memberId := ctx.GetInt64("memberId")
+	var req model_project.GetProjectTemplateReq
+	err := ctx.ShouldBind(&req)
+	if err != nil {
+		ctx.JSON(http.StatusOK, result.Fail(http.StatusBadRequest, "参数传递有误"))
+		return
+	}
+	// 调用grpc接口
+	grpcCtx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	grpcReq := &project.GetProjectTemplatesReq{
+		MemberId: memberId,
+		Page:     req.Page,
+		PageSize: req.PageSize,
+		ViewType: req.ViewType,
+	}
+	grpcResp, err := projectServiceClient.GetProjectTemplates(grpcCtx, grpcReq)
+	if err != nil {
+		code, msg := errs.ParseGrpcError(err)
+		ctx.JSON(http.StatusInternalServerError, result.Fail(code, msg))
+		return
+	}
+	var templates []*model_project.ProjectTemplate
+	copier.Copy(&templates, grpcResp.Ptm)
+	if templates == nil {
+		templates = []*model_project.ProjectTemplate{}
+	}
+	for _, template := range templates {
+		if template.TaskStages == nil {
+			template.TaskStages = []*model_project.TaskStagesOnlyName{}
+		}
+	}
+	ctx.JSON(http.StatusOK, result.Success(gin.H{
+		"list":  templates,
+		"total": grpcResp.Total,
+	}))
+}
+
+func saveProject(ctx *gin.Context) {
+	result := &common.Result{}
+	// 获取参数
+	memberId := ctx.GetInt64("memberId")
+	var req model_project.SaveProjectReq
+	err := ctx.ShouldBind(&req)
+	if err != nil {
+		ctx.JSON(http.StatusOK, result.Fail(http.StatusBadRequest, "参数传递有误"))
+		return
+	}
+	// 调用grpc接口
+	grpcCtx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	grpcReq := &project.SaveProjectReq{
+		MemberId:     memberId,
+		TemplateCode: req.TemplateCode,
+		Name:         req.Name,
+		Description:  req.Description,
+	}
+	grpcResp, err := projectServiceClient.SaveProject(grpcCtx, grpcReq)
+	if err != nil {
+		code, msg := errs.ParseGrpcError(err)
+		ctx.JSON(http.StatusInternalServerError, result.Fail(code, msg))
+		return
+	}
+
+	resp := &model_project.SaveProjectResp{}
+	copier.Copy(&resp, grpcResp)
+	ctx.JSON(http.StatusOK, result.Success(resp))
 }

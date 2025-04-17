@@ -33,8 +33,9 @@ message IndexResponse{
 message GetProjectListReq {
   int64 MemberId = 1;
   string MemberName = 2;
-  int64 Page = 3;
-  int64 Size = 4;
+  string SelectBy = 3;
+  int64 Page = 4;
+  int64 Size = 5;
 }
 
 message ProjectMemberMessage { 
@@ -77,7 +78,55 @@ message GetProjectListResp {
   int64 Total = 2;
 }
 
+message GetProjectTemplatesReq {
+  int64 memberId = 1;
+  int64 page = 2;
+  int64 pageSize = 3;
+  int32 viewType = 4;
+}
+
+message ProjectTemplateMessage{
+  int32 id = 1;
+  string name = 2;
+  string description = 3;
+  int32 sort = 4;
+  string createTime = 5;
+  string organizationCode = 6;
+  string cover = 7;
+  string memberCode = 8;
+  int32 isSystem = 9;
+  repeated TaskStages taskStages = 10;
+  string code = 11;
+}
+message TaskStages{
+  string name = 1;
+}
+message GetProjectTemplatesResp {
+  repeated ProjectTemplateMessage ptm = 1;
+  int64  Total = 2;
+}
+
+message SaveProjectReq {
+  int64 MemberId = 1;
+  string TemplateCode = 2;
+  string Name = 3;
+  string Description = 4;
+}
+
+message SaveProjectResp {
+  int64 Id = 1;
+  string Cover = 2;
+  string Name = 3;
+  string Description = 4;
+  string Code = 5;
+  string CreateTime = 6;
+  string TaskBoardTheme = 7;
+  string OrganizationCode = 8;  
+}
+
 service ProjectService {
   rpc Index(IndexMessage) returns (IndexResponse) {}
   rpc GetProjectList(GetProjectListReq) returns(GetProjectListResp) {}
+  rpc GetProjectTemplates(GetProjectTemplatesReq) returns (GetProjectTemplatesResp){}
+  rpc SaveProject(SaveProjectReq) returns(SaveProjectResp) {}
 }

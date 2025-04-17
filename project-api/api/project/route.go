@@ -10,12 +10,13 @@ type ProjectRouter struct {
 }
 
 func (*ProjectRouter) Register(r *gin.Engine) {
-	indexGroup := r.Group("/project/index")
-	indexGroup.Use(midd.VerifyToken())
-	indexGroup.POST("", index)
-	projectGroup := r.Group("/project/project")
+	projectGroup := r.Group("/project")
 	projectGroup.Use(midd.VerifyToken())
-	projectGroup.POST("/selfList", selfList)
+	projectGroup.POST("/index", index)
+	projectGroup.POST("/project", selfList)
+	projectGroup.POST("/project/selfList", selfList)
+	projectGroup.POST("/project_template", projectTemplate)
+	projectGroup.POST("/project/save", saveProject)
 }
 
 func init() {

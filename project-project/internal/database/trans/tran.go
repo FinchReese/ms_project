@@ -1,7 +1,7 @@
-package tran
+package trans
 
 import (
-	database_gorm "test.com/project-user/pkg/database/gorm"
+	database_gorm "test.com/project-project/internal/database/gorm"
 )
 
 type DbConn interface {

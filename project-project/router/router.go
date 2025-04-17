@@ -10,7 +10,9 @@ import (
 	"test.com/project-grpc/project"
 	"test.com/project-project/config"
 	"test.com/project-project/internal/dao"
+	"test.com/project-project/internal/database/trans"
 	"test.com/project-project/pkg/service/project_service_v1"
+	user_dao "test.com/project-user/pkg/dao"
 )
 
 const (
@@ -35,7 +37,14 @@ func InitRouter(r *gin.Engine) {
 
 func RegisterGrpc() *grpc.Server {
 	s := grpc.NewServer()
-	projectService := project_service_v1.NewProjectService(dao.NewMenuDAO(), dao.NewProjectMemberDAO())
+	projectService := project_service_v1.NewProjectService(
+		dao.NewMenuDAO(),
+		dao.NewProjectMemberDAO(),
+		dao.NewProjectTemplateDAO(),
+		dao.NewTemplateTaskStageDAO(),
+		dao.NewProjectDAO(),
+		user_dao.ODao,
+		trans.NewTransaction())
 	project.RegisterProjectServiceServer(s, projectService)
 	lis, err := net.Listen("tcp", config.AppConf.GrpcConf.Addr)
 	if err != nil {
