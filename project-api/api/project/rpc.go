@@ -12,7 +12,7 @@ import (
 
 var projectServiceClient project.ProjectServiceClient
 
-func InitUserRpc() {
+func InitProjectRpc() {
 	resolver.Register(service_discover.NewEtcdBuilder(config.AppConf.EtcdConf.Addrs))
 	conn, err := grpc.Dial("etcd:///project", grpc.WithInsecure())
 	if err != nil {

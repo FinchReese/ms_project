@@ -20,6 +20,6 @@ func (*ProjectRouter) Register(r *gin.Engine) {
 }
 
 func init() {
-	InitUserRpc()
+	InitProjectRpc()
 	router.RegisterRouter(&ProjectRouter{})
 }

@@ -11,10 +11,12 @@ import (
 	"test.com/project-common/errs"
 	"test.com/project-common/time_format"
 	"test.com/project-grpc/project"
+	"test.com/project-grpc/user/login"
 	"test.com/project-project/internal/data"
 	"test.com/project-project/internal/database/gorm"
 	"test.com/project-project/internal/database/trans"
 	"test.com/project-project/internal/repo"
+	"test.com/project-project/internal/rpc"
 	"test.com/project-project/pkg/model"
 	user_repo "test.com/project-user/pkg/repo"
 )
@@ -115,15 +117,16 @@ func (p *ProjectService) GetProjectTemplates(ctx context.Context, req *project.G
 
 func (p *ProjectService) SaveProject(ctx context.Context, req *project.SaveProjectReq) (*project.SaveProjectResp, error) {
 	var organizationCode int64 = 0
-	orgs, err := p.organizationRepo.GetOrganizationByMemberId(ctx, req.MemberId)
+	grpcResp, err := rpc.LoginServiceClient.GetOrganizationList(ctx, &login.GetOrganizationListReq{MemberId: req.MemberId})
 	if err != nil {
 		zap.L().Error("get organization err", zap.Error(err))
 		return nil, errs.GrpcError(model.GetOrganizationError)
 	}
-	if len(orgs) > 0 {
-		// 教程默认把成员的第一个组织当做当前组织
+	orgs := grpcResp.OrgList
+	if len(orgs) > 0 { // 教程把成员的第一个组织作为当前组织，实际应该是在前端选择当前组织，后端记录
 		organizationCode = orgs[0].Id
 	}
+
 	templateCodeStr, _ := encrypt.Decrypt(req.TemplateCode, model.AESKey)
 	templateCode, _ := strconv.ParseInt(templateCodeStr, 10, 64)
 	pro := &data.Project{
@@ -185,4 +188,8 @@ func (p *ProjectService) SaveProject(ctx context.Context, req *project.SaveProje
 		TaskBoardTheme:   pro.TaskBoardTheme,
 	}
 	return resp, nil
+}
+
+func init() {
+	rpc.InitUserRpc()
 }
