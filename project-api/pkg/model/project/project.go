@@ -116,3 +116,10 @@ type SaveProjectResp struct {
 	TaskBoardTheme   string `json:"task_board_theme"`
 	OrganizationCode string `json:"organization_code"`
 }
+
+type GetProjectDetailResp struct {
+	Project
+	OwnerName   string `json:"owner_name"`
+	Collected   int    `json:"collected"`
+	OwnerAvatar string `json:"owner_avatar"`
+}

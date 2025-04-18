@@ -18,7 +18,6 @@ import (
 	"test.com/project-project/internal/repo"
 	"test.com/project-project/internal/rpc"
 	"test.com/project-project/pkg/model"
-	user_repo "test.com/project-user/pkg/repo"
 )
 
 const (
@@ -34,19 +33,17 @@ type ProjectService struct {
 	projectTemplateRepo   repo.ProjectTemplateRepo
 	templateTaskStageRepo repo.TemplateTaskStageRepo
 	projectRepo           repo.ProjectRepo
-	organizationRepo      user_repo.OrganizationRepo
 	tran                  *trans.TransactionImpl
 }
 
 func NewProjectService(mr repo.MenuRepo, pmr repo.ProjectMemberRepo, ptr repo.ProjectTemplateRepo, ttsr repo.TemplateTaskStageRepo, pr repo.ProjectRepo,
-	or user_repo.OrganizationRepo, t *trans.TransactionImpl) *ProjectService {
+	t *trans.TransactionImpl) *ProjectService {
 	return &ProjectService{
 		menuRepo:              mr,
 		projectMemberRepo:     pmr,
 		projectTemplateRepo:   ptr,
 		templateTaskStageRepo: ttsr,
 		projectRepo:           pr,
-		organizationRepo:      or,
 		tran:                  t,
 	}
 }
@@ -71,6 +68,7 @@ func (p *ProjectService) GetProjectList(ctx context.Context, req *project.GetPro
 	resp := &project.GetProjectListResp{}
 	copier.Copy(&resp.ProjectList, projectList)
 	for _, project := range resp.ProjectList {
+		project.Code, _ = encrypt.EncryptInt64(project.ProjectCode, model.AESKey)
 		project.OwnerName = req.MemberName
 	}
 	resp.Total = total
@@ -183,10 +181,51 @@ func (p *ProjectService) SaveProject(ctx context.Context, req *project.SaveProje
 		Code:             proCode,
 		OrganizationCode: organizationCodeStr,
 		Name:             pro.Name,
+		Description:      pro.Description,
 		Cover:            pro.Cover,
 		CreateTime:       time_format.ConvertMsecToString(pro.CreateTime),
 		TaskBoardTheme:   pro.TaskBoardTheme,
 	}
+	return resp, nil
+}
+
+func (p *ProjectService) GetProjectDetail(ctx context.Context, req *project.GetProjectDetailReq) (*project.GetProjectDetailResp, error) {
+	// 解析请求消息获得参数
+	projectCodeStr, _ := encrypt.Decrypt(req.ProjectCode, model.AESKey)
+	projectId, _ := strconv.ParseInt(projectCodeStr, 10, 64)
+	// 数据库操作
+	// 在成员-项目表查询项目的信息
+	proAndMem, err := p.projectMemberRepo.GetProjectAndMember(ctx, req.MemberId, projectId)
+	if err != nil {
+		zap.L().Error("encrypt project id err", zap.Error(err))
+		return nil, errs.GrpcError(model.GetProjectAndMemberError)
+	}
+	// 在成员表获取owner的信息
+	grpcReq := &login.GetMemberByIdReq{MemberId: proAndMem.IsOwner}
+	member, err := rpc.LoginServiceClient.GetMemberById(ctx, grpcReq)
+	if err != nil {
+		zap.L().Error("Get member by id err", zap.Error(err))
+		return nil, errs.GrpcError(model.GetMemberByIdError)
+	}
+	// 查询项目收藏表判断项目是否被收藏
+	isCollected, err := p.projectMemberRepo.IsCollectedProject(ctx, req.MemberId, projectId)
+	if err != nil {
+		zap.L().Error("get project collected state err", zap.Error(err))
+		return nil, errs.GrpcError(model.GetProjectCollectedStateError)
+	}
+	if isCollected {
+		proAndMem.Collected = model.Collected
+	} else {
+		proAndMem.Collected = model.NotCollected
+	}
+	// 组织回复消息
+	resp := &project.GetProjectDetailResp{}
+	copier.Copy(&resp, proAndMem)
+	resp.OwnerAvatar = member.Avatar
+	resp.OwnerName = member.Name
+	resp.Code, _ = encrypt.EncryptInt64(proAndMem.Id, model.AESKey)
+	resp.OrganizationCode, _ = encrypt.EncryptInt64(proAndMem.OrganizationCode, model.AESKey)
+	resp.CreateTime = time_format.ConvertMsecToString(proAndMem.CreateTime)
 	return resp, nil
 }
 

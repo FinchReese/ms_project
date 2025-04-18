@@ -24,6 +24,6 @@ const (
 )
 
 const (
-	NoCollected = iota
+	NotCollected = iota
 	Collected
 )

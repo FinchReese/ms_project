@@ -12,7 +12,6 @@ import (
 	"test.com/project-project/internal/dao"
 	"test.com/project-project/internal/database/trans"
 	"test.com/project-project/pkg/service/project_service_v1"
-	user_dao "test.com/project-user/pkg/dao"
 )
 
 const (
@@ -43,7 +42,6 @@ func RegisterGrpc() *grpc.Server {
 		dao.NewProjectTemplateDAO(),
 		dao.NewTemplateTaskStageDAO(),
 		dao.NewProjectDAO(),
-		user_dao.ODao,
 		trans.NewTransaction())
 	project.RegisterProjectServiceServer(s, projectService)
 	lis, err := net.Listen("tcp", config.AppConf.GrpcConf.Addr)

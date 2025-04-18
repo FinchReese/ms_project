@@ -30,6 +30,7 @@ type ProjectAndProjectMember struct {
 	JoinTime    int64
 	IsOwner     int64
 	Authorize   string
+	Collected   int
 }
 
 func (p *ProjectAndProjectMember) AccessControlTypeStr() string {

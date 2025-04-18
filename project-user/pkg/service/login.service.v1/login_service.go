@@ -268,3 +268,17 @@ func (ls *LoginService) GetOrganizationList(ctx context.Context, req *login.GetO
 	}
 	return resp, nil
 }
+
+func (ls *LoginService) GetMemberById(ctx context.Context, req *login.GetMemberByIdReq) (*login.MemberMessage, error) {
+	// 解析参数
+	memberId := req.GetMemberId()
+	// 数据库查询
+	member, err := ls.MemberRepo.FindMemberById(ctx, memberId)
+	if err != nil {
+		zap.L().Error("find member by id err", zap.Error(err))
+		return nil, errs.GrpcError(model.FindMemberByIdError)
+	}
+	resp := &login.MemberMessage{}
+	copier.Copy(&resp, member)
+	return resp, nil
+}

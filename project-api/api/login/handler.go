@@ -111,7 +111,6 @@ func getOrgList(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, result.Fail(code, msg))
 		return
 	}
-	fmt.Println("call getOrgList, resp.OrgList:", resp.OrgList)
 	if resp.OrgList == nil {
 		ctx.JSON(http.StatusOK, result.Success([]*user.OrganizationList{}))
 		return

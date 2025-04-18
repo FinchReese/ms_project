@@ -2,6 +2,7 @@ package project
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -86,7 +87,7 @@ func projectTemplate(ctx *gin.Context) {
 		return
 	}
 	// 调用grpc接口
-	grpcCtx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	grpcCtx, cancel := context.WithTimeout(context.Background(), serviceTimeOut*time.Second)
 	defer cancel()
 	grpcReq := &project.GetProjectTemplatesReq{
 		MemberId: memberId,
@@ -127,7 +128,7 @@ func saveProject(ctx *gin.Context) {
 		return
 	}
 	// 调用grpc接口
-	grpcCtx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	grpcCtx, cancel := context.WithTimeout(context.Background(), serviceTimeOut*time.Second)
 	defer cancel()
 	grpcReq := &project.SaveProjectReq{
 		MemberId:     memberId,
@@ -143,6 +144,28 @@ func saveProject(ctx *gin.Context) {
 	}
 
 	resp := &model_project.SaveProjectResp{}
+	copier.Copy(&resp, grpcResp)
+	ctx.JSON(http.StatusOK, result.Success(resp))
+}
+
+func getProjectInfo(ctx *gin.Context) {
+	fmt.Println("call getProjectInfo")
+	result := &common.Result{}
+	// 获取参数
+	memberId := ctx.GetInt64("memberId")
+	projectCode := ctx.PostForm("projectCode")
+	// 通过grpc接口查询
+	grpcCtx, cancel := context.WithTimeout(context.Background(), serviceTimeOut*time.Second)
+	defer cancel()
+	grpcReq := &project.GetProjectDetailReq{MemberId: memberId, ProjectCode: projectCode}
+	grpcResp, err := projectServiceClient.GetProjectDetail(grpcCtx, grpcReq)
+	if err != nil {
+		code, msg := errs.ParseGrpcError(err)
+		ctx.JSON(http.StatusInternalServerError, result.Fail(code, msg))
+		return
+	}
+	// 组织回复消息
+	resp := &model_project.GetProjectDetailResp{}
 	copier.Copy(&resp, grpcResp)
 	ctx.JSON(http.StatusOK, result.Success(resp))
 }

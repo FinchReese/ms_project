@@ -14,6 +14,8 @@ type ProjectRepo interface {
 type ProjectMemberRepo interface {
 	GetProjectList(ctx context.Context, memberId int64, selectBy string, page int64, size int64) ([]*data.ProjectAndProjectMember, int64, error)
 	SaveProjectMember(ctx context.Context, p *data.ProjectMember, db *gorm.DB) error
+	GetProjectAndMember(ctx context.Context, memberId int64, projectId int64) (*data.ProjectAndProjectMember, error)
+	IsCollectedProject(ctx context.Context, memberId int64, projectId int64) (bool, error)
 }
 
 type ProjectTemplateRepo interface {

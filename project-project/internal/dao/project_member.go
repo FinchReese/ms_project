@@ -81,3 +81,30 @@ func (p *ProjectMemberDAO) GetProjectList(ctx context.Context, memberId int64, s
 func (p *ProjectMemberDAO) SaveProjectMember(ctx context.Context, pm *data.ProjectMember, db *gorm.DB) error {
 	return db.Session(&gorm.Session{Context: ctx}).Create(pm).Error
 }
+
+func (p *ProjectMemberDAO) GetProjectAndMember(ctx context.Context, memberId int64, projectId int64) (*data.ProjectAndProjectMember, error) {
+	var pm *data.ProjectAndProjectMember
+	session := p.conn.Db.Session(&gorm.Session{Context: ctx})
+	sql := fmt.Sprintf("select p.*, pm.project_code, pm.member_code, pm.join_time, pm.is_owner, pm.authorize" +
+		" from ms_project AS p, ms_project_member AS pm" +
+		" where p.id=pm.project_code and pm.project_code=? and pm.member_code=?" +
+		" limit 1")
+	tx := session.Raw(sql, projectId, memberId)
+	err := tx.Scan(&pm).Error
+	if err != nil {
+		return nil, err
+	}
+	if pm == nil {
+		zap.L().Error("Project member not found.", zap.Int64("memberId", memberId), zap.Int64("projectId", projectId))
+		return nil, fmt.Errorf("Project member not found")
+	}
+	return pm, nil
+}
+
+func (p *ProjectMemberDAO) IsCollectedProject(ctx context.Context, memberId int64, projectId int64) (bool, error) {
+	session := p.conn.Db.Session(&gorm.Session{Context: ctx})
+	var count int64
+	err := session.Model(&data.ProjectCollection{}).Where("project_code = ? and member_code = ?", projectId, memberId).
+		Count(&count).Error
+	return count > 0, err
+}
