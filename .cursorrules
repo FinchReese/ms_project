@@ -32,7 +32,7 @@
             {
               "step": 1,
               "title": "注册路由",
-              "description": "在project-api/api目录的子目录中：\n1. 在route.go中向gin.Engine注册URL和处理函数的映射关系\n2. 在同目录下的handler.go中实现对应的处理函数\n3. 处理函数通过调用对应的GRPC接口实现功能\n4. 在project-api/pkg/model目录的子目录下定义URL请求和响应的结构体",
+              "description": "在project-api/api目录的子目录中：\n1. 在route.go中向gin.Engine注册URL和处理函数的映射关系\n2. 在同目录下的handler.go中实现对应的处理函数\n3. 处理函数通过调用对应的GRPC接口实现功能\n4. 在project-api/pkg/model目录的子目录下定义URL请求和响应的结构体\n5. 所有API返回必须使用common.Result结构体组织响应数据，确保返回格式统一",
               "files": [
                 "route.go",
                 "handler.go",
@@ -42,10 +42,11 @@
             {
               "step": 2,
               "title": "GRPC接口",
-              "description": "GRPC接口开发步骤：\n1. 在对应目录的/api/protoc目录下的proto文件中新增rpc接口\n2. 在proto文件同级目录下执行命令生成go文件：\n   protoc --go_out=./gen --go_opt=paths=source_relative --go-grpc_out=./gen --go-grpc_opt=paths=source_relative project_service.proto\n3. 将生成的go文件移动到project-grpc目录的对应子目录下，并修改package为所在目录名\n4. 在对应目录的service目录的子目录下实现grpc接口，通过调用DAO层接口实现功能",
+              "description": "GRPC接口开发步骤：\n1. 在对应目录的/api/protoc目录下的proto文件中新增rpc接口\n2. 在proto文件同级目录下执行命令生成go文件：\n   protoc --go_out=./gen --go_opt=paths=source_relative --go-grpc_out=./gen --go-grpc_opt=paths=source_relative project_service.proto\n3. 将生成的go文件移动到project-grpc目录的对应子目录下，并修改package为所在目录名\n4. 在对应目录的service目录的子目录下实现grpc接口，通过调用DAO层接口实现功能\n5. 所有用到的枚举值和常量需要定义在对应目录的pkg/model/biz.go文件中",
               "files": [
                 "api/protoc/*.proto",
-                "service/*.go"
+                "service/*.go",
+                "pkg/model/biz.go"
               ]
             },
             {
