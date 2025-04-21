@@ -21,46 +21,10 @@
         "package": "lowercase",
         "interface": "PascalCase",
         "struct": "PascalCase",
-        "function": "PascalCase",
+        "function": "camelCase",
         "variable": "camelCase",
         "constant": "UPPER_CASE",
-        "description": "包名使用小写字母，接口和结构体使用PascalCase命名法，函数使用PascalCase命名法，变量使用camelCase命名法，常量使用全大写字母"
-      },
-      "development": {
-        "newRoute": {
-          "steps": [
-            {
-              "step": 1,
-              "title": "注册路由",
-              "description": "在project-api/api目录的子目录中：\n1. 在route.go中向gin.Engine注册URL和处理函数的映射关系\n2. 在pkg/model目录的子目录下定义请求和响应消息格式（如果不是结构体类型则不需要）\n3. 在handler.go中实现处理函数，通过调用对应的GRPC接口实现功能\n4. 所有API返回必须使用common.Result结构体组织响应数据",
-              "files": [
-                "route.go",
-                "handler.go",
-                "pkg/model/*/*.go"
-              ]
-            },
-            {
-              "step": 2,
-              "title": "GRPC接口",
-              "description": "GRPC接口开发步骤：\n1. 在对应目录的/api/protoc目录下的proto文件中新增rpc接口\n2. 在proto文件同级目录下执行命令生成go文件：\n   protoc --go_out=./gen --go_opt=paths=source_relative --go-grpc_out=./gen --go-grpc_opt=paths=source_relative project_service.proto\n3. 将生成的go文件移动到project-grpc目录的对应子目录下，并修改package为所在目录名\n4. 在对应目录的service目录的子目录下实现grpc接口，通过调用DAO层接口实现功能\n5. 所有用到的枚举值和常量需要定义在对应目录的pkg/model/biz.go文件中",
-              "files": [
-                "api/protoc/*.proto",
-                "service/*.go",
-                "pkg/model/biz.go"
-              ]
-            },
-            {
-              "step": 3,
-              "title": "DAO层",
-              "description": "在对应目录下：\n1. 在repo目录中定义数据库操作接口\n2. 在dao目录中实现接口",
-              "files": [
-                "repo/*.go",
-                "dao/*.go"
-              ]
-            }
-          ],
-          "description": "添加新路由的标准开发流程，包含路由注册、GRPC接口实现和DAO层开发三个步骤"
-        }
+        "description": "包名使用小写字母，接口和结构体使用PascalCase命名法，函数和变量使用camelCase命名法，常量使用全大写字母"
       }
     },
     "general": {
