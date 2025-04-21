@@ -42,8 +42,9 @@
             {
               "step": 2,
               "title": "GRPC接口",
-              "description": "在对应目录的service目录的子目录下：\n1. 实现处理函数使用的grpc接口\n2. 通过调用DAO层封装的数据库操作接口实现功能",
+              "description": "GRPC接口开发步骤：\n1. 在对应目录的/api/protoc目录下的proto文件中新增rpc接口\n2. 在proto文件同级目录下执行命令生成go文件：\n   protoc --go_out=./gen --go_opt=paths=source_relative --go-grpc_out=./gen --go-grpc_opt=paths=source_relative project_service.proto\n3. 将生成的go文件移动到project-grpc目录的对应子目录下，并修改package为所在目录名\n4. 在对应目录的service目录的子目录下实现grpc接口，通过调用DAO层接口实现功能",
               "files": [
+                "api/protoc/*.proto",
                 "service/*.go"
               ]
             },
