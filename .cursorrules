@@ -32,10 +32,11 @@
             {
               "step": 1,
               "title": "注册路由",
-              "description": "在project-api/api目录的子目录中：\n1. 在route.go中向gin.Engine注册URL和处理函数的映射关系\n2. 在同目录下的handler.go中实现对应的处理函数\n3. 处理函数通过调用对应的GRPC接口实现功能",
+              "description": "在project-api/api目录的子目录中：\n1. 在route.go中向gin.Engine注册URL和处理函数的映射关系\n2. 在同目录下的handler.go中实现对应的处理函数\n3. 处理函数通过调用对应的GRPC接口实现功能\n4. 在project-api/pkg/model目录的子目录下定义URL请求和响应的结构体",
               "files": [
                 "route.go",
-                "handler.go"
+                "handler.go",
+                "pkg/model/*/*.go"
               ]
             },
             {
