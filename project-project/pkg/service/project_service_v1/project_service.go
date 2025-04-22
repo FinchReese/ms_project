@@ -33,17 +33,19 @@ type ProjectService struct {
 	projectTemplateRepo   repo.ProjectTemplateRepo
 	templateTaskStageRepo repo.TemplateTaskStageRepo
 	projectRepo           repo.ProjectRepo
+	projectCollectRepo    repo.ProjectCollectRepo
 	tran                  *trans.TransactionImpl
 }
 
 func NewProjectService(mr repo.MenuRepo, pmr repo.ProjectMemberRepo, ptr repo.ProjectTemplateRepo, ttsr repo.TemplateTaskStageRepo, pr repo.ProjectRepo,
-	t *trans.TransactionImpl) *ProjectService {
+	pcr repo.ProjectCollectRepo, t *trans.TransactionImpl) *ProjectService {
 	return &ProjectService{
 		menuRepo:              mr,
 		projectMemberRepo:     pmr,
 		projectTemplateRepo:   ptr,
 		templateTaskStageRepo: ttsr,
 		projectRepo:           pr,
+		projectCollectRepo:    pcr,
 		tran:                  t,
 	}
 }
@@ -227,6 +229,43 @@ func (p *ProjectService) GetProjectDetail(ctx context.Context, req *project.GetP
 	resp.OrganizationCode, _ = encrypt.EncryptInt64(proAndMem.OrganizationCode, model.AESKey)
 	resp.CreateTime = time_format.ConvertMsecToString(proAndMem.CreateTime)
 	return resp, nil
+}
+
+// CollectProject 收藏或取消收藏项目
+func (p *ProjectService) CollectProject(ctx context.Context, req *project.CollectProjectReq) (*project.CollectProjectResp, error) {
+	// 解析projectCode获取项目ID
+	projectCodeStr, err := encrypt.Decrypt(req.ProjectCode, model.AESKey)
+	if err != nil {
+		zap.L().Error("decrypt project code error", zap.Error(err))
+		return nil, errs.GrpcError(model.DecryptProjectCodeError)
+	}
+	projectId, err := strconv.ParseInt(projectCodeStr, 10, 64)
+	if err != nil {
+		zap.L().Error("parse project id error", zap.Error(err))
+		return nil, errs.GrpcError(model.ParseProjectIdError)
+	}
+
+	// 根据type执行不同的操作
+	switch req.Type {
+	case "collect":
+		// 收藏项目
+		err = p.projectCollectRepo.Collect(ctx, req.MemberId, projectId, time.Now().UnixMilli())
+		if err != nil {
+			zap.L().Error("collect project error", zap.Error(err))
+			return nil, errs.GrpcError(model.CollectProjectError)
+		}
+	case "cancel":
+		// 取消收藏
+		err = p.projectCollectRepo.CancelCollect(ctx, req.MemberId, projectId)
+		if err != nil {
+			zap.L().Error("cancel collect project error", zap.Error(err))
+			return nil, errs.GrpcError(model.CancelCollectProjectError)
+		}
+	default:
+		return nil, errs.GrpcError(model.InvalidCollectType)
+	}
+
+	return &project.CollectProjectResp{}, nil
 }
 
 func init() {

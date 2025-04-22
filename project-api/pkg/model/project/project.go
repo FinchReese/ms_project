@@ -123,3 +123,8 @@ type GetProjectDetailResp struct {
 	Collected   int    `json:"collected"`
 	OwnerAvatar string `json:"owner_avatar"`
 }
+
+type CollectProjectReq struct {
+	ProjectCode string `form:"projectCode"`
+	Type        string `form:"type"`
+}

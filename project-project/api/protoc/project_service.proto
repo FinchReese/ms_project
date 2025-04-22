@@ -160,10 +160,20 @@ message GetProjectDetailResp {
   string ownerAvatar = 28;
 }
 
+message CollectProjectReq {
+  int64 memberId = 1;
+  string projectCode = 2;
+  string type = 3;
+}
+
+message CollectProjectResp {
+}
+
 service ProjectService {
   rpc Index(IndexMessage) returns (IndexResponse) {}
   rpc GetProjectList(GetProjectListReq) returns(GetProjectListResp) {}
   rpc GetProjectTemplates(GetProjectTemplatesReq) returns (GetProjectTemplatesResp){}
   rpc SaveProject(SaveProjectReq) returns(SaveProjectResp) {}
   rpc GetProjectDetail(GetProjectDetailReq) returns(GetProjectDetailResp) {}
+  rpc CollectProject(CollectProjectReq) returns(CollectProjectResp) {}
 }

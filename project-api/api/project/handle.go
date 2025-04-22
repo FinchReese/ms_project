@@ -169,3 +169,32 @@ func getProjectInfo(ctx *gin.Context) {
 	copier.Copy(&resp, grpcResp)
 	ctx.JSON(http.StatusOK, result.Success(resp))
 }
+
+func collectProject(ctx *gin.Context) {
+	result := &common.Result{}
+	// 获取参数
+	memberId := ctx.GetInt64("memberId")
+	var req model_project.CollectProjectReq
+	err := ctx.ShouldBind(&req)
+	if err != nil {
+		ctx.JSON(http.StatusOK, result.Fail(http.StatusBadRequest, "参数传递有误"))
+		return
+	}
+
+	// 调用grpc接口
+	grpcCtx, cancel := context.WithTimeout(context.Background(), serviceTimeOut*time.Second)
+	defer cancel()
+	grpcReq := &project.CollectProjectReq{
+		MemberId:    memberId,
+		ProjectCode: req.ProjectCode,
+		Type:        req.Type,
+	}
+	_, err = projectServiceClient.CollectProject(grpcCtx, grpcReq)
+	if err != nil {
+		code, msg := errs.ParseGrpcError(err)
+		ctx.JSON(http.StatusInternalServerError, result.Fail(code, msg))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, result.Success([]int{}))
+}

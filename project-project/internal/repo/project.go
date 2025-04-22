@@ -27,3 +27,10 @@ type ProjectTemplateRepo interface {
 type TemplateTaskStageRepo interface {
 	GetTaskStagesByTemplateIds(ctx context.Context, ids []int) ([]data.TemplateTaskStage, error)
 }
+
+type ProjectCollectRepo interface {
+	// 收藏项目
+	Collect(ctx context.Context, memberId int64, projectId int64, createTime int64) error
+	// 取消收藏项目
+	CancelCollect(ctx context.Context, memberId int64, projectId int64) error
+}
