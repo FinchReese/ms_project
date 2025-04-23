@@ -24,4 +24,5 @@ var (
 	CancelCollectProjectError      = errs.NewError(2016, "取消收藏项目出错")
 	InvalidCollectType             = errs.NewError(2017, "无效的收藏类型")
 	UpdateProjectDeletedStateError = errs.NewError(2018, "更新项目删除状态出错")
+	UpdateProjectError             = errs.NewError(2019, "更新项目出错")
 )

@@ -291,6 +291,40 @@ func (p *ProjectService) UpdateProjectDeletedState(ctx context.Context, req *pro
 	return &project.UpdateProjectDeletedStateResp{}, nil
 }
 
+func (p *ProjectService) UpdateProject(ctx context.Context, req *project.UpdateProjectReq) (*project.UpdateProjectResp, error) {
+	// 解析projectCode获取项目ID
+	projectCodeStr, err := encrypt.Decrypt(req.ProjectCode, model.AESKey)
+	if err != nil {
+		zap.L().Error("decrypt project code error", zap.Error(err))
+		return nil, errs.GrpcError(model.DecryptProjectCodeError)
+	}
+	projectId, err := strconv.ParseInt(projectCodeStr, 10, 64)
+	if err != nil {
+		zap.L().Error("parse project id error", zap.Error(err))
+		return nil, errs.GrpcError(model.ParseProjectIdError)
+	}
+	pro := &data.Project{
+		Id:                 projectId,
+		Name:               req.Name,
+		Description:        req.Description,
+		Cover:              req.Cover,
+		TaskBoardTheme:     req.TaskBoardTheme,
+		Prefix:             req.Prefix,
+		Private:            int(req.Private),
+		OpenPrefix:         int(req.OpenPrefix),
+		OpenBeginTime:      int(req.OpenBeginTime),
+		OpenTaskPrivate:    int(req.OpenTaskPrivate),
+		Schedule:           req.Schedule,
+		AutoUpdateSchedule: int(req.AutoUpdateSchedule),
+	}
+	err = p.projectRepo.UpdateProject(ctx, pro)
+	if err != nil {
+		zap.L().Error("update project error", zap.Error(err))
+		return nil, errs.GrpcError(model.UpdateProjectError)
+	}
+	return &project.UpdateProjectResp{}, nil
+}
+
 func init() {
 	rpc.InitUserRpc()
 }

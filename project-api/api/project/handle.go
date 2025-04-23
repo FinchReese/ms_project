@@ -237,3 +237,31 @@ func recycleProject(c *gin.Context) {
 func recoveryProject(c *gin.Context) {
 	UpdateProjectDeletedState(c, false)
 }
+
+// 更新项目
+func updateProject(ctx *gin.Context) {
+	result := &common.Result{}
+	// 1. 解析请求消息
+	var req model_project.UpdateProjectReq
+	err := ctx.ShouldBind(&req)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, result.Fail(http.StatusBadRequest, "参数错误"))
+		return
+	}
+
+	// 2. 调用gRPC服务
+	grpcCtx, cancel := context.WithTimeout(context.Background(), serviceTimeOut*time.Second)
+	defer cancel()
+
+	grpcReq := &project.UpdateProjectReq{}
+	copier.Copy(grpcReq, req)
+	_, err = projectServiceClient.UpdateProject(grpcCtx, grpcReq)
+	if err != nil {
+		code, msg := errs.ParseGrpcError(err)
+		ctx.JSON(http.StatusInternalServerError, result.Fail(code, msg))
+		return
+	}
+
+	// 4. 返回结果
+	ctx.JSON(http.StatusOK, result.Success([]int{}))
+}

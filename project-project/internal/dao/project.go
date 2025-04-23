@@ -32,3 +32,8 @@ func (pd *ProjectDAO) UpdateProjectDeletedState(ctx context.Context, projectId i
 		Where("id = ?", projectId).
 		Update("deleted", deletedState).Error
 }
+
+func (pd *ProjectDAO) UpdateProject(ctx context.Context, project *data.Project) error {
+	return pd.conn.Db.Session(&gorm.Session{Context: ctx}).Model(&data.Project{}).Where("id=?", project.Id).
+		Updates(project).Error
+}
