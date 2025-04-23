@@ -3,9 +3,11 @@ package router
 import (
 	"log"
 	"net"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
+	interceptor "test.com/project-common/Interceptor"
 	"test.com/project-common/service_discover"
 	"test.com/project-grpc/project"
 	"test.com/project-project/config"
@@ -16,6 +18,7 @@ import (
 
 const (
 	grpcServiceTTL int64 = 10 // grpc服务租约TTL为10秒
+	cacheExpire    int64 = 5  // 缓存过期时间5分钟
 )
 
 type Router interface {
@@ -35,7 +38,16 @@ func InitRouter(r *gin.Engine) {
 }
 
 func RegisterGrpc() *grpc.Server {
-	s := grpc.NewServer()
+	// 创建拦截器
+	methodToConfigMap := interceptor.MethodToConfigMap{
+		"/project.service.v1.ProjectService/GetProjectList": {
+			Resp:   &project.GetProjectListResp{},
+			Expire: time.Duration(cacheExpire) * time.Minute,
+		},
+	}
+	interceptor := interceptor.NewServiceInterceptor(methodToConfigMap, dao.Rc)
+	// 创建GRPC服务器时注册拦截器
+	s := grpc.NewServer(grpc.UnaryInterceptor(interceptor.Intercept))
 	projectService := project_service_v1.NewProjectService(
 		dao.NewMenuDAO(),
 		dao.NewProjectMemberDAO(),
