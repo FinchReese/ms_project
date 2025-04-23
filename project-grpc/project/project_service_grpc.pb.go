@@ -28,6 +28,7 @@ type ProjectServiceClient interface {
 	SaveProject(ctx context.Context, in *SaveProjectReq, opts ...grpc.CallOption) (*SaveProjectResp, error)
 	GetProjectDetail(ctx context.Context, in *GetProjectDetailReq, opts ...grpc.CallOption) (*GetProjectDetailResp, error)
 	CollectProject(ctx context.Context, in *CollectProjectReq, opts ...grpc.CallOption) (*CollectProjectResp, error)
+	UpdateProjectDeletedState(ctx context.Context, in *UpdateProjectDeletedStateReq, opts ...grpc.CallOption) (*UpdateProjectDeletedStateResp, error)
 }
 
 type projectServiceClient struct {
@@ -92,6 +93,15 @@ func (c *projectServiceClient) CollectProject(ctx context.Context, in *CollectPr
 	return out, nil
 }
 
+func (c *projectServiceClient) UpdateProjectDeletedState(ctx context.Context, in *UpdateProjectDeletedStateReq, opts ...grpc.CallOption) (*UpdateProjectDeletedStateResp, error) {
+	out := new(UpdateProjectDeletedStateResp)
+	err := c.cc.Invoke(ctx, "/project.service.v1.ProjectService/UpdateProjectDeletedState", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProjectServiceServer is the server API for ProjectService service.
 // All implementations must embed UnimplementedProjectServiceServer
 // for forward compatibility
@@ -102,6 +112,7 @@ type ProjectServiceServer interface {
 	SaveProject(context.Context, *SaveProjectReq) (*SaveProjectResp, error)
 	GetProjectDetail(context.Context, *GetProjectDetailReq) (*GetProjectDetailResp, error)
 	CollectProject(context.Context, *CollectProjectReq) (*CollectProjectResp, error)
+	UpdateProjectDeletedState(context.Context, *UpdateProjectDeletedStateReq) (*UpdateProjectDeletedStateResp, error)
 	mustEmbedUnimplementedProjectServiceServer()
 }
 
@@ -126,6 +137,9 @@ func (UnimplementedProjectServiceServer) GetProjectDetail(context.Context, *GetP
 }
 func (UnimplementedProjectServiceServer) CollectProject(context.Context, *CollectProjectReq) (*CollectProjectResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CollectProject not implemented")
+}
+func (UnimplementedProjectServiceServer) UpdateProjectDeletedState(context.Context, *UpdateProjectDeletedStateReq) (*UpdateProjectDeletedStateResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateProjectDeletedState not implemented")
 }
 func (UnimplementedProjectServiceServer) mustEmbedUnimplementedProjectServiceServer() {}
 
@@ -248,6 +262,24 @@ func _ProjectService_CollectProject_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProjectService_UpdateProjectDeletedState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateProjectDeletedStateReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectServiceServer).UpdateProjectDeletedState(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/project.service.v1.ProjectService/UpdateProjectDeletedState",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectServiceServer).UpdateProjectDeletedState(ctx, req.(*UpdateProjectDeletedStateReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ProjectService_ServiceDesc is the grpc.ServiceDesc for ProjectService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -278,6 +310,10 @@ var ProjectService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CollectProject",
 			Handler:    _ProjectService_CollectProject_Handler,
+		},
+		{
+			MethodName: "UpdateProjectDeletedState",
+			Handler:    _ProjectService_UpdateProjectDeletedState_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

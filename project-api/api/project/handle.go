@@ -198,3 +198,42 @@ func collectProject(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, result.Success([]int{}))
 }
+
+func UpdateProjectDeletedState(ctx *gin.Context, deletedState bool) {
+	result := &common.Result{}
+	// 1. 解析请求消息
+	var req model_project.UpdateProjectDeletedStateReq
+	err := ctx.ShouldBind(&req)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, result.Fail(http.StatusBadRequest, "参数错误"))
+		return
+	}
+
+	// 2. 创建2秒超时的上下文
+	grpcCtx, cancel := context.WithTimeout(context.Background(), serviceTimeOut*time.Second)
+	defer cancel()
+
+	// 3. 调用gRPC服务
+	_, err = projectServiceClient.UpdateProjectDeletedState(grpcCtx, &project.UpdateProjectDeletedStateReq{
+		ProjectCode:  req.ProjectCode,
+		DeletedState: deletedState,
+	})
+	if err != nil {
+		code, msg := errs.ParseGrpcError(err)
+		ctx.JSON(http.StatusInternalServerError, result.Fail(code, msg))
+		return
+	}
+
+	// 4. 返回结果
+	ctx.JSON(http.StatusOK, result.Success([]int{}))
+}
+
+// 移入回收站
+func recycleProject(c *gin.Context) {
+	UpdateProjectDeletedState(c, true)
+}
+
+// 从回收站还原
+func recoveryProject(c *gin.Context) {
+	UpdateProjectDeletedState(c, false)
+}

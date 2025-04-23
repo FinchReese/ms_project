@@ -3,7 +3,7 @@ package model
 const AESKey = "sdfgyrhgbxcdgryfhgywertd"
 
 const (
-	NoDeleted = iota
+	NotDeleted = iota
 	Deleted
 )
 

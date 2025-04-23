@@ -135,7 +135,7 @@ func (p *ProjectService) SaveProject(ctx context.Context, req *project.SaveProje
 		TemplateCode:      int(templateCode),
 		CreateTime:        time.Now().UnixMilli(),
 		Cover:             "https://img2.baidu.com/it/u=792555388,2449797505&fm=253&fmt=auto&app=138&f=JPEG?w=667&h=500",
-		Deleted:           model.NoDeleted,
+		Deleted:           model.NotDeleted,
 		Archive:           model.NoArchive,
 		OrganizationCode:  organizationCode,
 		AccessControlType: model.Open,
@@ -266,6 +266,29 @@ func (p *ProjectService) CollectProject(ctx context.Context, req *project.Collec
 	}
 
 	return &project.CollectProjectResp{}, nil
+}
+
+func (p *ProjectService) UpdateProjectDeletedState(ctx context.Context, req *project.UpdateProjectDeletedStateReq) (*project.UpdateProjectDeletedStateResp, error) {
+	// 解密项目ID
+	projectCodeStr, err := encrypt.Decrypt(req.ProjectCode, model.AESKey)
+	if err != nil {
+		zap.L().Error("decrypt project code err", zap.Error(err))
+		return nil, errs.GrpcError(model.DecryptProjectCodeError)
+	}
+	projectId, err := strconv.ParseInt(projectCodeStr, 10, 64)
+	if err != nil {
+		zap.L().Error("parse project id err", zap.Error(err))
+		return nil, errs.GrpcError(model.ParseProjectIdError)
+	}
+
+	// 调用 repo 层更新项目删除状态
+	err = p.projectRepo.UpdateProjectDeletedState(ctx, projectId, req.DeletedState)
+	if err != nil {
+		zap.L().Error("update project deleted state err", zap.Error(err))
+		return nil, errs.GrpcError(model.UpdateProjectDeletedStateError)
+	}
+
+	return &project.UpdateProjectDeletedStateResp{}, nil
 }
 
 func init() {

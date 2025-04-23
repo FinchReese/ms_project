@@ -169,6 +169,15 @@ message CollectProjectReq {
 message CollectProjectResp {
 }
 
+message UpdateProjectDeletedStateReq {
+  string projectCode = 1;
+  bool deletedState = 2;
+}
+
+message UpdateProjectDeletedStateResp {
+
+}
+
 service ProjectService {
   rpc Index(IndexMessage) returns (IndexResponse) {}
   rpc GetProjectList(GetProjectListReq) returns(GetProjectListResp) {}
@@ -176,4 +185,5 @@ service ProjectService {
   rpc SaveProject(SaveProjectReq) returns(SaveProjectResp) {}
   rpc GetProjectDetail(GetProjectDetailReq) returns(GetProjectDetailResp) {}
   rpc CollectProject(CollectProjectReq) returns(CollectProjectResp) {}
+  rpc UpdateProjectDeletedState(UpdateProjectDeletedStateReq) returns(UpdateProjectDeletedStateResp) {}
 }

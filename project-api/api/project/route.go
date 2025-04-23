@@ -19,6 +19,8 @@ func (*ProjectRouter) Register(r *gin.Engine) {
 	projectGroup.POST("/project/save", saveProject)
 	projectGroup.POST("/project/read", getProjectInfo)
 	projectGroup.POST("/project_collect/collect", collectProject)
+	projectGroup.POST("/project/recycle", recycleProject)
+	projectGroup.POST("/project/recovery", recoveryProject)
 }
 
 func init() {

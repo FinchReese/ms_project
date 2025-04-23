@@ -9,6 +9,7 @@ import (
 
 type ProjectRepo interface {
 	SaveProject(ctx context.Context, p *data.Project, db *gorm.DB) error
+	UpdateProjectDeletedState(ctx context.Context, projectId int64, deleted bool) error
 }
 
 type ProjectMemberRepo interface {

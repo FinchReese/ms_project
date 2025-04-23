@@ -128,3 +128,7 @@ type CollectProjectReq struct {
 	ProjectCode string `form:"projectCode"`
 	Type        string `form:"type"`
 }
+
+type UpdateProjectDeletedStateReq struct {
+	ProjectCode string `form:"projectCode"`
+}
