@@ -2,7 +2,9 @@ package login_service_v1
 
 import (
 	"context"
+	"encoding/json"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
@@ -210,6 +212,11 @@ func (ls *LoginService) Login(ctx context.Context, msg *login.LoginMessage) (*lo
 		AccessTokenExp: token.AccessExp,
 		TokenType:      tokenType,
 	}
+	// 缓存成员信息到redis
+	go func() {
+		marshal, _ := json.Marshal(member)
+		ls.Cache.Put(ctx, model.MemberKeyPrefix+"::"+strconv.FormatInt(member.Id, 10), string(marshal), exp)
+	}()
 
 	resp := &login.LoginResponse{
 		Member:           memMsg,
@@ -231,12 +238,23 @@ func (ls *LoginService) VerifyToken(ctx context.Context, req *login.VerifyTokenR
 		zap.L().Error("verify token error", zap.Error(err))
 		return nil, errs.GrpcError(model.VerifyTokenError)
 	}
-	// 调用grpc接口获取member
-	member, err := ls.MemberRepo.FindMemberById(ctx, memberId)
+	// 从redis中获取member
+	memberStr, err := ls.Cache.Get(ctx, model.MemberKeyPrefix+"::"+strconv.FormatInt(memberId, 10))
 	if err != nil {
-		zap.L().Error("find member by id err", zap.Error(err))
-		return nil, errs.GrpcError(model.FindMemberByIdError)
+		zap.L().Error("get member from redis err", zap.Error(err))
+		return nil, errs.GrpcError(model.GetMemberFromRedisError)
 	}
+	if memberStr == "" {
+		zap.L().Error("get member expire", zap.Int64("memberId", memberId))
+		return nil, errs.GrpcError(model.LoginTimeoutError)
+	}
+	var member member.Member
+	err = json.Unmarshal([]byte(memberStr), &member)
+	if err != nil {
+		zap.L().Error("unmarshal member from redis err", zap.Error(err))
+		return nil, errs.GrpcError(model.UnmarshalMemberFromRedisError)
+	}
+
 	memMsg := login.MemberMessage{}
 	copier.Copy(&memMsg, member)
 	resp := &login.VerifyTokenResp{Member: &memMsg}
