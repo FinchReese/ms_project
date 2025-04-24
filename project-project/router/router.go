@@ -58,6 +58,7 @@ func RegisterGrpc() *grpc.Server {
 		dao.NewTemplateTaskStageDAO(),
 		dao.NewProjectDAO(),
 		dao.NewProjectCollectDao(),
+		dao.NewTaskStageDAO(),
 		trans.NewTransaction())
 	project.RegisterProjectServiceServer(s, projectService)
 	// 注册task服务

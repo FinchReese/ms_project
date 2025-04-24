@@ -34,11 +34,12 @@ type ProjectService struct {
 	templateTaskStageRepo repo.TemplateTaskStageRepo
 	projectRepo           repo.ProjectRepo
 	projectCollectRepo    repo.ProjectCollectRepo
+	taskStageRepo         repo.TaskStageRepo
 	tran                  *trans.TransactionImpl
 }
 
 func NewProjectService(mr repo.MenuRepo, pmr repo.ProjectMemberRepo, ptr repo.ProjectTemplateRepo, ttsr repo.TemplateTaskStageRepo, pr repo.ProjectRepo,
-	pcr repo.ProjectCollectRepo, t *trans.TransactionImpl) *ProjectService {
+	pcr repo.ProjectCollectRepo, tsp repo.TaskStageRepo, t *trans.TransactionImpl) *ProjectService {
 	return &ProjectService{
 		menuRepo:              mr,
 		projectMemberRepo:     pmr,
@@ -46,6 +47,7 @@ func NewProjectService(mr repo.MenuRepo, pmr repo.ProjectMemberRepo, ptr repo.Pr
 		templateTaskStageRepo: ttsr,
 		projectRepo:           pr,
 		projectCollectRepo:    pcr,
+		taskStageRepo:         tsp,
 		tran:                  t,
 	}
 }
@@ -126,9 +128,12 @@ func (p *ProjectService) SaveProject(ctx context.Context, req *project.SaveProje
 	if len(orgs) > 0 { // 教程把成员的第一个组织作为当前组织，实际应该是在前端选择当前组织，后端记录
 		organizationCode = orgs[0].Id
 	}
-
 	templateCodeStr, _ := encrypt.Decrypt(req.TemplateCode, model.AESKey)
 	templateCode, _ := strconv.ParseInt(templateCodeStr, 10, 64)
+	templateTaskStages, err := p.templateTaskStageRepo.GetTaskStagesByTemplateIds(ctx, []int{int(templateCode)})
+	if err != nil {
+		return nil, errs.GrpcError(model.QueryTemplateTaskStagesError)
+	}
 	pro := &data.Project{
 		Name:              req.Name,
 		Description:       req.Description,
@@ -162,6 +167,22 @@ func (p *ProjectService) SaveProject(ctx context.Context, req *project.SaveProje
 		if err != nil {
 			zap.L().Error("save project member err", zap.Error(err))
 			return errs.GrpcError(model.SaveProjectMembertError)
+		}
+		//3. 生成任务的步骤
+		for index, templateTaskStage := range templateTaskStages {
+			taskStage := &data.TaskStage{
+				ProjectCode: pro.Id,
+				Name:        templateTaskStage.Name,
+				Sort:        index + 1,
+				Description: "",
+				CreateTime:  time.Now().UnixMilli(),
+				Deleted:     model.NotDeleted,
+			}
+			err := p.taskStageRepo.SaveTaskStage(ctx, taskStage, conn.TranDb)
+			if err != nil {
+				zap.L().Error("save task stage error", zap.Error(err))
+				return errs.GrpcError(model.SaveTaskStageError)
+			}
 		}
 		return nil
 	})
