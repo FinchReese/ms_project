@@ -1,0 +1,29 @@
+syntax = "proto3";
+package task.service.v1;
+option go_package = "./gen";
+
+message GetTaskStagesReq {
+    string projectCode = 1;
+    int32 pageSize = 2;
+    int32 page = 3;
+}
+
+message TaskStage {
+  int32 id = 1;
+  string name = 2;
+  string projectCode = 3;
+  int32 sort = 4;
+  string description = 5;
+  string createTimeStr = 6;
+  int32 deleted = 7;
+  string code = 8;
+}
+
+message GetTaskStagesResp {
+  int64 total = 1;
+  repeated TaskStage list = 2;
+}
+
+service TaskService {
+    rpc GetTaskStages(GetTaskStagesReq) returns (GetTaskStagesResp) {}
+}

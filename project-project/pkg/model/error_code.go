@@ -25,4 +25,7 @@ var (
 	InvalidCollectType             = errs.NewError(2017, "无效的收藏类型")
 	UpdateProjectDeletedStateError = errs.NewError(2018, "更新项目删除状态出错")
 	UpdateProjectError             = errs.NewError(2019, "更新项目出错")
+	GetTaskStagesError             = errs.NewError(2020, "获取任务步骤出错")
+	CopyTaskStageListError         = errs.NewError(2021, "复制任务步骤列表出错")
+	EncryptTaskStageIdError        = errs.NewError(2022, "加密任务步骤id出错")
 )

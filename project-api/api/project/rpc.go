@@ -8,9 +8,11 @@ import (
 	"test.com/project-api/config"
 	"test.com/project-common/service_discover"
 	"test.com/project-grpc/project"
+	"test.com/project-grpc/task"
 )
 
 var projectServiceClient project.ProjectServiceClient
+var TaskServiceClient task.TaskServiceClient
 
 func InitProjectRpc() {
 	resolver.Register(service_discover.NewEtcdBuilder(config.AppConf.EtcdConf.Addrs))
@@ -19,4 +21,5 @@ func InitProjectRpc() {
 		log.Fatalf("did not connect: %v", err)
 	}
 	projectServiceClient = project.NewProjectServiceClient(conn)
+	TaskServiceClient = task.NewTaskServiceClient(conn)
 }

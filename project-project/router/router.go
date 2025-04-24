@@ -10,10 +10,12 @@ import (
 	interceptor "test.com/project-common/Interceptor"
 	"test.com/project-common/service_discover"
 	"test.com/project-grpc/project"
+	"test.com/project-grpc/task"
 	"test.com/project-project/config"
 	"test.com/project-project/internal/dao"
 	"test.com/project-project/internal/database/trans"
 	"test.com/project-project/pkg/service/project_service_v1"
+	"test.com/project-project/pkg/service/task_service_v1"
 )
 
 const (
@@ -48,6 +50,7 @@ func RegisterGrpc() *grpc.Server {
 	interceptor := interceptor.NewServiceInterceptor(methodToConfigMap, dao.Rc)
 	// 创建GRPC服务器时注册拦截器
 	s := grpc.NewServer(grpc.UnaryInterceptor(interceptor.Intercept))
+	// 注册project服务
 	projectService := project_service_v1.NewProjectService(
 		dao.NewMenuDAO(),
 		dao.NewProjectMemberDAO(),
@@ -57,6 +60,9 @@ func RegisterGrpc() *grpc.Server {
 		dao.NewProjectCollectDao(),
 		trans.NewTransaction())
 	project.RegisterProjectServiceServer(s, projectService)
+	// 注册task服务
+	taskService := task_service_v1.NewTaskService(dao.NewTaskStageDAO())
+	task.RegisterTaskServiceServer(s, taskService)
 	lis, err := net.Listen("tcp", config.AppConf.GrpcConf.Addr)
 	if err != nil {
 		log.Println("cannot listen")
