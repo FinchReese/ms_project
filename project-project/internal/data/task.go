@@ -1,6 +1,12 @@
 package data
 
-import "test.com/project-common/time_format"
+import (
+	"github.com/jinzhu/copier"
+	"test.com/project-common/encrypt"
+	"test.com/project-common/time_format"
+	"test.com/project-grpc/task"
+	"test.com/project-project/pkg/model"
+)
 
 type TemplateTaskStage struct {
 	Id                  int
@@ -44,4 +50,112 @@ func (ts *TaskStage) TableName() string {
 
 func (ts *TaskStage) CreateTimeStr() string {
 	return time_format.ConvertMsecToString(ts.CreateTime)
+}
+
+type Task struct {
+	Id            int64  `json:"id"`
+	ProjectCode   int64  `json:"project_code"`
+	Name          string `json:"name"`
+	Pri           int    `json:"pri"`            // 紧急程度
+	ExecuteStatus int    `json:"execute_status"` // 执行状态
+	Description   string `json:"description"`    // 详情
+	CreateBy      int64  `json:"create_by"`      // 创建人
+	DoneBy        int64  `json:"done_by"`        // 完成人
+	DoneTime      int64  `json:"done_time"`      // 完成时间
+	CreateTime    int64  `json:"create_time"`    // 创建日期
+	AssignTo      int64  `json:"assign_to"`      // 指派给谁
+	Deleted       int    `json:"deleted"`        // 回收站
+	StageCode     int    `json:"stage_code"`     // 任务列表
+	TaskTag       string `json:"task_tag"`       // 任务标签
+	Done          int    `json:"done"`           // 是否完成
+	BeginTime     int64  `json:"begin_time"`     // 开始时间
+	EndTime       int64  `json:"end_time"`       // 截止时间
+	RemindTime    int64  `json:"remind_time"`    // 提醒时间
+	Pcode         int64  `json:"pcode"`          // 父任务id
+	Sort          int    `json:"sort"`           // 排序
+	Like          int    `json:"like"`           // 点赞数
+	Star          int    `json:"star"`           // 收藏数
+	DeletedTime   int64  `json:"deleted_time"`   // 删除时间
+	Private       int    `json:"private"`        // 是否隐私模式
+	IdNum         int    `json:"id_num"`         // 任务id编号
+	Path          string `json:"path"`           // 上级任务路径
+	Schedule      int    `json:"schedule"`       // 进度百分比
+	VersionCode   int64  `json:"version_code"`   // 版本id
+	FeaturesCode  int64  `json:"features_code"`  // 版本库id
+	WorkTime      int    `json:"work_time"`      // 预估工时
+	Status        int    `json:"status"`         // 执行状态
+}
+
+// TableName 指定表名
+func (*Task) TableName() string {
+	return "ms_task"
+}
+
+func (t *Task) ToDisplayTask() *task.Task {
+	dispTask := &task.Task{}
+	copier.Copy(&dispTask, t)
+	dispTask.CreateTime = time_format.ConvertMsecToString(t.CreateTime)
+	dispTask.DoneTime = time_format.ConvertMsecToString(t.DoneTime)
+	dispTask.BeginTime = time_format.ConvertMsecToString(t.BeginTime)
+	dispTask.EndTime = time_format.ConvertMsecToString(t.EndTime)
+	dispTask.RemindTime = time_format.ConvertMsecToString(t.RemindTime)
+	dispTask.DeletedTime = time_format.ConvertMsecToString(t.DeletedTime)
+	dispTask.CreateBy, _ = encrypt.EncryptInt64(t.CreateBy, model.AESKey)
+	dispTask.ProjectCode, _ = encrypt.EncryptInt64(t.ProjectCode, model.AESKey)
+	dispTask.DoneBy, _ = encrypt.EncryptInt64(t.DoneBy, model.AESKey)
+	dispTask.AssignTo, _ = encrypt.EncryptInt64(t.AssignTo, model.AESKey)
+	dispTask.StageCode, _ = encrypt.EncryptInt64(int64(t.StageCode), model.AESKey)
+	dispTask.Pcode, _ = encrypt.EncryptInt64(t.Pcode, model.AESKey)
+	dispTask.VersionCode, _ = encrypt.EncryptInt64(t.VersionCode, model.AESKey)
+	dispTask.FeaturesCode, _ = encrypt.EncryptInt64(t.FeaturesCode, model.AESKey)
+	dispTask.ExecuteStatus = t.GetExecuteStatusStr()
+	dispTask.Code, _ = encrypt.EncryptInt64(t.Id, model.AESKey)
+	dispTask.CanRead = 1
+	return dispTask
+}
+
+const (
+	Wait = iota
+	Doing
+	Done
+	Pause
+	Cancel
+	Closed
+)
+
+func (t *Task) GetExecuteStatusStr() string {
+	status := t.ExecuteStatus
+	if status == Wait {
+		return "wait"
+	}
+	if status == Doing {
+		return "doing"
+	}
+	if status == Done {
+		return "done"
+	}
+	if status == Pause {
+		return "pause"
+	}
+	if status == Cancel {
+		return "cancel"
+	}
+	if status == Closed {
+		return "closed"
+	}
+	return ""
+}
+
+type TaskMember struct {
+	Id         int64 `json:"id"`
+	TaskCode   int64 `json:"task_code"`   // 任务ID
+	IsExecutor int   `json:"is_executor"` // 执行者
+	MemberCode int64 `json:"member_code"` // 成员id
+	JoinTime   int64 `json:"join_time"`   // 加入时间
+	IsOwner    int   `json:"is_owner"`    // 是否创建人
+}
+
+// TableName 指定表名
+func (*TaskMember) TableName() string {
+	return "ms_task_member"
 }

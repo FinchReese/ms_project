@@ -167,3 +167,7 @@ type GetProjectMemberListResp struct {
 	Page  int                  `json:"page"`
 	List  []*ProjectMemberInfo `json:"list"`
 }
+
+type GetTaskListReq struct {
+	StageCode string `json:"stageCode" form:"stageCode"`
+}

@@ -53,3 +53,46 @@ func getTaskStage(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, result.Success(resp))
 
 }
+
+func getTaskList(ctx *gin.Context) {
+	result := &common.Result{}
+	// 1. 解析请求消息
+	var req model_project.GetTaskListReq
+	err := ctx.ShouldBind(&req)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, result.Fail(http.StatusBadRequest, "参数错误"))
+		return
+	}
+	memberId := ctx.GetInt64("memberId")
+
+	// 2. 调用gRPC服务
+	grpcCtx, cancel := context.WithTimeout(context.Background(), serviceTimeOut*time.Second)
+	defer cancel()
+
+	grpcReq := &task.GetTasksByStageCodeReq{
+		MemberId:  memberId,
+		StageCode: req.StageCode,
+	}
+	grpcResp, err := TaskServiceClient.GetTasksByStageCode(grpcCtx, grpcReq)
+	if err != nil {
+		code, msg := errs.ParseGrpcError(err)
+		ctx.JSON(http.StatusInternalServerError, result.Fail(code, msg))
+		return
+	}
+	// 3. 组织回复消息
+	var dispTaskList []*model_project.DispTask
+	copier.Copy(&dispTaskList, grpcResp)
+	if dispTaskList == nil {
+		dispTaskList = []*model_project.DispTask{}
+	}
+	//返回给前端的数据 一定不要是null
+	for _, v := range dispTaskList {
+		if v.Tags == nil {
+			v.Tags = []int{}
+		}
+		if v.ChildCount == nil {
+			v.ChildCount = []int{}
+		}
+	}
+	ctx.JSON(http.StatusOK, result.Success(dispTaskList))
+}

@@ -27,3 +27,8 @@ const (
 	NotCollected = iota
 	Collected
 )
+
+const (
+	CanNotRead = iota
+	CanRead
+)

@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TaskServiceClient interface {
 	GetTaskStages(ctx context.Context, in *GetTaskStagesReq, opts ...grpc.CallOption) (*GetTaskStagesResp, error)
+	GetTasksByStageCode(ctx context.Context, in *GetTasksByStageCodeReq, opts ...grpc.CallOption) (*GetTasksByStageCodeResp, error)
 }
 
 type taskServiceClient struct {
@@ -42,11 +43,21 @@ func (c *taskServiceClient) GetTaskStages(ctx context.Context, in *GetTaskStages
 	return out, nil
 }
 
+func (c *taskServiceClient) GetTasksByStageCode(ctx context.Context, in *GetTasksByStageCodeReq, opts ...grpc.CallOption) (*GetTasksByStageCodeResp, error) {
+	out := new(GetTasksByStageCodeResp)
+	err := c.cc.Invoke(ctx, "/task.service.v1.TaskService/GetTasksByStageCode", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TaskServiceServer is the server API for TaskService service.
 // All implementations must embed UnimplementedTaskServiceServer
 // for forward compatibility
 type TaskServiceServer interface {
 	GetTaskStages(context.Context, *GetTaskStagesReq) (*GetTaskStagesResp, error)
+	GetTasksByStageCode(context.Context, *GetTasksByStageCodeReq) (*GetTasksByStageCodeResp, error)
 	mustEmbedUnimplementedTaskServiceServer()
 }
 
@@ -56,6 +67,9 @@ type UnimplementedTaskServiceServer struct {
 
 func (UnimplementedTaskServiceServer) GetTaskStages(context.Context, *GetTaskStagesReq) (*GetTaskStagesResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTaskStages not implemented")
+}
+func (UnimplementedTaskServiceServer) GetTasksByStageCode(context.Context, *GetTasksByStageCodeReq) (*GetTasksByStageCodeResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTasksByStageCode not implemented")
 }
 func (UnimplementedTaskServiceServer) mustEmbedUnimplementedTaskServiceServer() {}
 
@@ -88,6 +102,24 @@ func _TaskService_GetTaskStages_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TaskService_GetTasksByStageCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTasksByStageCodeReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).GetTasksByStageCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/task.service.v1.TaskService/GetTasksByStageCode",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).GetTasksByStageCode(ctx, req.(*GetTasksByStageCodeReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TaskService_ServiceDesc is the grpc.ServiceDesc for TaskService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -98,6 +130,10 @@ var TaskService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetTaskStages",
 			Handler:    _TaskService_GetTaskStages_Handler,
+		},
+		{
+			MethodName: "GetTasksByStageCode",
+			Handler:    _TaskService_GetTasksByStageCode_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

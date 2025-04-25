@@ -32,4 +32,7 @@ var (
 	SaveTaskStageError             = errs.NewError(2024, "保存任务步骤出错")
 	GetProjectMemberListError      = errs.NewError(2025, "获取项目成员列表出错")
 	GetMembersInfoError            = errs.NewError(2026, "获取成员信息出错")
+	TaskStageCodeError             = errs.NewError(2027, "任务步骤编码错误")
+	GetTasksByStageCodeError       = errs.NewError(2028, "根据任务步骤编码获取任务列表出错")
+	GetTaskMembersError            = errs.NewError(2029, "获取任务成员列表出错")
 )
