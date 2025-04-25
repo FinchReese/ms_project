@@ -25,4 +25,5 @@ var (
 	GetMemberFromRedisError       = errs.NewError(2017, "从Redis获取成员信息失败")
 	UnmarshalMemberFromRedisError = errs.NewError(2018, "解析Redis中的成员信息失败")
 	LoginTimeoutError             = errs.NewError(2019, "登录已过期，请重新登录")
+	FindMembersByIdsError         = errs.NewError(2020, "根据id列表查找成员错误")
 )

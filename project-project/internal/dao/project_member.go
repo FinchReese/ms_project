@@ -108,3 +108,32 @@ func (p *ProjectMemberDAO) IsCollectedProject(ctx context.Context, memberId int6
 		Count(&count).Error
 	return count > 0, err
 }
+
+func (p *ProjectMemberDAO) GetProjectMemberList(ctx context.Context, projectId int64, page, pageSize int) ([]*data.ProjectMember, int64, error) {
+	var members []*data.ProjectMember
+	var total int64
+	offset := (page - 1) * pageSize
+	session := p.conn.Db.Session(&gorm.Session{Context: ctx})
+
+	// 查询总数
+	err := session.Model(&data.ProjectMember{}).
+		Where("project_code = ?", projectId).
+		Count(&total).Error
+	if err != nil {
+		zap.L().Error("Count project members error", zap.Error(err))
+		return nil, 0, err
+	}
+
+	// 分页查询成员列表
+	err = session.Model(&data.ProjectMember{}).
+		Where("project_code = ?", projectId).
+		Offset(offset).
+		Limit(pageSize).
+		Find(&members).Error
+	if err != nil {
+		zap.L().Error("Query project members error", zap.Error(err))
+		return nil, 0, err
+	}
+
+	return members, total, nil
+}

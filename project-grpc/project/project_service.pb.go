@@ -1876,6 +1876,211 @@ func (*UpdateProjectResp) Descriptor() ([]byte, []int) {
 	return file_project_service_proto_rawDescGZIP(), []int{19}
 }
 
+type GetProjectMemberListReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	ProjectCode string `protobuf:"bytes,1,opt,name=projectCode,proto3" json:"projectCode,omitempty"`
+	Page        int32  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize    int32  `protobuf:"varint,3,opt,name=pageSize,proto3" json:"pageSize,omitempty"`
+}
+
+func (x *GetProjectMemberListReq) Reset() {
+	*x = GetProjectMemberListReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_project_service_proto_msgTypes[20]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetProjectMemberListReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetProjectMemberListReq) ProtoMessage() {}
+
+func (x *GetProjectMemberListReq) ProtoReflect() protoreflect.Message {
+	mi := &file_project_service_proto_msgTypes[20]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetProjectMemberListReq.ProtoReflect.Descriptor instead.
+func (*GetProjectMemberListReq) Descriptor() ([]byte, []int) {
+	return file_project_service_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *GetProjectMemberListReq) GetProjectCode() string {
+	if x != nil {
+		return x.ProjectCode
+	}
+	return ""
+}
+
+func (x *GetProjectMemberListReq) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetProjectMemberListReq) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type ProjectMemberInfo struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Name       string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Avatar     string `protobuf:"bytes,2,opt,name=avatar,proto3" json:"avatar,omitempty"`
+	MemberCode int64  `protobuf:"varint,3,opt,name=memberCode,proto3" json:"memberCode,omitempty"`
+	Code       string `protobuf:"bytes,4,opt,name=code,proto3" json:"code,omitempty"`
+	Email      string `protobuf:"bytes,5,opt,name=email,proto3" json:"email,omitempty"`
+	IsOwner    int32  `protobuf:"varint,6,opt,name=isOwner,proto3" json:"isOwner,omitempty"`
+}
+
+func (x *ProjectMemberInfo) Reset() {
+	*x = ProjectMemberInfo{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_project_service_proto_msgTypes[21]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ProjectMemberInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProjectMemberInfo) ProtoMessage() {}
+
+func (x *ProjectMemberInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_project_service_proto_msgTypes[21]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProjectMemberInfo.ProtoReflect.Descriptor instead.
+func (*ProjectMemberInfo) Descriptor() ([]byte, []int) {
+	return file_project_service_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *ProjectMemberInfo) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ProjectMemberInfo) GetAvatar() string {
+	if x != nil {
+		return x.Avatar
+	}
+	return ""
+}
+
+func (x *ProjectMemberInfo) GetMemberCode() int64 {
+	if x != nil {
+		return x.MemberCode
+	}
+	return 0
+}
+
+func (x *ProjectMemberInfo) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+func (x *ProjectMemberInfo) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *ProjectMemberInfo) GetIsOwner() int32 {
+	if x != nil {
+		return x.IsOwner
+	}
+	return 0
+}
+
+type GetProjectMemberListResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Total int64                `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	List  []*ProjectMemberInfo `protobuf:"bytes,2,rep,name=list,proto3" json:"list,omitempty"`
+}
+
+func (x *GetProjectMemberListResp) Reset() {
+	*x = GetProjectMemberListResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_project_service_proto_msgTypes[22]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetProjectMemberListResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetProjectMemberListResp) ProtoMessage() {}
+
+func (x *GetProjectMemberListResp) ProtoReflect() protoreflect.Message {
+	mi := &file_project_service_proto_msgTypes[22]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetProjectMemberListResp.ProtoReflect.Descriptor instead.
+func (*GetProjectMemberListResp) Descriptor() ([]byte, []int) {
+	return file_project_service_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *GetProjectMemberListResp) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *GetProjectMemberListResp) GetList() []*ProjectMemberInfo {
+	if x != nil {
+		return x.List
+	}
+	return nil
+}
+
 var File_project_service_proto protoreflect.FileDescriptor
 
 var file_project_service_proto_rawDesc = []byte{
@@ -2168,7 +2373,31 @@ var file_project_service_proto_rawDesc = []byte{
 	0x68, 0x65, 0x64, 0x75, 0x6c, 0x65, 0x18, 0x0c, 0x20, 0x01, 0x28, 0x05, 0x52, 0x12, 0x41, 0x75,
 	0x74, 0x6f, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x53, 0x63, 0x68, 0x65, 0x64, 0x75, 0x6c, 0x65,
 	0x22, 0x13, 0x0a, 0x11, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63,
-	0x74, 0x52, 0x65, 0x73, 0x70, 0x32, 0xc0, 0x06, 0x0a, 0x0e, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63,
+	0x74, 0x52, 0x65, 0x73, 0x70, 0x22, 0x6b, 0x0a, 0x17, 0x47, 0x65, 0x74, 0x50, 0x72, 0x6f, 0x6a,
+	0x65, 0x63, 0x74, 0x4d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x71,
+	0x12, 0x20, 0x0a, 0x0b, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x43, 0x6f, 0x64, 0x65, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x43, 0x6f,
+	0x64, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x70, 0x61, 0x67, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05,
+	0x52, 0x04, 0x70, 0x61, 0x67, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x61, 0x67, 0x65, 0x53, 0x69,
+	0x7a, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x08, 0x70, 0x61, 0x67, 0x65, 0x53, 0x69,
+	0x7a, 0x65, 0x22, 0xa3, 0x01, 0x0a, 0x11, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x4d, 0x65,
+	0x6d, 0x62, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x16, 0x0a, 0x06,
+	0x61, 0x76, 0x61, 0x74, 0x61, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x61, 0x76,
+	0x61, 0x74, 0x61, 0x72, 0x12, 0x1e, 0x0a, 0x0a, 0x6d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x43, 0x6f,
+	0x64, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0a, 0x6d, 0x65, 0x6d, 0x62, 0x65, 0x72,
+	0x43, 0x6f, 0x64, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x63, 0x6f, 0x64, 0x65, 0x18, 0x04, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x04, 0x63, 0x6f, 0x64, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x65, 0x6d, 0x61, 0x69,
+	0x6c, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x65, 0x6d, 0x61, 0x69, 0x6c, 0x12, 0x18,
+	0x0a, 0x07, 0x69, 0x73, 0x4f, 0x77, 0x6e, 0x65, 0x72, 0x18, 0x06, 0x20, 0x01, 0x28, 0x05, 0x52,
+	0x07, 0x69, 0x73, 0x4f, 0x77, 0x6e, 0x65, 0x72, 0x22, 0x6b, 0x0a, 0x18, 0x47, 0x65, 0x74, 0x50,
+	0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x4d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x4c, 0x69, 0x73, 0x74,
+	0x52, 0x65, 0x73, 0x70, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x03, 0x52, 0x05, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x12, 0x39, 0x0a, 0x04, 0x6c, 0x69,
+	0x73, 0x74, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x25, 0x2e, 0x70, 0x72, 0x6f, 0x6a, 0x65,
+	0x63, 0x74, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x50, 0x72,
+	0x6f, 0x6a, 0x65, 0x63, 0x74, 0x4d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x52,
+	0x04, 0x6c, 0x69, 0x73, 0x74, 0x32, 0xb5, 0x07, 0x0a, 0x0e, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63,
 	0x74, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x4e, 0x0a, 0x05, 0x49, 0x6e, 0x64, 0x65,
 	0x78, 0x12, 0x20, 0x2e, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x2e, 0x73, 0x65, 0x72, 0x76,
 	0x69, 0x63, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x4d, 0x65, 0x73, 0x73,
@@ -2220,8 +2449,15 @@ var file_project_service_proto_rawDesc = []byte{
 	0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x52, 0x65, 0x71, 0x1a,
 	0x25, 0x2e, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63,
 	0x65, 0x2e, 0x76, 0x31, 0x2e, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x50, 0x72, 0x6f, 0x6a, 0x65,
-	0x63, 0x74, 0x52, 0x65, 0x73, 0x70, 0x22, 0x00, 0x42, 0x07, 0x5a, 0x05, 0x2e, 0x2f, 0x67, 0x65,
-	0x6e, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x63, 0x74, 0x52, 0x65, 0x73, 0x70, 0x22, 0x00, 0x12, 0x73, 0x0a, 0x14, 0x47, 0x65, 0x74, 0x50,
+	0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x4d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x4c, 0x69, 0x73, 0x74,
+	0x12, 0x2b, 0x2e, 0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x69,
+	0x63, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74,
+	0x4d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x71, 0x1a, 0x2c, 0x2e,
+	0x70, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e,
+	0x76, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x50, 0x72, 0x6f, 0x6a, 0x65, 0x63, 0x74, 0x4d, 0x65, 0x6d,
+	0x62, 0x65, 0x72, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x22, 0x00, 0x42, 0x07, 0x5a,
+	0x05, 0x2e, 0x2f, 0x67, 0x65, 0x6e, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -2236,7 +2472,7 @@ func file_project_service_proto_rawDescGZIP() []byte {
 	return file_project_service_proto_rawDescData
 }
 
-var file_project_service_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
+var file_project_service_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
 var file_project_service_proto_goTypes = []interface{}{
 	(*IndexMessage)(nil),                  // 0: project.service.v1.IndexMessage
 	(*MenuMessage)(nil),                   // 1: project.service.v1.MenuMessage
@@ -2258,6 +2494,9 @@ var file_project_service_proto_goTypes = []interface{}{
 	(*UpdateProjectDeletedStateResp)(nil), // 17: project.service.v1.UpdateProjectDeletedStateResp
 	(*UpdateProjectReq)(nil),              // 18: project.service.v1.UpdateProjectReq
 	(*UpdateProjectResp)(nil),             // 19: project.service.v1.UpdateProjectResp
+	(*GetProjectMemberListReq)(nil),       // 20: project.service.v1.GetProjectMemberListReq
+	(*ProjectMemberInfo)(nil),             // 21: project.service.v1.ProjectMemberInfo
+	(*GetProjectMemberListResp)(nil),      // 22: project.service.v1.GetProjectMemberListResp
 }
 var file_project_service_proto_depIdxs = []int32{
 	1,  // 0: project.service.v1.MenuMessage.children:type_name -> project.service.v1.MenuMessage
@@ -2265,27 +2504,30 @@ var file_project_service_proto_depIdxs = []int32{
 	4,  // 2: project.service.v1.GetProjectListResp.ProjectList:type_name -> project.service.v1.ProjectMemberMessage
 	8,  // 3: project.service.v1.ProjectTemplateMessage.taskStages:type_name -> project.service.v1.TaskStages
 	7,  // 4: project.service.v1.GetProjectTemplatesResp.ptm:type_name -> project.service.v1.ProjectTemplateMessage
-	0,  // 5: project.service.v1.ProjectService.Index:input_type -> project.service.v1.IndexMessage
-	3,  // 6: project.service.v1.ProjectService.GetProjectList:input_type -> project.service.v1.GetProjectListReq
-	6,  // 7: project.service.v1.ProjectService.GetProjectTemplates:input_type -> project.service.v1.GetProjectTemplatesReq
-	10, // 8: project.service.v1.ProjectService.SaveProject:input_type -> project.service.v1.SaveProjectReq
-	12, // 9: project.service.v1.ProjectService.GetProjectDetail:input_type -> project.service.v1.GetProjectDetailReq
-	14, // 10: project.service.v1.ProjectService.CollectProject:input_type -> project.service.v1.CollectProjectReq
-	16, // 11: project.service.v1.ProjectService.UpdateProjectDeletedState:input_type -> project.service.v1.UpdateProjectDeletedStateReq
-	18, // 12: project.service.v1.ProjectService.UpdateProject:input_type -> project.service.v1.UpdateProjectReq
-	2,  // 13: project.service.v1.ProjectService.Index:output_type -> project.service.v1.IndexResponse
-	5,  // 14: project.service.v1.ProjectService.GetProjectList:output_type -> project.service.v1.GetProjectListResp
-	9,  // 15: project.service.v1.ProjectService.GetProjectTemplates:output_type -> project.service.v1.GetProjectTemplatesResp
-	11, // 16: project.service.v1.ProjectService.SaveProject:output_type -> project.service.v1.SaveProjectResp
-	13, // 17: project.service.v1.ProjectService.GetProjectDetail:output_type -> project.service.v1.GetProjectDetailResp
-	15, // 18: project.service.v1.ProjectService.CollectProject:output_type -> project.service.v1.CollectProjectResp
-	17, // 19: project.service.v1.ProjectService.UpdateProjectDeletedState:output_type -> project.service.v1.UpdateProjectDeletedStateResp
-	19, // 20: project.service.v1.ProjectService.UpdateProject:output_type -> project.service.v1.UpdateProjectResp
-	13, // [13:21] is the sub-list for method output_type
-	5,  // [5:13] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	21, // 5: project.service.v1.GetProjectMemberListResp.list:type_name -> project.service.v1.ProjectMemberInfo
+	0,  // 6: project.service.v1.ProjectService.Index:input_type -> project.service.v1.IndexMessage
+	3,  // 7: project.service.v1.ProjectService.GetProjectList:input_type -> project.service.v1.GetProjectListReq
+	6,  // 8: project.service.v1.ProjectService.GetProjectTemplates:input_type -> project.service.v1.GetProjectTemplatesReq
+	10, // 9: project.service.v1.ProjectService.SaveProject:input_type -> project.service.v1.SaveProjectReq
+	12, // 10: project.service.v1.ProjectService.GetProjectDetail:input_type -> project.service.v1.GetProjectDetailReq
+	14, // 11: project.service.v1.ProjectService.CollectProject:input_type -> project.service.v1.CollectProjectReq
+	16, // 12: project.service.v1.ProjectService.UpdateProjectDeletedState:input_type -> project.service.v1.UpdateProjectDeletedStateReq
+	18, // 13: project.service.v1.ProjectService.UpdateProject:input_type -> project.service.v1.UpdateProjectReq
+	20, // 14: project.service.v1.ProjectService.GetProjectMemberList:input_type -> project.service.v1.GetProjectMemberListReq
+	2,  // 15: project.service.v1.ProjectService.Index:output_type -> project.service.v1.IndexResponse
+	5,  // 16: project.service.v1.ProjectService.GetProjectList:output_type -> project.service.v1.GetProjectListResp
+	9,  // 17: project.service.v1.ProjectService.GetProjectTemplates:output_type -> project.service.v1.GetProjectTemplatesResp
+	11, // 18: project.service.v1.ProjectService.SaveProject:output_type -> project.service.v1.SaveProjectResp
+	13, // 19: project.service.v1.ProjectService.GetProjectDetail:output_type -> project.service.v1.GetProjectDetailResp
+	15, // 20: project.service.v1.ProjectService.CollectProject:output_type -> project.service.v1.CollectProjectResp
+	17, // 21: project.service.v1.ProjectService.UpdateProjectDeletedState:output_type -> project.service.v1.UpdateProjectDeletedStateResp
+	19, // 22: project.service.v1.ProjectService.UpdateProject:output_type -> project.service.v1.UpdateProjectResp
+	22, // 23: project.service.v1.ProjectService.GetProjectMemberList:output_type -> project.service.v1.GetProjectMemberListResp
+	15, // [15:24] is the sub-list for method output_type
+	6,  // [6:15] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_project_service_proto_init() }
@@ -2534,6 +2776,42 @@ func file_project_service_proto_init() {
 				return nil
 			}
 		}
+		file_project_service_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetProjectMemberListReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_project_service_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ProjectMemberInfo); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_project_service_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetProjectMemberListResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -2541,7 +2819,7 @@ func file_project_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_project_service_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   20,
+			NumMessages:   23,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

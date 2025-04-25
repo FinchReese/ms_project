@@ -265,3 +265,43 @@ func updateProject(ctx *gin.Context) {
 	// 4. 返回结果
 	ctx.JSON(http.StatusOK, result.Success([]int{}))
 }
+
+func getProjectMemberList(ctx *gin.Context) {
+	// 1. 创建返回结果对象
+	result := &common.Result{}
+
+	// 2. 解析请求参数
+	var req model_project.GetProjectMemberListReq
+	err := ctx.ShouldBind(&req)
+	if err != nil {
+		ctx.JSON(http.StatusOK, result.Fail(http.StatusBadRequest, "参数传递有误"))
+		return
+	}
+
+	// 3. 创建带超时的上下文
+	grpcCtx, cancel := context.WithTimeout(context.Background(), serviceTimeOut*time.Second)
+	defer cancel()
+
+	// 4. 调用GRPC服务
+	resp, err := projectServiceClient.GetProjectMemberList(grpcCtx, &project.GetProjectMemberListReq{
+		ProjectCode: req.ProjectCode,
+		Page:        int32(req.Page),
+		PageSize:    int32(req.PageSize),
+	})
+	if err != nil {
+		code, msg := errs.ParseGrpcError(err)
+		ctx.JSON(http.StatusInternalServerError, result.Fail(code, msg))
+		return
+	}
+
+	// 5. 组装返回数据
+	data := &model_project.GetProjectMemberListResp{
+		Total: resp.Total,
+		Page:  req.Page,
+		List:  make([]*model_project.ProjectMemberInfo, 0),
+	}
+	copier.Copy(&data.List, resp.List)
+
+	// 6. 返回成功响应
+	ctx.JSON(http.StatusOK, result.Success(data))
+}

@@ -349,3 +349,65 @@ func (p *ProjectService) UpdateProject(ctx context.Context, req *project.UpdateP
 func init() {
 	rpc.InitUserRpc()
 }
+
+func (p *ProjectService) GetProjectMemberList(ctx context.Context, req *project.GetProjectMemberListReq) (*project.GetProjectMemberListResp, error) {
+	// 1. 解密projectCode获取项目ID
+	projectIdStr, err := encrypt.Decrypt(req.ProjectCode, model.AESKey)
+	if err != nil {
+		zap.L().Error("decrypt project code error", zap.Error(err))
+		return nil, errs.GrpcError(model.DecryptProjectCodeError)
+	}
+	projectId, err := strconv.ParseInt(projectIdStr, 10, 64)
+	if err != nil {
+		zap.L().Error("parse project id error", zap.Error(err))
+		return nil, errs.GrpcError(model.ParseProjectIdError)
+	}
+
+	// 2. 获取项目成员列表
+	members, total, err := p.projectMemberRepo.GetProjectMemberList(ctx, projectId, int(req.Page), int(req.PageSize))
+	if err != nil {
+		zap.L().Error("get project member list error", zap.Error(err))
+		return nil, errs.GrpcError(model.GetProjectMemberListError)
+	}
+	if members == nil || len(members) == 0 {
+		return &project.GetProjectMemberListResp{
+			Total: total,
+			List:  nil,
+		}, nil
+	}
+	projectOwner := members[0].IsOwner // 根据同一个项目id获取的项目的拥有者一定是相同的，取第一个记录的owner就行
+
+	// 3. 提取成员ID列表
+	var memberIds []int64
+	for _, m := range members {
+		memberIds = append(memberIds, m.MemberCode)
+	}
+
+	// 4. 调用user服务获取成员详细信息
+	memberInfos, err := rpc.LoginServiceClient.GetMembersByIds(ctx, &login.GetMembersByIdsReq{
+		MemberIds: memberIds,
+	})
+	if err != nil {
+		zap.L().Error("get members info error", zap.Error(err))
+		return nil, errs.GrpcError(model.GetMembersInfoError)
+	}
+
+	// 5. 组装返回数据
+	memberList := make([]*project.ProjectMemberInfo, 0)
+	for _, info := range memberInfos.List {
+		code, _ := encrypt.EncryptInt64(info.Id, model.AESKey)
+		memberList = append(memberList, &project.ProjectMemberInfo{
+			Name:       info.Name,
+			Avatar:     info.Avatar,
+			MemberCode: info.Id,
+			Code:       code,
+			Email:      info.Email,
+			IsOwner:    int32(projectOwner),
+		})
+	}
+
+	return &project.GetProjectMemberListResp{
+		Total: total,
+		List:  memberList,
+	}, nil
+}

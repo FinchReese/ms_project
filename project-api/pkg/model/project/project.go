@@ -147,3 +147,23 @@ type UpdateProjectReq struct {
 	TaskBoardTheme     string  `json:"task_board_theme" form:"task_board_theme"`
 	AutoUpdateSchedule int     `json:"auto_update_schedule" form:"auto_update_schedule"`
 }
+
+type GetProjectMemberListReq struct {
+	ProjectCode string `json:"projectCode" form:"projectCode"`
+	Page        int    `json:"page" form:"page"`
+	PageSize    int    `json:"pageSize" form:"pageSize"`
+}
+
+type ProjectMemberInfo struct {
+	Name    string `json:"name"`
+	Avatar  string `json:"avatar"`
+	Code    string `json:"code"`
+	Email   string `json:"email"`
+	IsOwner int    `json:"isOwner"`
+}
+
+type GetProjectMemberListResp struct {
+	Total int64                `json:"total"`
+	Page  int                  `json:"page"`
+	List  []*ProjectMemberInfo `json:"list"`
+}

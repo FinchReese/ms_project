@@ -197,6 +197,25 @@ message UpdateProjectResp {
 
 }
 
+message GetProjectMemberListReq {
+  string projectCode = 1;
+  int32 page = 2;
+  int32 pageSize = 3;
+}
+
+message ProjectMemberInfo {
+  string name = 1;
+  string avatar = 2;
+  int64 memberCode = 3;
+  string code = 4;
+  string email = 5;
+  int32 isOwner = 6;
+}
+message GetProjectMemberListResp {
+  int64 total = 1;
+  repeated ProjectMemberInfo list = 2;
+}
+
 service ProjectService {
   rpc Index(IndexMessage) returns (IndexResponse) {}
   rpc GetProjectList(GetProjectListReq) returns(GetProjectListResp) {}
@@ -206,4 +225,5 @@ service ProjectService {
   rpc CollectProject(CollectProjectReq) returns(CollectProjectResp) {}
   rpc UpdateProjectDeletedState(UpdateProjectDeletedStateReq) returns(UpdateProjectDeletedStateResp) {}
   rpc UpdateProject(UpdateProjectReq) returns (UpdateProjectResp) {}
+  rpc GetProjectMemberList(GetProjectMemberListReq) returns(GetProjectMemberListResp) {}
 }

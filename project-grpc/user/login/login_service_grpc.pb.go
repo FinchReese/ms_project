@@ -28,6 +28,7 @@ type LoginServiceClient interface {
 	VerifyToken(ctx context.Context, in *VerifyTokenReq, opts ...grpc.CallOption) (*VerifyTokenResp, error)
 	GetOrganizationList(ctx context.Context, in *GetOrganizationListReq, opts ...grpc.CallOption) (*GetOrganizationListResp, error)
 	GetMemberById(ctx context.Context, in *GetMemberByIdReq, opts ...grpc.CallOption) (*MemberMessage, error)
+	GetMembersByIds(ctx context.Context, in *GetMembersByIdsReq, opts ...grpc.CallOption) (*GetMembersByIdsResp, error)
 }
 
 type loginServiceClient struct {
@@ -92,6 +93,15 @@ func (c *loginServiceClient) GetMemberById(ctx context.Context, in *GetMemberByI
 	return out, nil
 }
 
+func (c *loginServiceClient) GetMembersByIds(ctx context.Context, in *GetMembersByIdsReq, opts ...grpc.CallOption) (*GetMembersByIdsResp, error) {
+	out := new(GetMembersByIdsResp)
+	err := c.cc.Invoke(ctx, "/login.service.v1.LoginService/GetMembersByIds", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LoginServiceServer is the server API for LoginService service.
 // All implementations must embed UnimplementedLoginServiceServer
 // for forward compatibility
@@ -102,6 +112,7 @@ type LoginServiceServer interface {
 	VerifyToken(context.Context, *VerifyTokenReq) (*VerifyTokenResp, error)
 	GetOrganizationList(context.Context, *GetOrganizationListReq) (*GetOrganizationListResp, error)
 	GetMemberById(context.Context, *GetMemberByIdReq) (*MemberMessage, error)
+	GetMembersByIds(context.Context, *GetMembersByIdsReq) (*GetMembersByIdsResp, error)
 	mustEmbedUnimplementedLoginServiceServer()
 }
 
@@ -126,6 +137,9 @@ func (UnimplementedLoginServiceServer) GetOrganizationList(context.Context, *Get
 }
 func (UnimplementedLoginServiceServer) GetMemberById(context.Context, *GetMemberByIdReq) (*MemberMessage, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMemberById not implemented")
+}
+func (UnimplementedLoginServiceServer) GetMembersByIds(context.Context, *GetMembersByIdsReq) (*GetMembersByIdsResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMembersByIds not implemented")
 }
 func (UnimplementedLoginServiceServer) mustEmbedUnimplementedLoginServiceServer() {}
 
@@ -248,6 +262,24 @@ func _LoginService_GetMemberById_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LoginService_GetMembersByIds_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMembersByIdsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoginServiceServer).GetMembersByIds(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/login.service.v1.LoginService/GetMembersByIds",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoginServiceServer).GetMembersByIds(ctx, req.(*GetMembersByIdsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // LoginService_ServiceDesc is the grpc.ServiceDesc for LoginService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -278,6 +310,10 @@ var LoginService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetMemberById",
 			Handler:    _LoginService_GetMemberById_Handler,
+		},
+		{
+			MethodName: "GetMembersByIds",
+			Handler:    _LoginService_GetMembersByIds_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

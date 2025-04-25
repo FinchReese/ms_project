@@ -110,6 +110,14 @@ message MenuMessage {
   repeated MenuMessage children = 18;
 }
 
+message GetMembersByIdsReq {
+  repeated int64 memberIds = 1;
+}
+
+message GetMembersByIdsResp {
+  repeated MemberMessage list = 1;
+}
+
 service LoginService {
   rpc GetCaptcha(CaptchaMessage) returns (CaptchaResponse) {}
   rpc Register(RegisterMessage) returns (RegisterResponse) {}
@@ -117,4 +125,5 @@ service LoginService {
   rpc VerifyToken(VerifyTokenReq) returns (VerifyTokenResp) {}
   rpc GetOrganizationList(GetOrganizationListReq) returns (GetOrganizationListResp) {}
   rpc GetMemberById(GetMemberByIdReq) returns(MemberMessage) {}
+  rpc GetMembersByIds(GetMembersByIdsReq) returns (GetMembersByIdsResp) {}
 }

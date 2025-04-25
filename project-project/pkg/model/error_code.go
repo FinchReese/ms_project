@@ -30,4 +30,6 @@ var (
 	EncryptTaskStageIdError        = errs.NewError(2022, "加密任务步骤id出错")
 	TemplateTaskStagesNotFound     = errs.NewError(2023, "模板任务步骤不存在")
 	SaveTaskStageError             = errs.NewError(2024, "保存任务步骤出错")
+	GetProjectMemberListError      = errs.NewError(2025, "获取项目成员列表出错")
+	GetMembersInfoError            = errs.NewError(2026, "获取成员信息出错")
 )

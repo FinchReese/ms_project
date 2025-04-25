@@ -62,3 +62,18 @@ func (md *MemberDao) FindMemberById(ctx context.Context, id int64) (*member.Memb
 	}
 	return mem, nil
 }
+
+func (md *MemberDao) FindMembersByIds(ctx context.Context, memberIds []int64) ([]*member.Member, error) {
+	var members []*member.Member
+	err := md.conn.Session(&gorm.Session{Context: ctx}).
+		Model(&member.Member{}).
+		Where("id IN ?", memberIds).
+		Find(&members).Error
+	if err != nil {
+		zap.L().Error("find members by ids error",
+			zap.Any("memberIds", memberIds),
+			zap.Error(err))
+		return nil, err
+	}
+	return members, nil
+}

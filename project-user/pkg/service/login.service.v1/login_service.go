@@ -300,3 +300,24 @@ func (ls *LoginService) GetMemberById(ctx context.Context, req *login.GetMemberB
 	copier.Copy(&resp, member)
 	return resp, nil
 }
+
+func (ls *LoginService) GetMembersByIds(ctx context.Context, req *login.GetMembersByIdsReq) (*login.GetMembersByIdsResp, error) {
+	// 调用之前实现的 DAO 层方法获取成员列表
+	members, err := ls.MemberRepo.FindMembersByIds(ctx, req.MemberIds)
+	if err != nil {
+		zap.L().Error("find members by ids error", zap.Error(err))
+		return nil, errs.GrpcError(model.FindMembersByIdsError)
+	}
+
+	// 转换为响应消息
+	memberMessages := make([]*login.MemberMessage, 0)
+	for _, m := range members {
+		memberMsg := &login.MemberMessage{}
+		copier.Copy(memberMsg, m)
+		memberMessages = append(memberMessages, memberMsg)
+	}
+
+	return &login.GetMembersByIdsResp{
+		List: memberMessages,
+	}, nil
+}
