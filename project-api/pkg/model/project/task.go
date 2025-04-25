@@ -1,7 +1,7 @@
 package project
 
 type GetTaskStageReq struct {
-	ProjectCode string `form:"project_code"`
+	ProjectCode string `form:"projectCode"`
 	Page        int32  `form:"page"`
 	PageSize    int32  `form:"pageSize"`
 }
