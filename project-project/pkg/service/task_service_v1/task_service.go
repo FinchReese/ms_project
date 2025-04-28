@@ -9,7 +9,6 @@ import (
 	"go.uber.org/zap"
 	"test.com/project-common/encrypt"
 	"test.com/project-common/errs"
-	"test.com/project-common/time_format"
 	"test.com/project-grpc/task"
 	"test.com/project-grpc/user/login"
 	"test.com/project-project/internal/data"
@@ -233,25 +232,10 @@ func (ts *TaskService) SaveTask(ctx context.Context, req *task.SaveTaskReq) (*ta
 		return nil, err
 	}
 
+	dispTask := newTask.ToDisplayTask()
 	// 9. 组织返回消息
 	resp := &task.SaveTaskResp{}
-	// 根据需要填充返回值
-	resp.Id = newTask.Id
-	resp.ProjectCode, _ = encrypt.EncryptInt64(newTask.ProjectCode, model.AESKey)
-	resp.Name = newTask.Name
-	resp.Pri = int32(newTask.Pri)
-	resp.ExecuteStatus = newTask.GetExecuteStatusStr()
-	resp.Description = newTask.Description
-	resp.CreateBy, _ = encrypt.EncryptInt64(newTask.CreateBy, model.AESKey)
-	resp.CreateTime = time_format.ConvertMsecToString(newTask.CreateTime)
-	resp.AssignTo, _ = encrypt.EncryptInt64(newTask.AssignTo, model.AESKey)
-	resp.Deleted = int32(newTask.Deleted)
-	resp.StageCode, _ = encrypt.EncryptInt64(int64(newTask.StageCode), model.AESKey)
-	resp.Done = int32(newTask.Done)
-	resp.Sort = int32(newTask.Sort)
-	resp.Private = int32(newTask.Private)
-	resp.IdNum = int32(newTask.IdNum)
-	resp.Code, _ = encrypt.EncryptInt64(newTask.Id, model.AESKey)
+	copier.Copy(&resp, dispTask)
 
 	// 如果有任务执行者，获取执行者信息
 	if assignTo > 0 {
