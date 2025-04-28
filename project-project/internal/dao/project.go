@@ -37,3 +37,15 @@ func (pd *ProjectDAO) UpdateProject(ctx context.Context, project *data.Project) 
 	return pd.conn.Db.Session(&gorm.Session{Context: ctx}).Model(&data.Project{}).Where("id=?", project.Id).
 		Updates(project).Error
 }
+
+// GetProjectByID 根据项目id获取项目信息
+func (pd *ProjectDAO) GetProjectByID(ctx context.Context, projectID int64) (*data.Project, error) {
+	var project data.Project
+	err := pd.conn.Db.Session(&gorm.Session{Context: ctx}).
+		Where("id = ?", projectID).
+		First(&project).Error
+	if err != nil {
+		return nil, err
+	}
+	return &project, nil
+}

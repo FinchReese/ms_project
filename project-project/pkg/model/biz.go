@@ -32,3 +32,8 @@ const (
 	CanNotRead = iota
 	CanRead
 )
+
+const (
+	NoExecutor = iota
+	Executor
+)

@@ -11,6 +11,8 @@ type ProjectRepo interface {
 	SaveProject(ctx context.Context, p *data.Project, db *gorm.DB) error
 	UpdateProjectDeletedState(ctx context.Context, projectId int64, deleted bool) error
 	UpdateProject(ctx context.Context, project *data.Project) error
+	// 根据项目id获取项目信息
+	GetProjectByID(ctx context.Context, projectID int64) (*data.Project, error)
 }
 
 type ProjectMemberRepo interface {

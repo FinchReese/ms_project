@@ -23,3 +23,11 @@ func (tmd *TaskMemberDAO) FindTaskMembers(ctx context.Context, taskCode int64, m
 	err = session.Model(&data.TaskMember{}).Where("task_code = ? and member_code = ?", taskCode, memberCode).Find(&list).Error
 	return
 }
+
+// SaveTaskMember 保存任务成员关系
+func (tmd *TaskMemberDAO) SaveTaskMember(ctx context.Context, taskMember *data.TaskMember, db *gorm.DB) error {
+	if db == nil {
+		db = tmd.conn.Db.Session(&gorm.Session{Context: ctx})
+	}
+	return db.Save(taskMember).Error
+}

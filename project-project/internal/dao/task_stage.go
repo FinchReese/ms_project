@@ -38,3 +38,15 @@ func (tsd *TaskStageDAO) FindStagesByProjectId(ctx context.Context, projectId in
 	err = session.Model(&data.TaskStage{}).Where("project_code=?", projectId).Count(&total).Error
 	return
 }
+
+// GetTaskStageByID 根据ID获取任务阶段
+func (tsd *TaskStageDAO) GetTaskStageByID(ctx context.Context, id int) (*data.TaskStage, error) {
+	var stage data.TaskStage
+	err := tsd.conn.Db.Session(&gorm.Session{Context: ctx}).
+		Where("id = ?", id).
+		First(&stage).Error
+	if err != nil {
+		return nil, err
+	}
+	return &stage, nil
+}

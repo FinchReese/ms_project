@@ -81,7 +81,7 @@ func getTaskList(ctx *gin.Context) {
 	}
 	// 3. 组织回复消息
 	var dispTaskList []*model_project.DispTask
-	copier.Copy(&dispTaskList, grpcResp)
+	copier.Copy(&dispTaskList, grpcResp.List)
 	if dispTaskList == nil {
 		dispTaskList = []*model_project.DispTask{}
 	}
@@ -95,4 +95,82 @@ func getTaskList(ctx *gin.Context) {
 		}
 	}
 	ctx.JSON(http.StatusOK, result.Success(dispTaskList))
+}
+
+// saveTask 创建任务处理函数
+func saveTask(ctx *gin.Context) {
+	result := &common.Result{}
+	// 1. 解析请求消息
+	var req model_project.SaveTaskReq
+	err := ctx.ShouldBind(&req)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, result.Fail(http.StatusBadRequest, "参数错误"))
+		return
+	}
+	// 获取当前登录用户ID
+	memberId := ctx.GetInt64("memberId")
+
+	// 2. 创建一个等待2秒钟的上下文
+	grpcCtx, cancel := context.WithTimeout(context.Background(), serviceTimeOut*time.Second)
+	defer cancel()
+
+	// 3. 调用gRPC服务
+	grpcReq := &task.SaveTaskReq{
+		Name:        req.Name,
+		StageCode:   req.StageCode,
+		ProjectCode: req.ProjectCode,
+		AssignTo:    req.AssignTo,
+		MemberId:    memberId,
+	}
+
+	grpcResp, err := TaskServiceClient.SaveTask(grpcCtx, grpcReq)
+	if err != nil {
+		code, msg := errs.ParseGrpcError(err)
+		ctx.JSON(http.StatusInternalServerError, result.Fail(code, msg))
+		return
+	}
+
+	// 4. 组织回复消息
+	resp := &model_project.SaveTaskResp{}
+	copier.Copy(resp, grpcResp)
+	if resp != nil {
+		if resp.Tags == nil {
+			resp.Tags = []int{}
+		}
+		if resp.ChildCount == nil {
+			resp.ChildCount = []int{}
+		}
+	}
+
+	// 5. 返回结果
+	ctx.JSON(http.StatusOK, result.Success(resp))
+}
+
+func moveTask(ctx *gin.Context) {
+	result := &common.Result{}
+	// 1. 解析请求消息
+	var req model_project.MoveTaskReq
+	err := ctx.ShouldBind(&req)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, result.Fail(http.StatusBadRequest, "参数错误"))
+		return
+	}
+	// 2. 调用gRPC服务
+	grpcCtx, cancel := context.WithTimeout(context.Background(), serviceTimeOut*time.Second)
+	defer cancel()
+
+	grpcReq := &task.MoveTaskReq{
+		OriginTaskCode:  req.PreTaskCode,
+		TargetTaskCode:  req.NextTaskCode,
+		TargetStageCode: req.ToStageCode,
+	}
+	_, err = TaskServiceClient.MoveTask(grpcCtx, grpcReq)
+	if err != nil {
+		code, msg := errs.ParseGrpcError(err)
+		ctx.JSON(http.StatusInternalServerError, result.Fail(code, msg))
+		return
+	}
+
+	// 3. 返回结果
+	ctx.JSON(http.StatusOK, result.Success([]int{}))
 }

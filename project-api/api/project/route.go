@@ -25,6 +25,8 @@ func (*ProjectRouter) Register(r *gin.Engine) {
 	projectGroup.POST("/task_stages", getTaskStage)
 	projectGroup.POST("/project_member/index", getProjectMemberList)
 	projectGroup.POST("/task_stages/tasks", getTaskList)
+	projectGroup.POST("/task/save", saveTask)
+	projectGroup.POST("/task/sort", moveTask)
 }
 
 func init() {

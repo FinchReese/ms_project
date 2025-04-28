@@ -66,6 +66,8 @@ func RegisterGrpc() *grpc.Server {
 		dao.NewTaskStageDAO(),
 		dao.NewTaskDAO(),
 		dao.NewTaskMemberDAO(),
+		dao.NewProjectDAO(),
+		trans.NewTransaction(),
 	)
 	task.RegisterTaskServiceServer(s, taskService)
 	lis, err := net.Listen("tcp", config.AppConf.GrpcConf.Addr)
