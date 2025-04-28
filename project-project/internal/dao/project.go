@@ -49,3 +49,13 @@ func (pd *ProjectDAO) GetProjectByID(ctx context.Context, projectID int64) (*dat
 	}
 	return &project, nil
 }
+
+// GetProjectsByIds 根据项目id列表获取项目信息
+func (pd *ProjectDAO) GetProjectsByIds(ctx context.Context, projectIds []int64) ([]*data.Project, error) {
+	var projects []*data.Project
+	err := pd.conn.Db.Session(&gorm.Session{Context: ctx}).Where("id IN ?", projectIds).Find(&projects).Error
+	if err != nil {
+		return nil, err
+	}
+	return projects, nil
+}

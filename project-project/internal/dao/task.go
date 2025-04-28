@@ -99,3 +99,60 @@ func (td *TaskDAO) ModifyTaskSort(ctx context.Context, taskId int64, sort int32,
 	}
 	return db.Model(&data.Task{}).Where("id = ?", taskId).Update("sort", sort).Error
 }
+
+// 指定assign_to、done字段筛选任务，再根据指定的页号和页大小返回任务列表
+func (td *TaskDAO) GetTasksByAssignToAndDone(ctx context.Context, assignTo int64, done int, page int, pageSize int) (list []*data.Task, total int64, err error) {
+	session := td.conn.Db.Session(&gorm.Session{Context: ctx})
+	err = session.Model(&data.Task{}).
+		Where("assign_to = ? AND done = ?", assignTo, done).
+		Order("sort asc").Offset((page - 1) * pageSize).
+		Limit(pageSize).
+		Find(&list).Error
+	if err != nil {
+		return nil, 0, err
+	}
+	err = session.Model(&data.Task{}).
+		Where("assign_to = ? AND done = ?", assignTo, done).
+		Count(&total).Error
+	if err != nil {
+		return nil, 0, err
+	}
+	return list, total, nil
+}
+
+// 指定成员id、done字段筛选任务，再根据指定的页号和页大小返回任务列表
+func (td *TaskDAO) GetTasksByMemberIdAndDone(ctx context.Context, memberId int64, done int, page int, pageSize int) (list []*data.Task, total int64, err error) {
+	session := td.conn.Db.Session(&gorm.Session{Context: ctx})
+	getTaskListSql := "select t.* from ms_task AS t, ms_task_member AS tm where t.id = tm.task_code AND tm.member_code = ? AND t.done = ? order by t.sort asc limit ?, ?"
+	err = session.Raw(getTaskListSql, memberId, done, (page-1)*pageSize, pageSize).Scan(&list).Error
+	if err != nil {
+		return nil, 0, err
+	}
+	getTaskCountSql := "select count(*) from ms_task AS t, ms_task_member AS tm where t.id = tm.task_code AND tm.member_code = ? AND t.done = ?"
+	err = session.Raw(getTaskCountSql, memberId, done).Scan(&total).Error
+	if err != nil {
+		return nil, 0, err
+	}
+	return list, total, nil
+}
+
+// 指定create_by、done字段筛选任务，再根据指定的页号和页大小返回任务列表
+func (td *TaskDAO) GetTasksByCreateByAndDone(ctx context.Context, createBy int64, done int, page int, pageSize int) (list []*data.Task, total int64, err error) {
+	session := td.conn.Db.Session(&gorm.Session{Context: ctx})
+	err = session.Model(&data.Task{}).
+		Where("create_by = ? AND done = ?", createBy, done).
+		Order("sort asc").
+		Offset((page - 1) * pageSize).
+		Limit(pageSize).
+		Find(&list).Error
+	if err != nil {
+		return nil, 0, err
+	}
+	err = session.Model(&data.Task{}).
+		Where("create_by = ? AND done = ?", createBy, done).
+		Count(&total).Error
+	if err != nil {
+		return nil, 0, err
+	}
+	return list, total, nil
+}

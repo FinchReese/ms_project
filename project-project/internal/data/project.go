@@ -37,6 +37,19 @@ func (p *Project) TableName() string {
 	return "ms_project"
 }
 
+func (m *Project) GetAccessControlType() string {
+	if m.AccessControlType == 0 {
+		return "open"
+	}
+	if m.AccessControlType == 1 {
+		return "private"
+	}
+	if m.AccessControlType == 2 {
+		return "custom"
+	}
+	return ""
+}
+
 type ProjectTemplate struct {
 	Id               int
 	Name             string

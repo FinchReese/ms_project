@@ -336,3 +336,64 @@ func (ts *TaskService) MoveTask(ctx context.Context, req *task.MoveTaskReq) (*ta
 	}
 	return &task.MoveTaskResp{}, nil
 }
+
+func (ts *TaskService) GetTaskList(ctx context.Context, req *task.GetTaskListReq) (*task.GetTaskListResp, error) {
+	var err error
+	var list []*data.Task
+	var total int64
+	switch req.TaskType {
+	case model.TaskTypeAssignedTo:
+		list, total, err = ts.task.GetTasksByAssignToAndDone(ctx, req.MemberId, int(req.Done), int(req.Page), int(req.PageSize))
+	case model.TaskTypeCreatedBy:
+		list, total, err = ts.task.GetTasksByCreateByAndDone(ctx, req.MemberId, int(req.Done), int(req.Page), int(req.PageSize))
+	case model.TaskTypeInvolved:
+		list, total, err = ts.task.GetTasksByMemberIdAndDone(ctx, req.MemberId, int(req.Done), int(req.Page), int(req.PageSize))
+	default:
+		zap.L().Error("invalid task type", zap.Int32("task_type", req.TaskType))
+		return nil, errs.GrpcError(model.InvalidTaskType)
+	}
+	if err != nil {
+		zap.L().Error("get task list error", zap.Error(err))
+		return nil, errs.GrpcError(model.GetTaskListError)
+	}
+	// 收集任务的项目id和成员id，统一查询项目和成员信息，避免重复查询，提升性能
+	projectIdList := []int64{}
+	memberIdList := []int64{}
+	for _, task := range list {
+		projectIdList = append(projectIdList, task.ProjectCode)
+		memberIdList = append(memberIdList, task.CreateBy)
+	}
+	// 向login服务一次性查询所有成员信息，提升性能
+	members, err := rpc.LoginServiceClient.GetMembersByIds(ctx, &login.GetMembersByIdsReq{
+		MemberIds: memberIdList,
+	})
+	if err != nil {
+		zap.L().Error("get members info error", zap.Error(err))
+		return nil, errs.GrpcError(model.GetMembersInfoError)
+	}
+	memIdToInfo := make(map[int64]*login.MemberMessage)
+	for _, member := range members.List {
+		memIdToInfo[member.Id] = member
+	}
+	// 向一次性查询所有项目信息，提升性能
+	projects, err := ts.project.GetProjectsByIds(ctx, projectIdList)
+	if err != nil {
+		zap.L().Error("get projects info error", zap.Error(err))
+		return nil, errs.GrpcError(model.GetProjectsInfoError)
+	}
+	projectIdToInfo := make(map[int64]*data.Project)
+	for _, project := range projects {
+		projectIdToInfo[project.Id] = project
+	}
+	var mtdList []*data.MyTaskDisplay
+	for _, v := range list {
+		memberMessage := memIdToInfo[v.AssignTo]
+		name := memberMessage.Name
+		avatar := memberMessage.Avatar
+		mtd := v.ToMyTaskDisplay(projectIdToInfo[v.ProjectCode], name, avatar)
+		mtdList = append(mtdList, mtd)
+	}
+	var myMsgs []*task.TaskMessage
+	copier.Copy(&myMsgs, mtdList)
+	return &task.GetTaskListResp{List: myMsgs, Total: total}, nil
+}

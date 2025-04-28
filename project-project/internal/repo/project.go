@@ -13,6 +13,8 @@ type ProjectRepo interface {
 	UpdateProject(ctx context.Context, project *data.Project) error
 	// 根据项目id获取项目信息
 	GetProjectByID(ctx context.Context, projectID int64) (*data.Project, error)
+	// 根据项目id列表获取项目信息
+	GetProjectsByIds(ctx context.Context, projectIds []int64) ([]*data.Project, error)
 }
 
 type ProjectMemberRepo interface {

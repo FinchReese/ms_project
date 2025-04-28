@@ -28,6 +28,12 @@ type TaskRepo interface {
 	GetTaskById(ctx context.Context, taskId int64) (*data.Task, error)
 	// 修改指定任务的sort
 	ModifyTaskSort(ctx context.Context, taskId int64, sort int32, db *gorm.DB) error
+	// 指定assign_to、done字段筛选任务，再根据指定的页号和页大小返回任务列表
+	GetTasksByAssignToAndDone(ctx context.Context, assignTo int64, done int, page int, pageSize int) (list []*data.Task, total int64, err error)
+	// 指定成员id、done字段筛选任务，再根据指定的页号和页大小返回任务列表
+	GetTasksByMemberIdAndDone(ctx context.Context, memberId int64, done int, page int, pageSize int) (list []*data.Task, total int64, err error)
+	// 指定create_by、done字段筛选任务，再根据指定的页号和页大小返回任务列表
+	GetTasksByCreateByAndDone(ctx context.Context, createBy int64, done int, page int, pageSize int) (list []*data.Task, total int64, err error)
 }
 
 type TaskMemberRepo interface {

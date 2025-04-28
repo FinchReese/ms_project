@@ -26,6 +26,7 @@ type TaskServiceClient interface {
 	GetTasksByStageCode(ctx context.Context, in *GetTasksByStageCodeReq, opts ...grpc.CallOption) (*GetTasksByStageCodeResp, error)
 	SaveTask(ctx context.Context, in *SaveTaskReq, opts ...grpc.CallOption) (*SaveTaskResp, error)
 	MoveTask(ctx context.Context, in *MoveTaskReq, opts ...grpc.CallOption) (*MoveTaskResp, error)
+	GetTaskList(ctx context.Context, in *GetTaskListReq, opts ...grpc.CallOption) (*GetTaskListResp, error)
 }
 
 type taskServiceClient struct {
@@ -72,6 +73,15 @@ func (c *taskServiceClient) MoveTask(ctx context.Context, in *MoveTaskReq, opts 
 	return out, nil
 }
 
+func (c *taskServiceClient) GetTaskList(ctx context.Context, in *GetTaskListReq, opts ...grpc.CallOption) (*GetTaskListResp, error) {
+	out := new(GetTaskListResp)
+	err := c.cc.Invoke(ctx, "/task.service.v1.TaskService/GetTaskList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TaskServiceServer is the server API for TaskService service.
 // All implementations must embed UnimplementedTaskServiceServer
 // for forward compatibility
@@ -80,6 +90,7 @@ type TaskServiceServer interface {
 	GetTasksByStageCode(context.Context, *GetTasksByStageCodeReq) (*GetTasksByStageCodeResp, error)
 	SaveTask(context.Context, *SaveTaskReq) (*SaveTaskResp, error)
 	MoveTask(context.Context, *MoveTaskReq) (*MoveTaskResp, error)
+	GetTaskList(context.Context, *GetTaskListReq) (*GetTaskListResp, error)
 	mustEmbedUnimplementedTaskServiceServer()
 }
 
@@ -98,6 +109,9 @@ func (UnimplementedTaskServiceServer) SaveTask(context.Context, *SaveTaskReq) (*
 }
 func (UnimplementedTaskServiceServer) MoveTask(context.Context, *MoveTaskReq) (*MoveTaskResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MoveTask not implemented")
+}
+func (UnimplementedTaskServiceServer) GetTaskList(context.Context, *GetTaskListReq) (*GetTaskListResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTaskList not implemented")
 }
 func (UnimplementedTaskServiceServer) mustEmbedUnimplementedTaskServiceServer() {}
 
@@ -184,6 +198,24 @@ func _TaskService_MoveTask_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TaskService_GetTaskList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTaskListReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).GetTaskList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/task.service.v1.TaskService/GetTaskList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).GetTaskList(ctx, req.(*GetTaskListReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TaskService_ServiceDesc is the grpc.ServiceDesc for TaskService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -206,6 +238,10 @@ var TaskService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "MoveTask",
 			Handler:    _TaskService_MoveTask_Handler,
+		},
+		{
+			MethodName: "GetTaskList",
+			Handler:    _TaskService_GetTaskList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

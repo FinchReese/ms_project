@@ -48,4 +48,7 @@ var (
 	IncreaseSortError              = errs.NewError(2040, "增加任务sort出错")
 	ModifyTaskSortError            = errs.NewError(2040, "修改任务sort出错")
 	GetTaskStageError              = errs.NewError(2041, "获取任务步骤出错")
+	GetTaskListError               = errs.NewError(2042, "获取任务列表出错")
+	InvalidTaskType                = errs.NewError(2043, "无效的任务类型")
+	GetProjectsInfoError           = errs.NewError(2044, "获取项目信息出错")
 )
