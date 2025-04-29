@@ -511,3 +511,54 @@ func (ts *TaskService) GetTaskMemberList(ctx context.Context, req *task.GetTaskM
 	}
 	return &task.GetTaskMemberListResp{List: taskMemberMessageList, Total: total}, nil
 }
+
+func (ts *TaskService) GetTaskLogList(ctx context.Context, req *task.GetTaskLogListReq) (*task.GetTaskLogListResp, error) {
+	taskCodeStr, _ := encrypt.Decrypt(req.TaskCode, model.AESKey)
+	taskCode, _ := strconv.ParseInt(taskCodeStr, 10, 64)
+	var logList []*data.ProjectLog
+	var total int64
+	var err error
+	if req.All == 1 {
+		logList, total, err = ts.projectLog.GetAllProjectLogListByTaskId(ctx, taskCode, int(req.Comment))
+		if err != nil {
+			zap.L().Error("get project log list by task id error", zap.Error(err))
+			return nil, errs.GrpcError(model.GetProjectLogListError)
+		}
+	} else {
+		logList, total, err = ts.projectLog.GetProjectLogListByTaskIdAndPage(ctx, taskCode, int(req.Comment), int64(req.Page), int64(req.PageSize))
+		if err != nil {
+			zap.L().Error("get project log list by task id and page error", zap.Error(err))
+			return nil, errs.GrpcError(model.GetProjectLogListError)
+		}
+	}
+	// 收集成员id,统一查找成员信息
+	memberIdList := []int64{}
+	for _, log := range logList {
+		memberIdList = append(memberIdList, log.MemberCode)
+	}
+	members, err := rpc.LoginServiceClient.GetMembersByIds(ctx, &login.GetMembersByIdsReq{
+		MemberIds: memberIdList,
+	})
+	if err != nil {
+		zap.L().Error("get members info error", zap.Error(err))
+		return nil, errs.GrpcError(model.GetMembersInfoError)
+	}
+	memberIdToInfo := make(map[int64]*login.MemberMessage)
+	for _, member := range members.List {
+		memberIdToInfo[member.Id] = member
+	}
+
+	dispLogList := []*data.ProjectLogDisplay{}
+	for _, log := range logList {
+		dispLog := log.ToDisplay()
+		memberInfo := memberIdToInfo[log.MemberCode]
+		dispLog.Member.Name = memberInfo.Name
+		dispLog.Member.Avatar = memberInfo.Avatar
+		dispLog.Member.Id = log.MemberCode
+		dispLog.Member.Code, _ = encrypt.EncryptInt64(log.MemberCode, model.AESKey)
+		dispLogList = append(dispLogList, dispLog)
+	}
+	var taskLogList []*task.TaskLog
+	copier.Copy(&taskLogList, dispLogList)
+	return &task.GetTaskLogListResp{List: taskLogList, Total: total, Page: req.Page}, nil
+}

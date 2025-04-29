@@ -1,5 +1,12 @@
 package data
 
+import (
+	"github.com/jinzhu/copier"
+	"test.com/project-common/encrypt"
+	"test.com/project-common/time_format"
+	"test.com/project-project/pkg/model"
+)
+
 // ProjectLog 项目日志表
 type ProjectLog struct {
 	Id           int64  `json:"id" gorm:"column:id;primaryKey;autoIncrement"`                 // 主键ID
@@ -18,6 +25,41 @@ type ProjectLog struct {
 }
 
 // TableName 指定表名
-func (ProjectLog) TableName() string {
+func (pl *ProjectLog) TableName() string {
 	return "ms_project_log"
+}
+
+type Member struct {
+	Id     int64
+	Code   string
+	Name   string
+	Avatar string
+}
+
+type ProjectLogDisplay struct {
+	Id           int64
+	MemberCode   string
+	Content      string
+	Remark       string
+	Type         string
+	CreateTime   string
+	SourceCode   string
+	ActionType   string
+	ToMemberCode string
+	IsComment    int
+	ProjectCode  string
+	Icon         string
+	IsRobot      int
+	Member       Member
+}
+
+func (pl *ProjectLog) ToDisplay() *ProjectLogDisplay {
+	pd := &ProjectLogDisplay{}
+	copier.Copy(pd, pl)
+	pd.MemberCode, _ = encrypt.EncryptInt64(pl.MemberCode, model.AESKey)
+	pd.ToMemberCode, _ = encrypt.EncryptInt64(pl.ToMemberCode, model.AESKey)
+	pd.ProjectCode, _ = encrypt.EncryptInt64(pl.ProjectCode, model.AESKey)
+	pd.CreateTime = time_format.ConvertMsecToString(pl.CreateTime)
+	pd.SourceCode, _ = encrypt.EncryptInt64(pl.SourceCode, model.AESKey)
+	return pd
 }

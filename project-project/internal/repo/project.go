@@ -44,4 +44,8 @@ type ProjectCollectRepo interface {
 
 type ProjectLogRepo interface {
 	CreateProjectLog(ctx context.Context, log *data.ProjectLog) error
+	// 获取指定任务id、is_comment的所有项目日志
+	GetAllProjectLogListByTaskId(ctx context.Context, taskId int64, isComment int) ([]*data.ProjectLog, int64, error)
+	// 根据指定任务id、页号、页大小获取项目日志列表
+	GetProjectLogListByTaskIdAndPage(ctx context.Context, taskId int64, isComment int, page int64, pageSize int64) ([]*data.ProjectLog, int64, error)
 }
