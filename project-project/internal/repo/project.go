@@ -41,3 +41,7 @@ type ProjectCollectRepo interface {
 	// 取消收藏项目
 	CancelCollect(ctx context.Context, memberId int64, projectId int64) error
 }
+
+type ProjectLogRepo interface {
+	CreateProjectLog(ctx context.Context, log *data.ProjectLog) error
+}

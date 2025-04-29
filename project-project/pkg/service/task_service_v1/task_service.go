@@ -26,15 +26,17 @@ type TaskService struct {
 	taskMember repo.TaskMemberRepo
 	project    repo.ProjectRepo
 	tran       *trans.TransactionImpl
+	projectLog repo.ProjectLogRepo
 }
 
-func NewTaskService(ts repo.TaskStageRepo, t repo.TaskRepo, tm repo.TaskMemberRepo, p repo.ProjectRepo, tran *trans.TransactionImpl) *TaskService {
+func NewTaskService(ts repo.TaskStageRepo, t repo.TaskRepo, tm repo.TaskMemberRepo, p repo.ProjectRepo, pl repo.ProjectLogRepo, tran *trans.TransactionImpl) *TaskService {
 	return &TaskService{
 		taskStage:  ts,
 		task:       t,
 		taskMember: tm,
 		project:    p,
 		tran:       tran,
+		projectLog: pl,
 	}
 }
 
@@ -230,6 +232,26 @@ func (ts *TaskService) SaveTask(ctx context.Context, req *task.SaveTaskReq) (*ta
 
 	if err != nil {
 		return nil, err
+	}
+	// 记录日志
+	projectLog := &data.ProjectLog{
+		MemberCode:   req.MemberId,
+		ToMemberCode: newTask.AssignTo,
+		SourceCode:   newTask.Id,
+		Content:      newTask.Name,
+		Remark:       "创建任务",
+		CreateTime:   time.Now().UnixMilli(),
+		Type:         "create",
+		ActionType:   "task",
+		ProjectCode:  projectID,
+		Icon:         "plus",
+		IsComment:    0,
+		IsRobot:      0,
+	}
+	err = ts.projectLog.CreateProjectLog(ctx, projectLog)
+	if err != nil {
+		zap.L().Error("create project log error", zap.Error(err))
+		return nil, errs.GrpcError(model.CreateProjectLogError)
 	}
 
 	dispTask := newTask.ToDisplayTask()
