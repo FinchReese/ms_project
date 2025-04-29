@@ -40,4 +40,6 @@ type TaskMemberRepo interface {
 	FindTaskMembers(ctx context.Context, taskCode int64, memberCode int64) (list []*data.TaskMember, err error)
 	// 保存任务成员关系
 	SaveTaskMember(ctx context.Context, taskMember *data.TaskMember, db *gorm.DB) error
+	// 根据任务id、页号和每页大小获取任务成员列表
+	GetTaskMemberList(ctx context.Context, taskCode int64, page int, pageSize int) (list []*data.TaskMember, total int64, err error)
 }

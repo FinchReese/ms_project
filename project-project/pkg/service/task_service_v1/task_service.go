@@ -446,3 +446,46 @@ func (ts *TaskService) GetTaskDetail(ctx context.Context, req *task.GetTaskDetai
 	copier.Copy(&resp, dispTask)
 	return resp, nil
 }
+
+func (ts *TaskService) GetTaskMemberList(ctx context.Context, req *task.GetTaskMemberListReq) (*task.GetTaskMemberListResp, error) {
+	taskCodeStr, _ := encrypt.Decrypt(req.TaskCode, model.AESKey)
+	taskCode, _ := strconv.ParseInt(taskCodeStr, 10, 64)
+	taskMemberList, total, err := ts.taskMember.GetTaskMemberList(ctx, taskCode, int(req.Page), int(req.PageSize))
+	if err != nil {
+		zap.L().Error("find task members error", zap.Error(err))
+		return nil, errs.GrpcError(model.GetTaskMembersError)
+	}
+	// 收集成员任务id，统一查找成员信息
+	memberIdList := []int64{}
+	for _, taskMember := range taskMemberList {
+		memberIdList = append(memberIdList, taskMember.MemberCode)
+	}
+	members, err := rpc.LoginServiceClient.GetMembersByIds(ctx, &login.GetMembersByIdsReq{
+		MemberIds: memberIdList,
+	})
+	if err != nil {
+		zap.L().Error("get members info error", zap.Error(err))
+		return nil, errs.GrpcError(model.GetMembersInfoError)
+	}
+	memberIdToInfo := make(map[int64]*login.MemberMessage)
+	for _, member := range members.List {
+		memberIdToInfo[member.Id] = member
+	}
+
+	taskMemberMessageList := []*task.TaskMember{}
+
+	for _, taskMember := range taskMemberList {
+		code, _ := encrypt.EncryptInt64(taskMember.MemberCode, model.AESKey)
+		taskMemberMessage := &task.TaskMember{
+			Id:                taskMember.Id,
+			Name:              memberIdToInfo[taskMember.MemberCode].Name,
+			Avatar:            memberIdToInfo[taskMember.MemberCode].Avatar,
+			Code:              code,
+			MembarAccountCode: memberIdToInfo[taskMember.MemberCode].Account,
+			IsExecutor:        int32(taskMember.IsExecutor),
+			IsOwner:           int32(taskMember.IsOwner),
+		}
+		taskMemberMessageList = append(taskMemberMessageList, taskMemberMessage)
+	}
+	return &task.GetTaskMemberListResp{List: taskMemberMessageList, Total: total}, nil
+}

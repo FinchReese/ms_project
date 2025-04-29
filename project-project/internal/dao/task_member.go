@@ -31,3 +31,14 @@ func (tmd *TaskMemberDAO) SaveTaskMember(ctx context.Context, taskMember *data.T
 	}
 	return db.Save(taskMember).Error
 }
+
+func (tmd *TaskMemberDAO) GetTaskMemberList(ctx context.Context, taskCode int64, page int, pageSize int) (list []*data.TaskMember, total int64, err error) {
+	session := tmd.conn.Db.Session(&gorm.Session{Context: ctx})
+	offset := (page - 1) * pageSize
+	err = session.Model(&data.TaskMember{}).Where("task_code = ?", taskCode).Offset(offset).Limit(pageSize).Find(&list).Error
+	if err != nil {
+		return nil, 0, err
+	}
+	err = session.Model(&data.TaskMember{}).Where("task_code = ?", taskCode).Count(&total).Error
+	return
+}

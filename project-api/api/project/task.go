@@ -259,3 +259,41 @@ func getTaskDetail(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, result.Success(resp))
 }
+
+func getTaskMemberList(ctx *gin.Context) {
+	result := &common.Result{}
+	// 1. 解析请求消息
+	var req model_project.GetTaskMemberListReq
+	err := ctx.ShouldBind(&req)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, result.Fail(http.StatusBadRequest, "参数错误"))
+		return
+	}
+
+	// 2. 调用gRPC服务
+	grpcCtx, cancel := context.WithTimeout(context.Background(), serviceTimeOut*time.Second)
+	defer cancel()
+
+	grpcReq := &task.GetTaskMemberListReq{
+		TaskCode: req.TaskCode,
+		Page:     int32(req.Page),
+		PageSize: int32(req.PageSize),
+	}
+	grpcResp, err := TaskServiceClient.GetTaskMemberList(grpcCtx, grpcReq)
+	if err != nil {
+		code, msg := errs.ParseGrpcError(err)
+		ctx.JSON(http.StatusInternalServerError, result.Fail(code, msg))
+		return
+	}
+
+	resp := &model_project.GetTaskMemberListResp{}
+	copier.Copy(&resp.List, grpcResp.List)
+	if resp.List == nil {
+		resp.List = []*model_project.TaskMember{}
+	}
+	resp.Total = grpcResp.Total
+	resp.Page = req.Page
+
+	// 4. 返回结果
+	ctx.JSON(http.StatusOK, result.Success(resp))
+}

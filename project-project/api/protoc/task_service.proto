@@ -241,6 +241,26 @@ message GetTaskDetailResp {
   string statusText = 38;
 }
 
+message GetTaskMemberListReq {
+  string taskCode = 1;
+  int32 pageSize = 2;
+  int32 page = 3;
+}
+
+message TaskMember {
+  int64 id = 1;
+  string name = 2;
+  string avatar = 3;
+  string code = 4;
+  string membarAccountCode = 5;
+  int32 isExecutor = 6;
+  int32 isOwner = 7;
+}
+
+message GetTaskMemberListResp {
+  repeated TaskMember list = 1;
+  int64  total = 2;
+}
 
 service TaskService {
     rpc GetTaskStages(GetTaskStagesReq) returns (GetTaskStagesResp) {}
@@ -249,4 +269,5 @@ service TaskService {
     rpc MoveTask(MoveTaskReq) returns (MoveTaskResp) {}
     rpc GetTaskList(GetTaskListReq) returns (GetTaskListResp) {}
     rpc GetTaskDetail(GetTaskDetailReq) returns (GetTaskDetailResp) {}
+    rpc GetTaskMemberList(GetTaskMemberListReq) returns (GetTaskMemberListResp) {}
 }

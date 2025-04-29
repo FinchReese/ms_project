@@ -261,3 +261,25 @@ type GetTaskDetailResp struct {
 	ProjectName   string   `json:"projectName"`
 	StageName     string   `json:"stageName"`
 }
+
+type GetTaskMemberListReq struct {
+	TaskCode string `form:"taskCode"`
+	Page     int    `form:"page"`
+	PageSize int    `form:"pageSize"`
+}
+
+type GetTaskMemberListResp struct {
+	Total int64         `json:"total"`
+	Page  int           `json:"page"`
+	List  []*TaskMember `json:"list"`
+}
+
+type TaskMember struct {
+	Id                int64  `json:"id"`
+	Name              string `json:"name"`
+	Avatar            string `json:"avatar"`
+	Code              string `json:"code"`
+	MembarAccountCode string `json:"membar_account_code"`
+	IsExecutor        int    `json:"is_executor"`
+	IsOwner           int    `json:"is_owner"`
+}
