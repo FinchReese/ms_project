@@ -205,7 +205,7 @@ func (ls *LoginService) Login(ctx context.Context, msg *login.LoginMessage) (*lo
 
 	exp := time.Duration(config.AppConf.JwtConf.AccessExp*3600*24) * time.Second
 	rExp := time.Duration(config.AppConf.JwtConf.RefreshExp*3600*24) * time.Second
-	token := jwts.CreateToken(member.Id, exp, config.AppConf.JwtConf.AccessSecret, rExp, config.AppConf.JwtConf.RefreshSecret)
+	token := jwts.CreateToken(member.Id, exp, config.AppConf.JwtConf.AccessSecret, rExp, config.AppConf.JwtConf.RefreshSecret, msg.Ip)
 	tokenMsg := &login.TokenMessage{
 		AccessToken:    token.AccessToken,
 		RefreshToken:   token.RefreshToken,
@@ -233,7 +233,7 @@ func (ls *LoginService) VerifyToken(ctx context.Context, req *login.VerifyTokenR
 	if strings.Contains(token, tokenType) {
 		token = strings.ReplaceAll(token, tokenType+" ", "")
 	}
-	memberId, err := jwts.ParseToken(token, config.AppConf.JwtConf.AccessSecret)
+	memberId, err := jwts.ParseToken(token, config.AppConf.JwtConf.AccessSecret, req.Ip)
 	if err != nil {
 		zap.L().Error("verify token error", zap.Error(err))
 		return nil, errs.GrpcError(model.VerifyTokenError)

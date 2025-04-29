@@ -16,6 +16,15 @@ const (
 	verifyTokenTimeout = 2 // 校验token超时时间设置为2秒
 )
 
+// 获取ip函数
+func GetIp(c *gin.Context) string {
+	ip := c.ClientIP()
+	if ip == "::1" {
+		ip = "127.0.0.1"
+	}
+	return ip
+}
+
 func VerifyToken() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 获取header的token
@@ -23,7 +32,7 @@ func VerifyToken() gin.HandlerFunc {
 		// 调用grpc接口校验token
 		ctx, cancelFunc := context.WithTimeout(context.Background(), verifyTokenTimeout*time.Second)
 		defer cancelFunc()
-		resp, err := rpc.LoginServiceClient.VerifyToken(ctx, &login.VerifyTokenReq{Token: token})
+		resp, err := rpc.LoginServiceClient.VerifyToken(ctx, &login.VerifyTokenReq{Token: token, Ip: GetIp(c)})
 
 		// 根据校验token结果处理
 		result := &common.Result{}

@@ -67,6 +67,15 @@ func registerUser(c *gin.Context) {
 	c.JSON(http.StatusOK, result.Success(nil))
 }
 
+// 获取ip函数
+func GetIp(c *gin.Context) string {
+	ip := c.ClientIP()
+	if ip == "::1" {
+		ip = "127.0.0.1"
+	}
+	return ip
+}
+
 func projectLogin(c *gin.Context) {
 	result := &common.Result{}
 	// 解析参数
@@ -82,6 +91,7 @@ func projectLogin(c *gin.Context) {
 	msg := &login.LoginMessage{
 		Account:  req.Account,
 		Password: req.Password,
+		Ip:       GetIp(c),
 	}
 	loginRsp, err := rpc.LoginServiceClient.Login(ctx, msg)
 	if err != nil {

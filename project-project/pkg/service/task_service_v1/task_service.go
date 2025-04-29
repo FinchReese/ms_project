@@ -397,3 +397,52 @@ func (ts *TaskService) GetTaskList(ctx context.Context, req *task.GetTaskListReq
 	copier.Copy(&myMsgs, mtdList)
 	return &task.GetTaskListResp{List: myMsgs, Total: total}, nil
 }
+
+func (ts *TaskService) GetTaskDetail(ctx context.Context, req *task.GetTaskDetailReq) (*task.GetTaskDetailResp, error) {
+	taskCodeStr, _ := encrypt.Decrypt(req.TaskCode, model.AESKey)
+	taskCode, _ := strconv.ParseInt(taskCodeStr, 10, 64)
+	taskInfo, err := ts.task.GetTaskById(ctx, taskCode)
+	if err != nil {
+		zap.L().Error("get task by id error", zap.Error(err))
+	}
+	dispTask := taskInfo.ToTaskDisplay()
+	// 允许访问的条件是Private字段为1且在ms_task_member表中存在记录
+	if taskInfo.Private == 1 {
+		taskMemberList, err := ts.taskMember.FindTaskMembers(ctx, taskInfo.Id, req.MemberId)
+		if err != nil {
+			zap.L().Error("find task members error", zap.Error(err))
+			return nil, errs.GrpcError(model.GetTaskMembersError)
+		}
+		if taskMemberList == nil || len(taskMemberList) == 0 {
+			dispTask.CanRead = model.CanNotRead
+		} else {
+			dispTask.CanRead = model.CanRead
+		}
+	}
+	// 在ms_project表查询项目名字
+	project, err := ts.project.GetProjectByID(ctx, taskInfo.ProjectCode)
+	if err != nil {
+		zap.L().Error("get project by id error", zap.Error(err))
+		return nil, errs.GrpcError(model.GetProjectError)
+	}
+	dispTask.ProjectName = project.Name
+	// 在ms_task_stage表查询任务步骤名字
+	taskStage, err := ts.taskStage.GetTaskStageByID(ctx, taskInfo.StageCode)
+	if err != nil {
+		zap.L().Error("get task stage by id error", zap.Error(err))
+		return nil, errs.GrpcError(model.GetTaskStageError)
+	}
+	dispTask.StageName = taskStage.Name
+	// 借助login服务查找执行者信息
+	member, err := rpc.LoginServiceClient.GetMemberById(ctx, &login.GetMemberByIdReq{MemberId: taskInfo.AssignTo})
+	if err != nil {
+		zap.L().Error("get member by id error", zap.Error(err))
+		return nil, errs.GrpcError(model.GetMemberByIdError)
+	}
+	dispTask.Executor.Name = member.Name
+	dispTask.Executor.Avatar = member.Avatar
+	// 组织回复消息
+	resp := &task.GetTaskDetailResp{}
+	copier.Copy(&resp, dispTask)
+	return resp, nil
+}

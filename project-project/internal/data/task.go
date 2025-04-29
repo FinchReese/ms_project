@@ -114,10 +114,110 @@ func (t *Task) ToDisplayTask() *task.Task {
 	return dispTask
 }
 
+type TaskDisplay struct {
+	Id            int64
+	ProjectCode   string
+	Name          string
+	Pri           int
+	ExecuteStatus string
+	Description   string
+	CreateBy      string
+	DoneBy        string
+	DoneTime      string
+	CreateTime    string
+	AssignTo      string
+	Deleted       int
+	StageCode     string
+	TaskTag       string
+	Done          int
+	BeginTime     string
+	EndTime       string
+	RemindTime    string
+	Pcode         string
+	Sort          int
+	Like          int
+	Star          int
+	DeletedTime   string
+	Private       int
+	IdNum         int
+	Path          string
+	Schedule      int
+	VersionCode   string
+	FeaturesCode  string
+	WorkTime      int
+	Status        int
+	Code          string
+	CanRead       int
+	Executor      Executor
+	ProjectName   string
+	StageName     string
+	PriText       string
+	StatusText    string
+}
+
 type Executor struct {
 	Name   string
 	Avatar string
 	Code   string
+}
+
+const (
+	NoStarted = iota
+	Started
+)
+const (
+	Normal = iota
+	Urgent
+	VeryUrgent
+)
+
+func (t *Task) GetStatusStr() string {
+	status := t.Status
+	if status == NoStarted {
+		return "未开始"
+	}
+	if status == Started {
+		return "开始"
+	}
+	return ""
+}
+func (t *Task) GetPriStr() string {
+	status := t.Pri
+	if status == Normal {
+		return "普通"
+	}
+	if status == Urgent {
+		return "紧急"
+	}
+	if status == VeryUrgent {
+		return "非常紧急"
+	}
+	return ""
+}
+
+func (t *Task) ToTaskDisplay() *TaskDisplay {
+	td := &TaskDisplay{}
+	copier.Copy(td, t)
+	td.CreateTime = time_format.ConvertMsecToString(t.CreateTime)
+	td.DoneTime = time_format.ConvertMsecToString(t.DoneTime)
+	td.BeginTime = time_format.ConvertMsecToString(t.BeginTime)
+	td.EndTime = time_format.ConvertMsecToString(t.EndTime)
+	td.RemindTime = time_format.ConvertMsecToString(t.RemindTime)
+	td.DeletedTime = time_format.ConvertMsecToString(t.DeletedTime)
+	td.CreateBy, _ = encrypt.EncryptInt64(t.CreateBy, model.AESKey)
+	td.ProjectCode, _ = encrypt.EncryptInt64(t.ProjectCode, model.AESKey)
+	td.DoneBy, _ = encrypt.EncryptInt64(t.DoneBy, model.AESKey)
+	td.AssignTo, _ = encrypt.EncryptInt64(t.AssignTo, model.AESKey)
+	td.StageCode, _ = encrypt.EncryptInt64(int64(t.StageCode), model.AESKey)
+	td.Pcode, _ = encrypt.EncryptInt64(t.Pcode, model.AESKey)
+	td.VersionCode, _ = encrypt.EncryptInt64(t.VersionCode, model.AESKey)
+	td.FeaturesCode, _ = encrypt.EncryptInt64(t.FeaturesCode, model.AESKey)
+	td.ExecuteStatus = t.GetExecuteStatusStr()
+	td.Code, _ = encrypt.EncryptInt64(t.Id, model.AESKey)
+	td.CanRead = 1
+	td.StatusText = t.GetStatusStr()
+	td.PriText = t.GetPriStr()
+	return td
 }
 
 type MyTaskDisplay struct {

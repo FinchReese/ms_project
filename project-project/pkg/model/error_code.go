@@ -51,4 +51,5 @@ var (
 	GetTaskListError               = errs.NewError(2042, "获取任务列表出错")
 	InvalidTaskType                = errs.NewError(2043, "无效的任务类型")
 	GetProjectsInfoError           = errs.NewError(2044, "获取项目信息出错")
+	GetProjectError                = errs.NewError(2045, "获取项目出错")
 )
