@@ -43,3 +43,10 @@ type TaskMemberRepo interface {
 	// 根据任务id、页号和每页大小获取任务成员列表
 	GetTaskMemberList(ctx context.Context, taskCode int64, page int, pageSize int) (list []*data.TaskMember, total int64, err error)
 }
+
+type TaskWorkTimeRepo interface {
+	// 保存任务工时
+	SaveTaskWorkTime(ctx context.Context, taskWorkTime *data.TaskWorkTime) error
+	// 根据任务id获取任务工时列表
+	GetTaskWorkTimeList(ctx context.Context, taskCode int64) (list []*data.TaskWorkTime, err error)
+}

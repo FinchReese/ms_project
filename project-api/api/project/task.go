@@ -11,6 +11,7 @@ import (
 	model_project "test.com/project-api/pkg/model/project"
 	common "test.com/project-common"
 	"test.com/project-common/errs"
+	"test.com/project-common/time_format"
 	"test.com/project-grpc/task"
 )
 
@@ -331,4 +332,75 @@ func getTaskLogList(ctx *gin.Context) {
 	resp.Total = grpcResp.Total
 	resp.Page = req.Page
 	ctx.JSON(http.StatusOK, result.Success(resp))
+}
+
+func getTaskWorkTimeList(ctx *gin.Context) {
+	result := &common.Result{}
+	// 1. 解析请求消息
+	var req model_project.GetTaskWorkTimeListReq
+	err := ctx.ShouldBind(&req)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, result.Fail(http.StatusBadRequest, "参数错误"))
+		return
+	}
+
+	// 2. 调用gRPC服务
+	grpcCtx, cancel := context.WithTimeout(context.Background(), serviceTimeOut*time.Second)
+	defer cancel()
+
+	grpcReq := &task.GetTaskWorkTimeListReq{
+		TaskCode: req.TaskCode,
+	}
+	grpcResp, err := TaskServiceClient.GetTaskWorkTimeList(grpcCtx, grpcReq)
+	if err != nil {
+		code, msg := errs.ParseGrpcError(err)
+		ctx.JSON(http.StatusInternalServerError, result.Fail(code, msg))
+		return
+	}
+
+	// 3. 组织回复消息
+	var taskWorkTimeList []*model_project.TaskWorkTime
+	copier.Copy(&taskWorkTimeList, grpcResp.List)
+	if taskWorkTimeList == nil {
+		taskWorkTimeList = []*model_project.TaskWorkTime{}
+	}
+
+	// 4. 返回结果
+	ctx.JSON(http.StatusOK, result.Success(taskWorkTimeList))
+}
+
+func saveTaskWorkTime(ctx *gin.Context) {
+	result := &common.Result{}
+	// 1. 解析请求消息
+	var req model_project.SaveTaskWorkTimeReq
+	err := ctx.ShouldBind(&req)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, result.Fail(http.StatusBadRequest, "参数错误"))
+		return
+	}
+	beginTime, err := time_format.ParseTimeStr(req.BeginTime)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, result.Fail(http.StatusBadRequest, "参数错误"))
+		return
+	}
+	memberId := ctx.GetInt64("memberId")
+
+	// 2. 调用gRPC服务
+	grpcCtx, cancel := context.WithTimeout(context.Background(), serviceTimeOut*time.Second)
+	defer cancel()
+	grpcReq := &task.SaveTaskWorkTimeReq{
+		TaskCode:  req.TaskCode,
+		Content:   req.Content,
+		BeginTime: beginTime,
+		Num:       int32(req.Num),
+		MemberId:  memberId,
+	}
+	_, err = TaskServiceClient.SaveTaskWorkTime(grpcCtx, grpcReq)
+	if err != nil {
+		code, msg := errs.ParseGrpcError(err)
+		ctx.JSON(http.StatusInternalServerError, result.Fail(code, msg))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, result.Success([]int{}))
 }

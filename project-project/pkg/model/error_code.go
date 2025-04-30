@@ -54,4 +54,6 @@ var (
 	GetProjectError                = errs.NewError(2045, "获取项目出错")
 	CreateProjectLogError          = errs.NewError(2046, "创建项目日志出错")
 	GetProjectLogListError         = errs.NewError(2047, "获取项目日志列表出错")
+	SaveTaskWorkTimeError          = errs.NewError(2048, "保存任务工时出错")
+	GetTaskWorkTimeListError       = errs.NewError(2049, "获取任务工时列表出错")
 )

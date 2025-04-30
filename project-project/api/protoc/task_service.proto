@@ -1,6 +1,6 @@
 syntax = "proto3";
 package task.service.v1;
-option go_package = "./gen";
+option go_package = "../../../../project-grpc/task";
 
 message GetTaskStagesReq {
     string projectCode = 1;
@@ -300,6 +300,36 @@ message GetTaskLogListResp {
   int32 page = 3;
 }
 
+message SaveTaskWorkTimeReq {
+  string taskCode = 1;
+  string content = 2;
+  int32 num = 3;
+  int64 beginTime = 4;
+  int64 memberId = 5;
+}
+
+message SaveTaskWorkTimeResp {
+}
+
+message GetTaskWorkTimeListReq {
+  string taskCode = 1;
+}
+
+message GetTaskWorkTimeListResp {
+  repeated TaskWorkTime list = 1;
+}
+
+message TaskWorkTime {
+  int64 id = 1;
+  int64 taskCode = 2;
+  int64 memberCode = 3;
+  string createTime = 4;
+  string content = 5;
+  string beginTime = 6;
+  int32 num = 7;
+  string code = 8;
+  Member member = 9;
+}
 
 service TaskService {
     rpc GetTaskStages(GetTaskStagesReq) returns (GetTaskStagesResp) {}
@@ -310,4 +340,6 @@ service TaskService {
     rpc GetTaskDetail(GetTaskDetailReq) returns (GetTaskDetailResp) {}
     rpc GetTaskMemberList(GetTaskMemberListReq) returns (GetTaskMemberListResp) {}
     rpc GetTaskLogList(GetTaskLogListReq) returns (GetTaskLogListResp) {}
+    rpc SaveTaskWorkTime(SaveTaskWorkTimeReq) returns (SaveTaskWorkTimeResp) {}
+    rpc GetTaskWorkTimeList(GetTaskWorkTimeListReq) returns (GetTaskWorkTimeListResp) {}
 }

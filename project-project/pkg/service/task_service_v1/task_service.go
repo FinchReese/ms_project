@@ -21,22 +21,24 @@ import (
 
 type TaskService struct {
 	task.UnimplementedTaskServiceServer
-	taskStage  repo.TaskStageRepo
-	task       repo.TaskRepo
-	taskMember repo.TaskMemberRepo
-	project    repo.ProjectRepo
-	tran       *trans.TransactionImpl
-	projectLog repo.ProjectLogRepo
+	taskStage    repo.TaskStageRepo
+	task         repo.TaskRepo
+	taskMember   repo.TaskMemberRepo
+	project      repo.ProjectRepo
+	tran         *trans.TransactionImpl
+	projectLog   repo.ProjectLogRepo
+	taskWorkTime repo.TaskWorkTimeRepo
 }
 
-func NewTaskService(ts repo.TaskStageRepo, t repo.TaskRepo, tm repo.TaskMemberRepo, p repo.ProjectRepo, pl repo.ProjectLogRepo, tran *trans.TransactionImpl) *TaskService {
+func NewTaskService(ts repo.TaskStageRepo, t repo.TaskRepo, tm repo.TaskMemberRepo, p repo.ProjectRepo, pl repo.ProjectLogRepo, twt repo.TaskWorkTimeRepo, tran *trans.TransactionImpl) *TaskService {
 	return &TaskService{
-		taskStage:  ts,
-		task:       t,
-		taskMember: tm,
-		project:    p,
-		tran:       tran,
-		projectLog: pl,
+		taskStage:    ts,
+		task:         t,
+		taskMember:   tm,
+		project:      p,
+		tran:         tran,
+		projectLog:   pl,
+		taskWorkTime: twt,
 	}
 }
 
@@ -561,4 +563,67 @@ func (ts *TaskService) GetTaskLogList(ctx context.Context, req *task.GetTaskLogL
 	var taskLogList []*task.TaskLog
 	copier.Copy(&taskLogList, dispLogList)
 	return &task.GetTaskLogListResp{List: taskLogList, Total: total, Page: req.Page}, nil
+}
+
+func (ts *TaskService) SaveTaskWorkTime(ctx context.Context, req *task.SaveTaskWorkTimeReq) (*task.SaveTaskWorkTimeResp, error) {
+	taskCodeStr, _ := encrypt.Decrypt(req.TaskCode, model.AESKey)
+	taskCode, _ := strconv.ParseInt(taskCodeStr, 10, 64)
+	// 组织taskWorkTime
+	taskWorkTime := &data.TaskWorkTime{
+		TaskCode:   taskCode,
+		MemberCode: req.MemberId,
+		Content:    req.Content,
+		Num:        int(req.Num),
+		BeginTime:  req.BeginTime,
+	}
+	err := ts.taskWorkTime.SaveTaskWorkTime(ctx, taskWorkTime)
+	if err != nil {
+		zap.L().Error("save task work time error", zap.Error(err))
+		return nil, errs.GrpcError(model.SaveTaskWorkTimeError)
+	}
+	return &task.SaveTaskWorkTimeResp{}, nil
+}
+
+func (ts *TaskService) GetTaskWorkTimeList(ctx context.Context, req *task.GetTaskWorkTimeListReq) (*task.GetTaskWorkTimeListResp, error) {
+	taskCodeStr, _ := encrypt.Decrypt(req.TaskCode, model.AESKey)
+	taskCode, _ := strconv.ParseInt(taskCodeStr, 10, 64)
+	taskWorkTimeList, err := ts.taskWorkTime.GetTaskWorkTimeList(ctx, taskCode)
+	if err != nil {
+		zap.L().Error("get task work time list error", zap.Error(err))
+		return nil, errs.GrpcError(model.GetTaskWorkTimeListError)
+	}
+	if taskWorkTimeList == nil || len(taskWorkTimeList) == 0 {
+		return &task.GetTaskWorkTimeListResp{List: []*task.TaskWorkTime{}}, nil
+	}
+	// 收集任务工时的成员id，统一查找成员信息
+	memberIdList := []int64{}
+	for _, taskWorkTime := range taskWorkTimeList {
+		memberIdList = append(memberIdList, taskWorkTime.MemberCode)
+	}
+	members, err := rpc.LoginServiceClient.GetMembersByIds(ctx, &login.GetMembersByIdsReq{
+		MemberIds: memberIdList,
+	})
+	if err != nil {
+		zap.L().Error("get members info error", zap.Error(err))
+		return nil, errs.GrpcError(model.GetMembersInfoError)
+	}
+	memberIdToInfo := make(map[int64]*login.MemberMessage)
+	for _, member := range members.List {
+		memberIdToInfo[member.Id] = member
+	}
+
+	taskWorkTimeDisplayList := []*data.TaskWorkTimeDisplay{}
+	for _, taskWorkTime := range taskWorkTimeList {
+		taskWorkTimeDisplay := taskWorkTime.ToDisplay()
+		memberInfo := memberIdToInfo[taskWorkTime.MemberCode]
+		taskWorkTimeDisplay.Member.Name = memberInfo.Name
+		taskWorkTimeDisplay.Member.Avatar = memberInfo.Avatar
+		taskWorkTimeDisplay.Member.Id = memberInfo.Id
+		taskWorkTimeDisplay.Member.Code, _ = encrypt.EncryptInt64(memberInfo.Id, model.AESKey)
+		taskWorkTimeDisplayList = append(taskWorkTimeDisplayList, taskWorkTimeDisplay)
+	}
+	// 组织回复消息
+	var taskWorkTimeListResp []*task.TaskWorkTime
+	copier.Copy(&taskWorkTimeListResp, taskWorkTimeDisplayList)
+	return &task.GetTaskWorkTimeListResp{List: taskWorkTimeListResp}, nil
 }
