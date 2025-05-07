@@ -2,15 +2,20 @@ package project
 
 import (
 	"context"
+	"io"
 	"net/http"
+	"os"
+	"path"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
+	"go.uber.org/zap"
 	"test.com/project-api/pkg/model/project"
 	model_project "test.com/project-api/pkg/model/project"
 	common "test.com/project-common"
 	"test.com/project-common/errs"
+	"test.com/project-common/fs"
 	"test.com/project-common/time_format"
 	"test.com/project-grpc/task"
 )
@@ -403,4 +408,85 @@ func saveTaskWorkTime(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, result.Success([]int{}))
+}
+
+func uploadFile(ctx *gin.Context) {
+	result := &common.Result{}
+	// 1. 解析请求消息
+	var req model_project.UploadFileReq
+	err := ctx.ShouldBind(&req)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, result.Fail(http.StatusBadRequest, "参数错误"))
+		return
+	}
+	// 获取上传文件
+	file, err := ctx.FormFile("file")
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, result.Fail(http.StatusBadRequest, "获取文件失败"))
+		return
+	}
+	// 打开上传文件
+	fileContent, err := file.Open()
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, result.Fail(http.StatusBadRequest, "打开文件内容失败"))
+		return
+	}
+	saveDir := "upload/" + req.ProjectCode + "/" + req.TaskCode + "/" + time_format.ConvertTimeToDate(time.Now())
+	// 如果文件夹不存在，则创建文件夹
+	if !fs.FileExists(saveDir) {
+		os.MkdirAll(saveDir, os.ModePerm)
+	}
+	savePath := saveDir + "/" + file.Filename
+	// 将上传文件的内容追加到保存文件
+	saveFile, err := os.OpenFile(savePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, os.ModePerm)
+	if err != nil {
+		zap.L().Error("打开文件错误", zap.Error(err))
+		ctx.JSON(http.StatusInternalServerError, result.Fail(http.StatusBadRequest, "打开文件错误"))
+		return
+	}
+	defer saveFile.Close()
+	buf := make([]byte, req.CurrentChunkSize)
+	_, err = io.ReadFull(fileContent, buf)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, result.Fail(http.StatusBadRequest, "读取上传文件内容失败"))
+		return
+	}
+	_, err = saveFile.Write(buf)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, result.Fail(http.StatusBadRequest, "保存文件内容失败"))
+		return
+	}
+	// 最后一个文件分片处理完成需要记录文件信息
+	if req.CurrentChunkSize == req.TotalSize {
+		// 调用GRPC服务存储文件信息
+		grpcCtx, cancel := context.WithTimeout(context.Background(), serviceTimeOut*time.Second)
+		defer cancel()
+		grpcReq := &task.SaveUploadFileInfoReq{
+			TaskCode:    req.TaskCode,
+			ProjectCode: req.ProjectCode,
+			PathName:    savePath,
+			FileName:    req.Filename,
+			Size:        int64(req.TotalSize),
+			Extension:   path.Ext(savePath),
+			FileUrl:     "http://localhost/" + savePath,
+			FileType:    file.Header.Get("Content-Type"),
+			MemberId:    ctx.GetInt64("memberId"),
+		}
+		_, err = TaskServiceClient.SaveUploadFileInfo(grpcCtx, grpcReq)
+		if err != nil {
+			code, msg := errs.ParseGrpcError(err)
+			ctx.JSON(http.StatusInternalServerError, result.Fail(code, msg))
+			return
+		}
+	}
+
+	// 组织回复消息
+	resp := &model_project.UploadFileResp{
+		File:        savePath,
+		Hash:        "",
+		Key:         savePath,
+		Url:         "http://localhost/" + savePath,
+		ProjectName: req.ProjectName,
+	}
+	ctx.JSON(http.StatusOK, result.Success(resp))
 }

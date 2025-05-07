@@ -28,9 +28,11 @@ type TaskService struct {
 	tran         *trans.TransactionImpl
 	projectLog   repo.ProjectLogRepo
 	taskWorkTime repo.TaskWorkTimeRepo
+	file         repo.FileRepo
+	sourceLink   repo.SourceLinkRepo
 }
 
-func NewTaskService(ts repo.TaskStageRepo, t repo.TaskRepo, tm repo.TaskMemberRepo, p repo.ProjectRepo, pl repo.ProjectLogRepo, twt repo.TaskWorkTimeRepo, tran *trans.TransactionImpl) *TaskService {
+func NewTaskService(ts repo.TaskStageRepo, t repo.TaskRepo, tm repo.TaskMemberRepo, p repo.ProjectRepo, pl repo.ProjectLogRepo, twt repo.TaskWorkTimeRepo, f repo.FileRepo, sl repo.SourceLinkRepo, tran *trans.TransactionImpl) *TaskService {
 	return &TaskService{
 		taskStage:    ts,
 		task:         t,
@@ -39,6 +41,8 @@ func NewTaskService(ts repo.TaskStageRepo, t repo.TaskRepo, tm repo.TaskMemberRe
 		tran:         tran,
 		projectLog:   pl,
 		taskWorkTime: twt,
+		file:         f,
+		sourceLink:   sl,
 	}
 }
 
@@ -592,7 +596,7 @@ func (ts *TaskService) GetTaskWorkTimeList(ctx context.Context, req *task.GetTas
 		zap.L().Error("get task work time list error", zap.Error(err))
 		return nil, errs.GrpcError(model.GetTaskWorkTimeListError)
 	}
-	if taskWorkTimeList == nil || len(taskWorkTimeList) == 0 {
+	if len(taskWorkTimeList) == 0 {
 		return &task.GetTaskWorkTimeListResp{List: []*task.TaskWorkTime{}}, nil
 	}
 	// 收集任务工时的成员id，统一查找成员信息
@@ -626,4 +630,84 @@ func (ts *TaskService) GetTaskWorkTimeList(ctx context.Context, req *task.GetTas
 	var taskWorkTimeListResp []*task.TaskWorkTime
 	copier.Copy(&taskWorkTimeListResp, taskWorkTimeDisplayList)
 	return &task.GetTaskWorkTimeListResp{List: taskWorkTimeListResp}, nil
+}
+
+// SaveUploadFileInfo 保存上传文件信息
+func (ts *TaskService) SaveUploadFileInfo(ctx context.Context, req *task.SaveUploadFileInfoReq) (*task.SaveUploadFileInfoResp, error) {
+	// 1. 解析请求参数
+	var projectID int64 = 0
+	if req.ProjectCode != "" {
+		projectCodeStr, _ := encrypt.Decrypt(req.ProjectCode, model.AESKey)
+		projectID, _ = strconv.ParseInt(projectCodeStr, 10, 64)
+	}
+
+	var taskID int64 = 0
+	if req.TaskCode != "" {
+		taskCodeStr, _ := encrypt.Decrypt(req.TaskCode, model.AESKey)
+		taskID, _ = strconv.ParseInt(taskCodeStr, 10, 64)
+	}
+	// 根据memberId查询organization code，把第一个作为成员的organization code
+	var organizationCode int64 = 0
+	grpcResp, err := rpc.LoginServiceClient.GetOrganizationList(ctx, &login.GetOrganizationListReq{MemberId: req.MemberId})
+	if err != nil {
+		zap.L().Error("get organization err", zap.Error(err))
+		return nil, errs.GrpcError(model.GetOrganizationError)
+	}
+	orgs := grpcResp.OrgList
+	if len(orgs) > 0 { // 教程把成员的第一个组织作为当前组织，实际应该是在前端选择当前组织，后端记录
+		organizationCode = orgs[0].Id
+	}
+
+	// 2. 创建文件记录
+	now := time.Now().UnixMilli()
+	fileRecord := &data.File{
+		PathName:         req.PathName,
+		Title:            req.FileName,
+		Extension:        req.Extension,
+		Size:             int(req.Size),
+		ObjectType:       "", // 默认为任务类型
+		OrganizationCode: organizationCode,
+		TaskCode:         taskID,
+		ProjectCode:      projectID,
+		CreateBy:         req.MemberId,
+		CreateTime:       now,
+		Downloads:        0,                // 默认下载次数为0
+		Extra:            "",               // 默认无额外信息
+		Deleted:          model.NotDeleted, // 默认未删除
+		FileUrl:          req.FileUrl,
+		FileType:         req.FileType,
+	}
+
+	// 3. 开启事务，保存文件信息和资源关联关系
+	err = ts.tran.ExecTran(func(db trans.DbConn) error {
+		conn := db.(*gorm.MysqlConn)
+		// 保存文件信息
+		if err := ts.file.SaveFile(ctx, fileRecord, conn.TranDb); err != nil {
+			zap.L().Error("save file error", zap.Error(err))
+			return errs.GrpcError(model.SaveFileError)
+		}
+		// 保存源文件链接信息
+		sourceLink := &data.SourceLink{
+			SourceType:       "file",
+			SourceCode:       int64(fileRecord.Id),
+			LinkType:         "task",
+			LinkCode:         taskID,
+			OrganizationCode: organizationCode,
+			CreateBy:         req.MemberId,
+			CreateTime:       strconv.FormatInt(now, 10),
+			Sort:             0, // 默认排序
+		}
+
+		if err := ts.sourceLink.SaveSourceLink(ctx, sourceLink, conn.TranDb); err != nil {
+			zap.L().Error("save source link error", zap.Error(err))
+			return errs.GrpcError(model.SaveSourceLinkError)
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &task.SaveUploadFileInfoResp{}, nil
 }

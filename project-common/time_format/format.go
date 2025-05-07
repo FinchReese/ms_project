@@ -3,8 +3,13 @@ package time_format
 import "time"
 
 func ConvertTimeToString(t time.Time) string {
-	return t.Format("2006-01-02 15:04:05")
+	return t.Format("2006-01-02_15:04:05")
 }
+
+func ConvertTimeToDate(t time.Time) string {
+	return t.Format("2006-01-02")
+}
+
 func ConvertTimeToYMD(t time.Time) string {
 	return t.Format("2006-01-02")
 }

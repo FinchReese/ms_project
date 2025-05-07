@@ -331,6 +331,21 @@ message TaskWorkTime {
   Member member = 9;
 }
 
+message SaveUploadFileInfoReq {
+  string pathName = 1;
+  string fileName = 2;
+  string extension = 3;
+  int64 size = 4;
+  string projectCode = 5;
+  string taskCode = 6;
+  string fileUrl = 7;
+  string fileType = 8;
+  int64 memberId = 9;
+}
+
+message SaveUploadFileInfoResp {
+}
+
 service TaskService {
     rpc GetTaskStages(GetTaskStagesReq) returns (GetTaskStagesResp) {}
     rpc GetTasksByStageCode(GetTasksByStageCodeReq) returns (GetTasksByStageCodeResp) {}
@@ -342,4 +357,5 @@ service TaskService {
     rpc GetTaskLogList(GetTaskLogListReq) returns (GetTaskLogListResp) {}
     rpc SaveTaskWorkTime(SaveTaskWorkTimeReq) returns (SaveTaskWorkTimeResp) {}
     rpc GetTaskWorkTimeList(GetTaskWorkTimeListReq) returns (GetTaskWorkTimeListResp) {}
+    rpc SaveUploadFileInfo(SaveUploadFileInfoReq) returns (SaveUploadFileInfoResp) {}
 }

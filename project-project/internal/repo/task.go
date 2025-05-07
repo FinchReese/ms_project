@@ -50,3 +50,15 @@ type TaskWorkTimeRepo interface {
 	// 根据任务id获取任务工时列表
 	GetTaskWorkTimeList(ctx context.Context, taskCode int64) (list []*data.TaskWorkTime, err error)
 }
+
+// FileRepo 文件表仓库接口
+type FileRepo interface {
+	// SaveFile 保存文件记录
+	SaveFile(ctx context.Context, file *data.File, db *gorm.DB) error
+}
+
+// SourceLinkRepo 资源关联表仓库接口
+type SourceLinkRepo interface {
+	// SaveSourceLink 保存资源关联记录
+	SaveSourceLink(ctx context.Context, sourceLink *data.SourceLink, db *gorm.DB) error
+}

@@ -56,4 +56,6 @@ var (
 	GetProjectLogListError         = errs.NewError(2047, "获取项目日志列表出错")
 	SaveTaskWorkTimeError          = errs.NewError(2048, "保存任务工时出错")
 	GetTaskWorkTimeListError       = errs.NewError(2049, "获取任务工时列表出错")
+	SaveFileError                  = errs.NewError(2050, "保存文件记录出错")
+	SaveSourceLinkError            = errs.NewError(2051, "保存资源关联记录出错")
 )
