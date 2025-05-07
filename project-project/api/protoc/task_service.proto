@@ -346,6 +346,52 @@ message SaveUploadFileInfoReq {
 message SaveUploadFileInfoResp {
 }
 
+message GetTaskLinkFilesReq {
+  string taskCode = 1;
+}
+
+message TaskLinkFile {
+  int64  id = 1;
+  string code = 2;
+  string sourceType = 3;
+  string sourceCode = 4;
+  string linkType = 5;
+  string linkCode = 6;
+  string OrganizationCode = 7;
+  string createBy = 8;
+  string createTime = 9;
+  int32 sort = 10;
+  string title = 11;
+  SourceDetail sourceDetail = 12;
+}
+
+message SourceDetail {
+  int64  id = 1;
+  string  code = 2;
+  string pathName = 3;
+  string title = 4;
+  string Extension = 5;
+  int32 size = 6;
+  string ObjectType = 7;
+  string OrganizationCode = 8;
+  string  TaskCode = 9;
+  string projectCode = 10;
+  string createBy = 11;
+  string createTime = 12;
+  int32 downloads = 13;
+  string Extra = 14;
+  int32 Deleted = 15;
+  string FileUrl = 16;
+  string FileType = 17;
+  string deletedTime = 18;
+  string ProjectName = 19;
+  string FullName = 20;
+}
+
+message GetTaskLinkFilesResp {
+  repeated TaskLinkFile list = 1;
+}
+
 service TaskService {
     rpc GetTaskStages(GetTaskStagesReq) returns (GetTaskStagesResp) {}
     rpc GetTasksByStageCode(GetTasksByStageCodeReq) returns (GetTasksByStageCodeResp) {}
@@ -358,4 +404,5 @@ service TaskService {
     rpc SaveTaskWorkTime(SaveTaskWorkTimeReq) returns (SaveTaskWorkTimeResp) {}
     rpc GetTaskWorkTimeList(GetTaskWorkTimeListReq) returns (GetTaskWorkTimeListResp) {}
     rpc SaveUploadFileInfo(SaveUploadFileInfoReq) returns (SaveUploadFileInfoResp) {}
+    rpc GetTaskLinkFiles(GetTaskLinkFilesReq) returns (GetTaskLinkFilesResp) {}
 }

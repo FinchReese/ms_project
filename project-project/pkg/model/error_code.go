@@ -58,4 +58,6 @@ var (
 	GetTaskWorkTimeListError       = errs.NewError(2049, "获取任务工时列表出错")
 	SaveFileError                  = errs.NewError(2050, "保存文件记录出错")
 	SaveSourceLinkError            = errs.NewError(2051, "保存资源关联记录出错")
+	GetSourceLinkListError         = errs.NewError(2052, "获取资源关联列表出错")
+	GetFileListByIdsError          = errs.NewError(2053, "根据文件id列表获取文件列表出错")
 )

@@ -690,7 +690,7 @@ func (ts *TaskService) SaveUploadFileInfo(ctx context.Context, req *task.SaveUpl
 		sourceLink := &data.SourceLink{
 			SourceType:       "file",
 			SourceCode:       int64(fileRecord.Id),
-			LinkType:         "task",
+			LinkType:         model.LinkTypeTask,
 			LinkCode:         taskID,
 			OrganizationCode: organizationCode,
 			CreateBy:         req.MemberId,
@@ -710,4 +710,41 @@ func (ts *TaskService) SaveUploadFileInfo(ctx context.Context, req *task.SaveUpl
 	}
 
 	return &task.SaveUploadFileInfoResp{}, nil
+}
+
+func (ts *TaskService) GetTaskLinkFiles(ctx context.Context, req *task.GetTaskLinkFilesReq) (*task.GetTaskLinkFilesResp, error) {
+	// 解析task code
+	taskCodeStr, _ := encrypt.Decrypt(req.TaskCode, model.AESKey)
+	taskCode, _ := strconv.ParseInt(taskCodeStr, 10, 64)
+	// 根据task code获取资源关联列表
+	sourceLinkList, err := ts.sourceLink.GetSourceLinkList(ctx, model.LinkTypeTask, taskCode)
+	if err != nil {
+		zap.L().Error("get source link list error", zap.Error(err))
+		return nil, errs.GrpcError(model.GetSourceLinkListError)
+	}
+	// 先收集文件id，再统一查询文件信息，提升性能
+	fileIdList := []int64{}
+	for _, sourceLink := range sourceLinkList {
+		fileIdList = append(fileIdList, sourceLink.SourceCode)
+	}
+	files, err := ts.file.GetFileListByIds(ctx, fileIdList)
+	if err != nil {
+		zap.L().Error("get file list by ids error", zap.Error(err))
+		return nil, errs.GrpcError(model.GetFileListByIdsError)
+	}
+	// 创建文件id到文件的映射
+	fileIdToFile := make(map[int64]*data.File)
+	for _, file := range files {
+		fileIdToFile[int64(file.Id)] = file
+	}
+	// 整理展示的文件信息
+	var sourceLinkDisplayList []*data.SourceLinkDisplay
+	for _, sourceLink := range sourceLinkList {
+		sourceLinkDisplay := sourceLink.ToDisplay(fileIdToFile[sourceLink.SourceCode])
+		sourceLinkDisplayList = append(sourceLinkDisplayList, sourceLinkDisplay)
+	}
+	// 组织回复消息
+	var taskLinkFiles []*task.TaskLinkFile
+	copier.Copy(&taskLinkFiles, sourceLinkDisplayList)
+	return &task.GetTaskLinkFilesResp{List: taskLinkFiles}, nil
 }

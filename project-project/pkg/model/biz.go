@@ -48,3 +48,8 @@ const (
 	TaskTypeInvolved   = 2 // 参与的任务
 	TaskTypeCreatedBy  = 3 // 创建的任务
 )
+
+// link type
+const (
+	LinkTypeTask = "task"
+)

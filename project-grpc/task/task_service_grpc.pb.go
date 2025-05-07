@@ -33,6 +33,7 @@ type TaskServiceClient interface {
 	SaveTaskWorkTime(ctx context.Context, in *SaveTaskWorkTimeReq, opts ...grpc.CallOption) (*SaveTaskWorkTimeResp, error)
 	GetTaskWorkTimeList(ctx context.Context, in *GetTaskWorkTimeListReq, opts ...grpc.CallOption) (*GetTaskWorkTimeListResp, error)
 	SaveUploadFileInfo(ctx context.Context, in *SaveUploadFileInfoReq, opts ...grpc.CallOption) (*SaveUploadFileInfoResp, error)
+	GetTaskLinkFiles(ctx context.Context, in *GetTaskLinkFilesReq, opts ...grpc.CallOption) (*GetTaskLinkFilesResp, error)
 }
 
 type taskServiceClient struct {
@@ -142,6 +143,15 @@ func (c *taskServiceClient) SaveUploadFileInfo(ctx context.Context, in *SaveUplo
 	return out, nil
 }
 
+func (c *taskServiceClient) GetTaskLinkFiles(ctx context.Context, in *GetTaskLinkFilesReq, opts ...grpc.CallOption) (*GetTaskLinkFilesResp, error) {
+	out := new(GetTaskLinkFilesResp)
+	err := c.cc.Invoke(ctx, "/task.service.v1.TaskService/GetTaskLinkFiles", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TaskServiceServer is the server API for TaskService service.
 // All implementations must embed UnimplementedTaskServiceServer
 // for forward compatibility
@@ -157,6 +167,7 @@ type TaskServiceServer interface {
 	SaveTaskWorkTime(context.Context, *SaveTaskWorkTimeReq) (*SaveTaskWorkTimeResp, error)
 	GetTaskWorkTimeList(context.Context, *GetTaskWorkTimeListReq) (*GetTaskWorkTimeListResp, error)
 	SaveUploadFileInfo(context.Context, *SaveUploadFileInfoReq) (*SaveUploadFileInfoResp, error)
+	GetTaskLinkFiles(context.Context, *GetTaskLinkFilesReq) (*GetTaskLinkFilesResp, error)
 	mustEmbedUnimplementedTaskServiceServer()
 }
 
@@ -196,6 +207,9 @@ func (UnimplementedTaskServiceServer) GetTaskWorkTimeList(context.Context, *GetT
 }
 func (UnimplementedTaskServiceServer) SaveUploadFileInfo(context.Context, *SaveUploadFileInfoReq) (*SaveUploadFileInfoResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveUploadFileInfo not implemented")
+}
+func (UnimplementedTaskServiceServer) GetTaskLinkFiles(context.Context, *GetTaskLinkFilesReq) (*GetTaskLinkFilesResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTaskLinkFiles not implemented")
 }
 func (UnimplementedTaskServiceServer) mustEmbedUnimplementedTaskServiceServer() {}
 
@@ -408,6 +422,24 @@ func _TaskService_SaveUploadFileInfo_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TaskService_GetTaskLinkFiles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTaskLinkFilesReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).GetTaskLinkFiles(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/task.service.v1.TaskService/GetTaskLinkFiles",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).GetTaskLinkFiles(ctx, req.(*GetTaskLinkFilesReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TaskService_ServiceDesc is the grpc.ServiceDesc for TaskService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -458,6 +490,10 @@ var TaskService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SaveUploadFileInfo",
 			Handler:    _TaskService_SaveUploadFileInfo_Handler,
+		},
+		{
+			MethodName: "GetTaskLinkFiles",
+			Handler:    _TaskService_GetTaskLinkFiles_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

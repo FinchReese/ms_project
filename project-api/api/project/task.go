@@ -457,7 +457,7 @@ func uploadFile(ctx *gin.Context) {
 		return
 	}
 	// 最后一个文件分片处理完成需要记录文件信息
-	if req.CurrentChunkSize == req.TotalSize {
+	if req.ChunkNumber == req.TotalChunks {
 		// 调用GRPC服务存储文件信息
 		grpcCtx, cancel := context.WithTimeout(context.Background(), serviceTimeOut*time.Second)
 		defer cancel()
@@ -489,4 +489,31 @@ func uploadFile(ctx *gin.Context) {
 		ProjectName: req.ProjectName,
 	}
 	ctx.JSON(http.StatusOK, result.Success(resp))
+}
+
+func getTaskLinkFiles(ctx *gin.Context) {
+	result := &common.Result{}
+	// 1. 解析请求消息
+	var req model_project.GetTaskLinkFilesReq
+	err := ctx.ShouldBind(&req)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, result.Fail(http.StatusBadRequest, "参数错误"))
+		return
+	}
+	// 2. 调用gRPC服务获取任务关联文件
+	grpcCtx, cancel := context.WithTimeout(context.Background(), serviceTimeOut*time.Second)
+	defer cancel()
+	grpcReq := &task.GetTaskLinkFilesReq{
+		TaskCode: req.TaskCode,
+	}
+	grpcResp, err := TaskServiceClient.GetTaskLinkFiles(grpcCtx, grpcReq)
+	if err != nil {
+		code, msg := errs.ParseGrpcError(err)
+		ctx.JSON(http.StatusInternalServerError, result.Fail(code, msg))
+		return
+	}
+	// 3. 组织回复消息
+	var taskLinkFiles []*model_project.SourceLink
+	copier.Copy(&taskLinkFiles, grpcResp.List)
+	ctx.JSON(http.StatusOK, result.Success(taskLinkFiles))
 }

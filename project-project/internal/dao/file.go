@@ -28,3 +28,13 @@ func (f *FileDao) SaveFile(ctx context.Context, file *data.File, db *gorm.DB) er
 	}
 	return db.Create(file).Error
 }
+
+// 根据文件id获取文件记录
+func (f *FileDao) GetFileListByIds(ctx context.Context, fileIdList []int64) ([]*data.File, error) {
+	session := f.conn.Db.Session(&gorm.Session{Context: ctx})
+	var files []*data.File
+	if err := session.Model(&data.File{}).Where("id IN ?", fileIdList).Find(&files).Error; err != nil {
+		return nil, err
+	}
+	return files, nil
+}

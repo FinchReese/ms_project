@@ -55,10 +55,14 @@ type TaskWorkTimeRepo interface {
 type FileRepo interface {
 	// SaveFile 保存文件记录
 	SaveFile(ctx context.Context, file *data.File, db *gorm.DB) error
+	// 根据文件id列表获取文件记录
+	GetFileListByIds(ctx context.Context, fileIdList []int64) ([]*data.File, error)
 }
 
 // SourceLinkRepo 资源关联表仓库接口
 type SourceLinkRepo interface {
 	// SaveSourceLink 保存资源关联记录
 	SaveSourceLink(ctx context.Context, sourceLink *data.SourceLink, db *gorm.DB) error
+	// 根据link type和link code获取资源关联记录
+	GetSourceLinkList(ctx context.Context, linkType string, linkCode int64) ([]*data.SourceLink, error)
 }
