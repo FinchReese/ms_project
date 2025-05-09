@@ -63,3 +63,25 @@ func (pl *ProjectLog) ToDisplay() *ProjectLogDisplay {
 	pd.SourceCode, _ = encrypt.EncryptInt64(pl.SourceCode, model.AESKey)
 	return pd
 }
+
+type IndexProjectLogDisplay struct {
+	Content      string
+	Remark       string
+	CreateTime   string
+	SourceCode   string
+	IsComment    int
+	ProjectCode  string
+	MemberAvatar string
+	MemberName   string
+	ProjectName  string
+	TaskName     string
+}
+
+func (pl *ProjectLog) ToIndexDisplay() *IndexProjectLogDisplay {
+	pd := &IndexProjectLogDisplay{}
+	copier.Copy(pd, pl)
+	pd.ProjectCode, _ = encrypt.EncryptInt64(pl.ProjectCode, model.AESKey)
+	pd.CreateTime = time_format.ConvertMsecToString(pl.CreateTime)
+	pd.SourceCode, _ = encrypt.EncryptInt64(pl.SourceCode, model.AESKey)
+	return pd
+}

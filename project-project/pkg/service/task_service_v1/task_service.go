@@ -781,3 +781,66 @@ func (ts *TaskService) CreateTaskComment(ctx context.Context, req *task.CreateTa
 	}
 	return &task.CreateTaskCommentResp{}, nil
 }
+
+func (ts *TaskService) GetUserProjectLogList(ctx context.Context, req *task.GetUserProjectLogListReq) (*task.GetUserProjectLogListResp, error) {
+	// 根据memberId获取项目日志列表
+	projectLogList, total, err := ts.projectLog.GetProjectLogList(ctx, req.MemberId, int64(req.Page), int64(req.PageSize))
+	if err != nil {
+		zap.L().Error("get project log list error", zap.Error(err))
+		return nil, errs.GrpcError(model.GetProjectLogListError)
+	}
+	// 如果日志列表为空，则返回空列表
+	if len(projectLogList) == 0 || total == 0 {
+		return &task.GetUserProjectLogListResp{List: []*task.ProjectLogMessage{}, Total: 0}, nil
+	}
+	// 收集项目日志的项目id和任务id，统一查询项目和任务信息
+	projectIdList := []int64{}
+	taskIdList := []int64{}
+	for _, projectLog := range projectLogList {
+		projectIdList = append(projectIdList, projectLog.ProjectCode)
+		taskIdList = append(taskIdList, projectLog.SourceCode)
+	}
+	// 查询项目信息
+	projects, err := ts.project.GetProjectsByIds(ctx, projectIdList)
+	if err != nil {
+		zap.L().Error("get project list error", zap.Error(err))
+		return nil, errs.GrpcError(model.GetProjectListError)
+	}
+	projectIdToProject := make(map[int64]*data.Project)
+	for _, project := range projects {
+		projectIdToProject[project.Id] = project
+	}
+	// 查询任务信息
+	tasks, err := ts.task.GetTasksByIds(ctx, taskIdList)
+	if err != nil {
+		zap.L().Error("get task list error", zap.Error(err))
+		return nil, errs.GrpcError(model.GetTaskListError)
+	}
+	taskIdToTask := make(map[int64]*data.Task)
+	for _, task := range tasks {
+		taskIdToTask[task.Id] = task
+	}
+	// 查询成员信息
+	member, err := rpc.LoginServiceClient.GetMemberById(ctx, &login.GetMemberByIdReq{
+		MemberId: req.MemberId,
+	})
+	if err != nil {
+		zap.L().Error("get member by id error", zap.Error(err))
+		return nil, errs.GrpcError(model.GetMemberByIdError)
+	}
+
+	// 组织回复消息
+	var projectLogDisplayList []*data.IndexProjectLogDisplay
+	for _, projectLog := range projectLogList {
+		projectLogMessage := projectLog.ToIndexDisplay()
+		projectLogMessage.ProjectName = projectIdToProject[projectLog.ProjectCode].Name
+		projectLogMessage.TaskName = taskIdToTask[projectLog.SourceCode].Name
+		projectLogMessage.MemberAvatar = member.Avatar
+		projectLogMessage.MemberName = member.Name
+		projectLogDisplayList = append(projectLogDisplayList, projectLogMessage)
+	}
+
+	var projectLogMessageList []*task.ProjectLogMessage
+	copier.Copy(&projectLogMessageList, projectLogDisplayList)
+	return &task.GetUserProjectLogListResp{List: projectLogMessageList, Total: total}, nil
+}

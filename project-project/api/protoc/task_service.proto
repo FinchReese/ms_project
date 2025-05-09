@@ -401,6 +401,30 @@ message CreateTaskCommentReq {
 message CreateTaskCommentResp {
 }
 
+message GetUserProjectLogListReq {
+  int64 memberId = 1;
+  int32 pageSize = 2;
+  int32 page = 3;
+}
+
+message ProjectLogMessage{
+  string Content  = 1;
+  string Remark       = 2;
+  string CreateTime    = 3;
+  string SourceCode    = 4;
+  int32 IsComment       = 5;
+  string ProjectCode   = 6;
+  string ProjectName   =7;
+  string MemberAvatar  =8;
+  string MemberName   =9;
+  string TaskName      = 10;
+}
+message GetUserProjectLogListResp {
+  repeated ProjectLogMessage list = 1;
+  int64 total = 2;
+}
+
+
 service TaskService {
     rpc GetTaskStages(GetTaskStagesReq) returns (GetTaskStagesResp) {}
     rpc GetTasksByStageCode(GetTasksByStageCodeReq) returns (GetTasksByStageCodeResp) {}
@@ -415,4 +439,5 @@ service TaskService {
     rpc SaveUploadFileInfo(SaveUploadFileInfoReq) returns (SaveUploadFileInfoResp) {}
     rpc GetTaskLinkFiles(GetTaskLinkFilesReq) returns (GetTaskLinkFilesResp) {}
     rpc CreateTaskComment(CreateTaskCommentReq) returns (CreateTaskCommentResp) {}
+    rpc GetUserProjectLogList(GetUserProjectLogListReq) returns (GetUserProjectLogListResp) {}
 }

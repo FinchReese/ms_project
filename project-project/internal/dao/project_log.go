@@ -56,3 +56,26 @@ func (pld *ProjectLogDAO) GetProjectLogListByTaskIdAndPage(ctx context.Context, 
 	}
 	return logs, total, nil
 }
+
+func (pld *ProjectLogDAO) GetProjectLogList(ctx context.Context, memberId int64, page int64, pageSize int64) ([]*data.ProjectLog, int64, error) {
+	var logs []*data.ProjectLog
+	var total int64
+	offset := (page - 1) * pageSize
+	session := pld.conn.Db.Session(&gorm.Session{Context: ctx})
+	err := session.Model(&data.ProjectLog{}).
+		Where("member_code = ?", memberId).
+		Offset(int(offset)).
+		Limit(int(pageSize)).
+		Order("create_time DESC").
+		Find(&logs).Error
+	if err != nil {
+		return nil, 0, err
+	}
+	err = session.Model(&data.ProjectLog{}).
+		Where("member_code = ?", memberId).
+		Count(&total).Error
+	if err != nil {
+		return nil, 0, err
+	}
+	return logs, total, nil
+}

@@ -93,6 +93,13 @@ func (td *TaskDAO) GetTaskById(ctx context.Context, taskId int64) (*data.Task, e
 	return &task, err
 }
 
+func (td *TaskDAO) GetTasksByIds(ctx context.Context, taskIds []int64) ([]*data.Task, error) {
+	session := td.conn.Db.Session(&gorm.Session{Context: ctx})
+	var tasks []*data.Task
+	err := session.Model(&data.Task{}).Where("id IN ?", taskIds).Find(&tasks).Error
+	return tasks, err
+}
+
 func (td *TaskDAO) ModifyTaskSort(ctx context.Context, taskId int64, sort int32, db *gorm.DB) error {
 	if db == nil {
 		return errors.New("db is nil")

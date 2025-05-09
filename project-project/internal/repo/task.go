@@ -26,6 +26,8 @@ type TaskRepo interface {
 	IncreaseSort(ctx context.Context, projectID int64, stageCode int, sort int, db *gorm.DB) error
 	// 根据id获取任务
 	GetTaskById(ctx context.Context, taskId int64) (*data.Task, error)
+	// 根据id列表获取任务
+	GetTasksByIds(ctx context.Context, taskIds []int64) ([]*data.Task, error)
 	// 修改指定任务的sort
 	ModifyTaskSort(ctx context.Context, taskId int64, sort int32, db *gorm.DB) error
 	// 指定assign_to、done字段筛选任务，再根据指定的页号和页大小返回任务列表

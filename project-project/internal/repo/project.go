@@ -48,4 +48,6 @@ type ProjectLogRepo interface {
 	GetAllProjectLogListByTaskId(ctx context.Context, taskId int64, isComment int) ([]*data.ProjectLog, int64, error)
 	// 根据指定任务id、页号、页大小获取项目日志列表
 	GetProjectLogListByTaskIdAndPage(ctx context.Context, taskId int64, isComment int, page int64, pageSize int64) ([]*data.ProjectLog, int64, error)
+	// 根据指定成员id、页号、页大小获取项目日志列表
+	GetProjectLogList(ctx context.Context, memberId int64, page int64, pageSize int64) ([]*data.ProjectLog, int64, error)
 }

@@ -544,3 +544,43 @@ func createComment(ctx *gin.Context) {
 	// 回复
 	ctx.JSON(http.StatusOK, result.Success(""))
 }
+
+func getUserProjectLogList(ctx *gin.Context) {
+	result := &common.Result{}
+	// 1. 解析请求消息
+	var req model_project.GetUserProjectLogListReq
+	err := ctx.ShouldBind(&req)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, result.Fail(http.StatusBadRequest, "参数错误"))
+		return
+	}
+	if req.Page == 0 {
+		req.Page = 1
+	}
+	if req.PageSize == 0 {
+		req.PageSize = 20
+	}
+	// 2. 调用gRPC服务获取用户项目日志列表
+	grpcCtx, cancel := context.WithTimeout(context.Background(), serviceTimeOut*time.Second)
+	defer cancel()
+	grpcReq := &task.GetUserProjectLogListReq{
+		MemberId: ctx.GetInt64("memberId"),
+		Page:     int32(req.Page),
+		PageSize: int32(req.PageSize),
+	}
+	grpcResp, err := TaskServiceClient.GetUserProjectLogList(grpcCtx, grpcReq)
+	if err != nil {
+		code, msg := errs.ParseGrpcError(err)
+		ctx.JSON(http.StatusInternalServerError, result.Fail(code, msg))
+		return
+	}
+	// 3. 组织回复消息
+	// 如果列表为空，则返回空列表
+	if len(grpcResp.List) == 0 || grpcResp.Total == 0 {
+		ctx.JSON(http.StatusOK, result.Success([]*model_project.ProjectLog{}))
+		return
+	}
+	var projectLogList []*model_project.ProjectLog
+	copier.Copy(&projectLogList, grpcResp.List)
+	ctx.JSON(http.StatusOK, result.Success(projectLogList))
+}
