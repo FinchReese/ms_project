@@ -251,7 +251,7 @@ func (ts *TaskService) SaveTask(ctx context.Context, req *task.SaveTaskReq) (*ta
 		ActionType:   "task",
 		ProjectCode:  projectID,
 		Icon:         "plus",
-		IsComment:    0,
+		IsComment:    model.NotCommentLog,
 		IsRobot:      0,
 	}
 	err = ts.projectLog.CreateProjectLog(ctx, projectLog)
@@ -432,6 +432,7 @@ func (ts *TaskService) GetTaskDetail(ctx context.Context, req *task.GetTaskDetai
 	taskInfo, err := ts.task.GetTaskById(ctx, taskCode)
 	if err != nil {
 		zap.L().Error("get task by id error", zap.Error(err))
+		return nil, errs.GrpcError(model.GetTaskError)
 	}
 	dispTask := taskInfo.ToTaskDisplay()
 	// 允许访问的条件是Private字段为1且在ms_task_member表中存在记录
@@ -747,4 +748,36 @@ func (ts *TaskService) GetTaskLinkFiles(ctx context.Context, req *task.GetTaskLi
 	var taskLinkFiles []*task.TaskLinkFile
 	copier.Copy(&taskLinkFiles, sourceLinkDisplayList)
 	return &task.GetTaskLinkFilesResp{List: taskLinkFiles}, nil
+}
+
+func (ts *TaskService) CreateTaskComment(ctx context.Context, req *task.CreateTaskCommentReq) (*task.CreateTaskCommentResp, error) {
+	// 解析task code
+	taskCodeStr, _ := encrypt.Decrypt(req.TaskCode, model.AESKey)
+	taskId, _ := strconv.ParseInt(taskCodeStr, 10, 64)
+	// 根据Id获取任务
+	taskInfo, err := ts.task.GetTaskById(ctx, taskId)
+	if err != nil {
+		zap.L().Error("get task by id error", zap.Error(err))
+		return nil, errs.GrpcError(model.GetTaskError)
+	}
+	pl := &data.ProjectLog{
+		MemberCode:   req.MemberId,
+		Content:      req.CommentContent,
+		Remark:       req.CommentContent,
+		Type:         "createComment",
+		CreateTime:   time.Now().UnixMilli(),
+		SourceCode:   taskId,
+		ActionType:   "task",
+		ToMemberCode: 0,
+		IsComment:    model.CommentLog,
+		ProjectCode:  taskInfo.ProjectCode,
+		Icon:         "plus",
+		IsRobot:      0,
+	}
+	err = ts.projectLog.CreateProjectLog(ctx, pl)
+	if err != nil {
+		zap.L().Error("create project log error", zap.Error(err))
+		return nil, errs.GrpcError(model.CreateProjectLogError)
+	}
+	return &task.CreateTaskCommentResp{}, nil
 }

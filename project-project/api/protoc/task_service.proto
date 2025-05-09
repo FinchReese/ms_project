@@ -392,6 +392,15 @@ message GetTaskLinkFilesResp {
   repeated TaskLinkFile list = 1;
 }
 
+message CreateTaskCommentReq {
+  int64 memberId = 1;
+  string taskCode = 2;
+  string commentContent = 3;
+}
+
+message CreateTaskCommentResp {
+}
+
 service TaskService {
     rpc GetTaskStages(GetTaskStagesReq) returns (GetTaskStagesResp) {}
     rpc GetTasksByStageCode(GetTasksByStageCodeReq) returns (GetTasksByStageCodeResp) {}
@@ -405,4 +414,5 @@ service TaskService {
     rpc GetTaskWorkTimeList(GetTaskWorkTimeListReq) returns (GetTaskWorkTimeListResp) {}
     rpc SaveUploadFileInfo(SaveUploadFileInfoReq) returns (SaveUploadFileInfoResp) {}
     rpc GetTaskLinkFiles(GetTaskLinkFilesReq) returns (GetTaskLinkFilesResp) {}
+    rpc CreateTaskComment(CreateTaskCommentReq) returns (CreateTaskCommentResp) {}
 }

@@ -53,3 +53,9 @@ const (
 const (
 	LinkTypeTask = "task"
 )
+
+// log type
+const (
+	NotCommentLog = 0 // 非评论日志
+	CommentLog    = 1 // 评论日志
+)

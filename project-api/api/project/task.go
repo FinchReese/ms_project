@@ -517,3 +517,30 @@ func getTaskLinkFiles(ctx *gin.Context) {
 	copier.Copy(&taskLinkFiles, grpcResp.List)
 	ctx.JSON(http.StatusOK, result.Success(taskLinkFiles))
 }
+
+func createComment(ctx *gin.Context) {
+	result := &common.Result{}
+	// 解析请求消息
+	var req model_project.CreateCommentReq
+	err := ctx.ShouldBind(&req)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, result.Fail(http.StatusBadRequest, "参数错误"))
+		return
+	}
+	// 调用grpc接口实现功能
+	grpcCtx, cancel := context.WithTimeout(context.Background(), serviceTimeOut*time.Second)
+	defer cancel()
+	grpcReq := &task.CreateTaskCommentReq{
+		TaskCode:       req.TaskCode,
+		MemberId:       ctx.GetInt64("memberId"),
+		CommentContent: req.Comment,
+	}
+	_, err = TaskServiceClient.CreateTaskComment(grpcCtx, grpcReq)
+	if err != nil {
+		code, msg := errs.ParseGrpcError(err)
+		ctx.JSON(http.StatusInternalServerError, result.Fail(code, msg))
+		return
+	}
+	// 回复
+	ctx.JSON(http.StatusOK, result.Success(""))
+}
