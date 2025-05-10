@@ -14,6 +14,7 @@ import (
 	"test.com/project-project/config"
 	"test.com/project-project/internal/dao"
 	"test.com/project-project/internal/database/trans"
+	"test.com/project-project/internal/domain"
 	"test.com/project-project/pkg/service/project_service_v1"
 	"test.com/project-project/pkg/service/task_service_v1"
 )
@@ -72,6 +73,8 @@ func RegisterGrpc() *grpc.Server {
 		dao.NewFileDao(),
 		dao.NewSourceLinkDao(),
 		trans.NewTransaction(),
+		domain.NewUserDomain(),
+		domain.NewTaskWorkTimeDomain(dao.NewTaskWorkTimeDAO(), domain.NewUserDomain()),
 	)
 	task.RegisterTaskServiceServer(s, taskService)
 	lis, err := net.Listen("tcp", config.AppConf.GrpcConf.Addr)

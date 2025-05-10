@@ -22,30 +22,33 @@ import (
 
 type TaskService struct {
 	task.UnimplementedTaskServiceServer
-	taskStage    repo.TaskStageRepo
-	task         repo.TaskRepo
-	taskMember   repo.TaskMemberRepo
-	project      repo.ProjectRepo
-	tran         *trans.TransactionImpl
-	projectLog   repo.ProjectLogRepo
-	taskWorkTime repo.TaskWorkTimeRepo
-	file         repo.FileRepo
-	sourceLink   repo.SourceLinkRepo
-	userDomain   *domain.UserDomain
+	taskStage          repo.TaskStageRepo
+	task               repo.TaskRepo
+	taskMember         repo.TaskMemberRepo
+	project            repo.ProjectRepo
+	tran               *trans.TransactionImpl
+	projectLog         repo.ProjectLogRepo
+	taskWorkTime       repo.TaskWorkTimeRepo
+	file               repo.FileRepo
+	sourceLink         repo.SourceLinkRepo
+	userDomain         *domain.UserDomain
+	taskWorkTimeDomain *domain.TaskWorkTimeDomain
 }
 
-func NewTaskService(ts repo.TaskStageRepo, t repo.TaskRepo, tm repo.TaskMemberRepo, p repo.ProjectRepo, pl repo.ProjectLogRepo, twt repo.TaskWorkTimeRepo, f repo.FileRepo, sl repo.SourceLinkRepo, tran *trans.TransactionImpl, userDomain *domain.UserDomain) *TaskService {
+func NewTaskService(ts repo.TaskStageRepo, t repo.TaskRepo, tm repo.TaskMemberRepo, p repo.ProjectRepo, pl repo.ProjectLogRepo, twt repo.TaskWorkTimeRepo, f repo.FileRepo,
+	sl repo.SourceLinkRepo, tran *trans.TransactionImpl, userDomain *domain.UserDomain, taskWorkTimeDomain *domain.TaskWorkTimeDomain) *TaskService {
 	return &TaskService{
-		taskStage:    ts,
-		task:         t,
-		taskMember:   tm,
-		project:      p,
-		tran:         tran,
-		projectLog:   pl,
-		taskWorkTime: twt,
-		file:         f,
-		sourceLink:   sl,
-		userDomain:   userDomain,
+		taskStage:          ts,
+		task:               t,
+		taskMember:         tm,
+		project:            p,
+		tran:               tran,
+		projectLog:         pl,
+		taskWorkTime:       twt,
+		file:               f,
+		sourceLink:         sl,
+		userDomain:         userDomain,
+		taskWorkTimeDomain: taskWorkTimeDomain,
 	}
 }
 
@@ -565,36 +568,14 @@ func (ts *TaskService) SaveTaskWorkTime(ctx context.Context, req *task.SaveTaskW
 }
 
 func (ts *TaskService) GetTaskWorkTimeList(ctx context.Context, req *task.GetTaskWorkTimeListReq) (*task.GetTaskWorkTimeListResp, error) {
+	// 解析task code
 	taskCodeStr, _ := encrypt.Decrypt(req.TaskCode, model.AESKey)
 	taskCode, _ := strconv.ParseInt(taskCodeStr, 10, 64)
-	taskWorkTimeList, err := ts.taskWorkTime.GetTaskWorkTimeList(ctx, taskCode)
+	// 获取任务工时列表
+	taskWorkTimeDisplayList, err := ts.taskWorkTimeDomain.GetTaskWorkTimeList(ctx, taskCode)
 	if err != nil {
 		zap.L().Error("get task work time list error", zap.Error(err))
 		return nil, errs.GrpcError(model.GetTaskWorkTimeListError)
-	}
-	if len(taskWorkTimeList) == 0 {
-		return &task.GetTaskWorkTimeListResp{List: []*task.TaskWorkTime{}}, nil
-	}
-	// 收集任务工时的成员id，统一查找成员信息
-	memberIdList := []int64{}
-	for _, taskWorkTime := range taskWorkTimeList {
-		memberIdList = append(memberIdList, taskWorkTime.MemberCode)
-	}
-	memberIdToInfo, err := ts.userDomain.GetIdToMemberMap(ctx, memberIdList)
-	if err != nil {
-		zap.L().Error("get id to member map error", zap.Error(err))
-		return nil, errs.GrpcError(model.GetIdToMemberMapError)
-	}
-
-	taskWorkTimeDisplayList := []*data.TaskWorkTimeDisplay{}
-	for _, taskWorkTime := range taskWorkTimeList {
-		taskWorkTimeDisplay := taskWorkTime.ToDisplay()
-		memberInfo := memberIdToInfo[taskWorkTime.MemberCode]
-		taskWorkTimeDisplay.Member.Name = memberInfo.Name
-		taskWorkTimeDisplay.Member.Avatar = memberInfo.Avatar
-		taskWorkTimeDisplay.Member.Id = memberInfo.Id
-		taskWorkTimeDisplay.Member.Code, _ = encrypt.EncryptInt64(memberInfo.Id, model.AESKey)
-		taskWorkTimeDisplayList = append(taskWorkTimeDisplayList, taskWorkTimeDisplay)
 	}
 	// 组织回复消息
 	var taskWorkTimeListResp []*task.TaskWorkTime
