@@ -61,4 +61,4 @@ var (
 	GetSourceLinkListError         = errs.NewError(2052, "获取资源关联列表出错")
 	GetFileListByIdsError          = errs.NewError(2053, "根据文件id列表获取文件列表出错")
 	GetIdToMemberMapError          = errs.NewError(2054, "获取id到成员映射出错")
-)
+	GetProjectAuthListError        = errs.NewError(2055, "获取项目权限列表出错")

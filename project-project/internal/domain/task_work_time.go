@@ -23,11 +23,11 @@ func NewTaskWorkTimeDomain(taskWorkTimeRepo repo.TaskWorkTimeRepo, userDomain *U
 	}
 }
 
-func (t *TaskWorkTimeDomain) GetTaskWorkTimeList(ctx context.Context, taskId int64) ([]*data.TaskWorkTimeDisplay, error) {
+func (t *TaskWorkTimeDomain) GetTaskWorkTimeList(ctx context.Context, taskId int64) ([]*data.TaskWorkTimeDisplay, *errs.BError) {
 	taskWorkTimeList, err := t.taskWorkTime.GetTaskWorkTimeList(ctx, taskId)
 	if err != nil {
 		zap.L().Error("get task work time list error", zap.Error(err))
-		return nil, errs.GrpcError(model.GetTaskWorkTimeListError)
+		return nil, model.GetTaskWorkTimeListError
 	}
 	if len(taskWorkTimeList) == 0 {
 		return []*data.TaskWorkTimeDisplay{}, nil
@@ -37,10 +37,10 @@ func (t *TaskWorkTimeDomain) GetTaskWorkTimeList(ctx context.Context, taskId int
 	for _, taskWorkTime := range taskWorkTimeList {
 		memberIdList = append(memberIdList, taskWorkTime.MemberCode)
 	}
-	memberIdToInfo, err := t.userDomain.GetIdToMemberMap(ctx, memberIdList)
-	if err != nil {
-		zap.L().Error("get id to member map error", zap.Error(err))
-		return nil, errs.GrpcError(model.GetIdToMemberMapError)
+	memberIdToInfo, bErr := t.userDomain.GetIdToMemberMap(ctx, memberIdList)
+	if bErr != nil {
+		zap.L().Error("get id to member map error", zap.Error(errs.GrpcError(bErr)))
+		return nil, bErr
 	}
 
 	taskWorkTimeDisplayList := []*data.TaskWorkTimeDisplay{}
