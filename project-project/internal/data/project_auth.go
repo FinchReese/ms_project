@@ -41,7 +41,7 @@ type ProjectAuthDisplay struct {
 func (pa *ProjectAuth) ToDisplay() *ProjectAuthDisplay {
 	p := &ProjectAuthDisplay{}
 	copier.Copy(p, pa)
-	p.OrganizationCode, _ = encrypt.EncryptInt64.EncryptNoErr(pa.OrganizationCode, model.AESKey)
+	p.OrganizationCode, _ = encrypt.EncryptInt64(pa.OrganizationCode, model.AESKey)
 	p.CreateAt = time_format.ConvertMsecToString(pa.CreateAt)
 	if pa.Type == "admin" || pa.Type == "member" {
 		//不能删除

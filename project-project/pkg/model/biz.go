@@ -59,3 +59,23 @@ const (
 	NotCommentLog = 0 // 非评论日志
 	CommentLog    = 1 // 评论日志
 )
+
+// 是否能删除
+const (
+	CanDelete    = 1 // 能删除
+	CanNotDelete = 0 // 不能删除
+)
+
+// 账号状态
+const (
+	AccountStatusDisabled = 0 // 禁用
+	AccountStatusEnabled  = 1 // 启用
+)
+
+// 查询成员账号类型
+const (
+	QueryMemberAccountTypeEnableAccount      = 1 // 使用中
+	QueryMemberAccountTypeNullDepartmentCode = 2 // 部门id为空
+	QueryMemberAccountTypeDisableAccount     = 3 // 禁用
+	QueryMemberAccountTypeByDepartmentCode   = 4 // 使用中并根据部门id查询
+)
