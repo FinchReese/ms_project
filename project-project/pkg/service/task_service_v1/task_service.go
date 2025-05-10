@@ -14,6 +14,7 @@ import (
 	"test.com/project-project/internal/data"
 	"test.com/project-project/internal/database/gorm"
 	"test.com/project-project/internal/database/trans"
+	"test.com/project-project/internal/domain"
 	"test.com/project-project/internal/repo"
 	"test.com/project-project/internal/rpc"
 	"test.com/project-project/pkg/model"
@@ -30,9 +31,10 @@ type TaskService struct {
 	taskWorkTime repo.TaskWorkTimeRepo
 	file         repo.FileRepo
 	sourceLink   repo.SourceLinkRepo
+	userDomain   *domain.UserDomain
 }
 
-func NewTaskService(ts repo.TaskStageRepo, t repo.TaskRepo, tm repo.TaskMemberRepo, p repo.ProjectRepo, pl repo.ProjectLogRepo, twt repo.TaskWorkTimeRepo, f repo.FileRepo, sl repo.SourceLinkRepo, tran *trans.TransactionImpl) *TaskService {
+func NewTaskService(ts repo.TaskStageRepo, t repo.TaskRepo, tm repo.TaskMemberRepo, p repo.ProjectRepo, pl repo.ProjectLogRepo, twt repo.TaskWorkTimeRepo, f repo.FileRepo, sl repo.SourceLinkRepo, tran *trans.TransactionImpl, userDomain *domain.UserDomain) *TaskService {
 	return &TaskService{
 		taskStage:    ts,
 		task:         t,
@@ -43,6 +45,7 @@ func NewTaskService(ts repo.TaskStageRepo, t repo.TaskRepo, tm repo.TaskMemberRe
 		taskWorkTime: twt,
 		file:         f,
 		sourceLink:   sl,
+		userDomain:   userDomain,
 	}
 }
 
@@ -113,18 +116,10 @@ func (ts *TaskService) GetTasksByStageCode(ctx context.Context, in *task.GetTask
 		memIdList = append(memIdList, memId)
 		dispTaskList = append(dispTaskList, dispTask)
 	}
-
-	// 向login服务一次性查询所有成员信息，提升性能
-	members, err := rpc.LoginServiceClient.GetMembersByIds(ctx, &login.GetMembersByIdsReq{
-		MemberIds: memIdList,
-	})
+	memIdToInfo, err := ts.userDomain.GetIdToMemberMap(ctx, memIdList)
 	if err != nil {
-		zap.L().Error("get members info error", zap.Error(err))
-		return nil, errs.GrpcError(model.GetMembersInfoError)
-	}
-	memIdToInfo := make(map[int64]*login.MemberMessage)
-	for _, member := range members.List {
-		memIdToInfo[member.Id] = member
+		zap.L().Error("get id to member map error", zap.Error(err))
+		return nil, errs.GrpcError(model.GetIdToMemberMapError)
 	}
 	for _, dispTask := range dispTaskList {
 		assignToStr, _ := encrypt.Decrypt(dispTask.AssignTo, model.AESKey)
@@ -391,17 +386,10 @@ func (ts *TaskService) GetTaskList(ctx context.Context, req *task.GetTaskListReq
 		projectIdList = append(projectIdList, task.ProjectCode)
 		memberIdList = append(memberIdList, task.CreateBy)
 	}
-	// 向login服务一次性查询所有成员信息，提升性能
-	members, err := rpc.LoginServiceClient.GetMembersByIds(ctx, &login.GetMembersByIdsReq{
-		MemberIds: memberIdList,
-	})
+	memIdToInfo, err := ts.userDomain.GetIdToMemberMap(ctx, memberIdList)
 	if err != nil {
-		zap.L().Error("get members info error", zap.Error(err))
-		return nil, errs.GrpcError(model.GetMembersInfoError)
-	}
-	memIdToInfo := make(map[int64]*login.MemberMessage)
-	for _, member := range members.List {
-		memIdToInfo[member.Id] = member
+		zap.L().Error("get id to member map error", zap.Error(err))
+		return nil, errs.GrpcError(model.GetIdToMemberMapError)
 	}
 	// 向一次性查询所有项目信息，提升性能
 	projects, err := ts.project.GetProjectsByIds(ctx, projectIdList)
@@ -489,20 +477,13 @@ func (ts *TaskService) GetTaskMemberList(ctx context.Context, req *task.GetTaskM
 	for _, taskMember := range taskMemberList {
 		memberIdList = append(memberIdList, taskMember.MemberCode)
 	}
-	members, err := rpc.LoginServiceClient.GetMembersByIds(ctx, &login.GetMembersByIdsReq{
-		MemberIds: memberIdList,
-	})
+	memberIdToInfo, err := ts.userDomain.GetIdToMemberMap(ctx, memberIdList)
 	if err != nil {
-		zap.L().Error("get members info error", zap.Error(err))
-		return nil, errs.GrpcError(model.GetMembersInfoError)
-	}
-	memberIdToInfo := make(map[int64]*login.MemberMessage)
-	for _, member := range members.List {
-		memberIdToInfo[member.Id] = member
+		zap.L().Error("get id to member map error", zap.Error(err))
+		return nil, errs.GrpcError(model.GetIdToMemberMapError)
 	}
 
 	taskMemberMessageList := []*task.TaskMember{}
-
 	for _, taskMember := range taskMemberList {
 		code, _ := encrypt.EncryptInt64(taskMember.MemberCode, model.AESKey)
 		taskMemberMessage := &task.TaskMember{
@@ -543,16 +524,10 @@ func (ts *TaskService) GetTaskLogList(ctx context.Context, req *task.GetTaskLogL
 	for _, log := range logList {
 		memberIdList = append(memberIdList, log.MemberCode)
 	}
-	members, err := rpc.LoginServiceClient.GetMembersByIds(ctx, &login.GetMembersByIdsReq{
-		MemberIds: memberIdList,
-	})
+	memberIdToInfo, err := ts.userDomain.GetIdToMemberMap(ctx, memberIdList)
 	if err != nil {
-		zap.L().Error("get members info error", zap.Error(err))
-		return nil, errs.GrpcError(model.GetMembersInfoError)
-	}
-	memberIdToInfo := make(map[int64]*login.MemberMessage)
-	for _, member := range members.List {
-		memberIdToInfo[member.Id] = member
+		zap.L().Error("get id to member map error", zap.Error(err))
+		return nil, errs.GrpcError(model.GetIdToMemberMapError)
 	}
 
 	dispLogList := []*data.ProjectLogDisplay{}
@@ -605,16 +580,10 @@ func (ts *TaskService) GetTaskWorkTimeList(ctx context.Context, req *task.GetTas
 	for _, taskWorkTime := range taskWorkTimeList {
 		memberIdList = append(memberIdList, taskWorkTime.MemberCode)
 	}
-	members, err := rpc.LoginServiceClient.GetMembersByIds(ctx, &login.GetMembersByIdsReq{
-		MemberIds: memberIdList,
-	})
+	memberIdToInfo, err := ts.userDomain.GetIdToMemberMap(ctx, memberIdList)
 	if err != nil {
-		zap.L().Error("get members info error", zap.Error(err))
-		return nil, errs.GrpcError(model.GetMembersInfoError)
-	}
-	memberIdToInfo := make(map[int64]*login.MemberMessage)
-	for _, member := range members.List {
-		memberIdToInfo[member.Id] = member
+		zap.L().Error("get id to member map error", zap.Error(err))
+		return nil, errs.GrpcError(model.GetIdToMemberMapError)
 	}
 
 	taskWorkTimeDisplayList := []*data.TaskWorkTimeDisplay{}
