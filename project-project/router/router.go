@@ -9,12 +9,14 @@ import (
 	"google.golang.org/grpc"
 	interceptor "test.com/project-common/Interceptor"
 	"test.com/project-common/service_discover"
+	"test.com/project-grpc/account"
 	"test.com/project-grpc/project"
 	"test.com/project-grpc/task"
 	"test.com/project-project/config"
 	"test.com/project-project/internal/dao"
 	"test.com/project-project/internal/database/trans"
 	"test.com/project-project/internal/domain"
+	"test.com/project-project/pkg/service/account_service_v1"
 	"test.com/project-project/pkg/service/project_service_v1"
 	"test.com/project-project/pkg/service/task_service_v1"
 )
@@ -77,6 +79,13 @@ func RegisterGrpc() *grpc.Server {
 		domain.NewTaskWorkTimeDomain(dao.NewTaskWorkTimeDAO(), domain.NewUserDomain()),
 	)
 	task.RegisterTaskServiceServer(s, taskService)
+	// 注册account服务
+	accountService := account_service_v1.NewAccountService(
+		domain.NewMemberAccountDomain(dao.NewMemberAccountDAO(), domain.NewUserDomain(), domain.NewDepartmentDomain(dao.NewDepartmentDAO())),
+		domain.NewProjectAuthDomain(dao.NewProjectAuthDAO()),
+		domain.NewUserDomain(),
+	)
+	account.RegisterAccountServiceServer(s, accountService)
 	lis, err := net.Listen("tcp", config.AppConf.GrpcConf.Addr)
 	if err != nil {
 		log.Println("cannot listen")

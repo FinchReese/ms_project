@@ -34,3 +34,30 @@ func (u *UserDomain) GetIdToMemberMap(ctx context.Context, userIdList []int64) (
 	}
 	return idToMemberMap, nil
 }
+
+func (u *UserDomain) GetMemberInfo(ctx context.Context, memberCode int64) (*login.MemberMessage, *errs.BError) {
+	member, err := u.loginServiceClient.GetMemberById(ctx, &login.GetMemberByIdReq{
+		MemberId: memberCode,
+	})
+	if err != nil {
+		zap.L().Error("get member account error", zap.Error(err))
+		return nil, model.GetMemberByIdError
+	}
+	return member, nil
+}
+
+// GetOrganizationCodeByMemberId 根据member id查询organization code
+func (u *UserDomain) GetOrganizationCodeByMemberId(ctx context.Context, memberId int64) (int64, *errs.BError) {
+	// 调用login服务的RPC接口查询organization信息
+	resp, err := u.loginServiceClient.GetOrganizationList(ctx, &login.GetOrganizationListReq{
+		MemberId: memberId,
+	})
+	if err != nil {
+		zap.L().Error("get organization by member id error", zap.Error(err))
+		return 0, model.GetOrganizationListError
+	}
+	if len(resp.OrgList) == 0 {
+		return 0, nil
+	}
+	return resp.OrgList[0].Id, nil
+}

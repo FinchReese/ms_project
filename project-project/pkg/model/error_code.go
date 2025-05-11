@@ -62,3 +62,5 @@ var (
 	GetFileListByIdsError          = errs.NewError(2053, "根据文件id列表获取文件列表出错")
 	GetIdToMemberMapError          = errs.NewError(2054, "获取id到成员映射出错")
 	GetProjectAuthListError        = errs.NewError(2055, "获取项目权限列表出错")
+	GetMemberAccountListError      = errs.NewError(2056, "获取成员账号列表出错")
+	GetDepartmentByIdError         = errs.NewError(2057, "获取部门信息出错")

@@ -21,6 +21,16 @@ func EncryptInt64(id int64, keyText string) (cipherStr string, err error) {
 	idStr := strconv.FormatInt(id, 10)
 	return Encrypt(idStr, keyText)
 }
+
+func DecryptToInt64(cipherStr string, keyText string) (res int64, err error) {
+	str, err := Decrypt(cipherStr, keyText)
+	if err != nil {
+		return 0, err
+	}
+	res, err = strconv.ParseInt(str, 10, 64)
+	return
+}
+
 func Encrypt(plainText string, keyText string) (cipherStr string, err error) {
 	// 转换成字节数据, 方便加密
 	plainByte := []byte(plainText)

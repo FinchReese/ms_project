@@ -119,9 +119,9 @@ func (ts *TaskService) GetTasksByStageCode(ctx context.Context, in *task.GetTask
 		memIdList = append(memIdList, memId)
 		dispTaskList = append(dispTaskList, dispTask)
 	}
-	memIdToInfo, err := ts.userDomain.GetIdToMemberMap(ctx, memIdList)
-	if err != nil {
-		zap.L().Error("get id to member map error", zap.Error(err))
+	memIdToInfo, bErr := ts.userDomain.GetIdToMemberMap(ctx, memIdList)
+	if bErr != nil {
+		zap.L().Error("get id to member map error", zap.Error(errs.GrpcError(bErr)))
 		return nil, errs.GrpcError(model.GetIdToMemberMapError)
 	}
 	for _, dispTask := range dispTaskList {
@@ -389,9 +389,9 @@ func (ts *TaskService) GetTaskList(ctx context.Context, req *task.GetTaskListReq
 		projectIdList = append(projectIdList, task.ProjectCode)
 		memberIdList = append(memberIdList, task.CreateBy)
 	}
-	memIdToInfo, err := ts.userDomain.GetIdToMemberMap(ctx, memberIdList)
-	if err != nil {
-		zap.L().Error("get id to member map error", zap.Error(err))
+	memIdToInfo, bErr := ts.userDomain.GetIdToMemberMap(ctx, memberIdList)
+	if bErr != nil {
+		zap.L().Error("get id to member map error", zap.Error(errs.GrpcError(bErr)))
 		return nil, errs.GrpcError(model.GetIdToMemberMapError)
 	}
 	// 向一次性查询所有项目信息，提升性能
@@ -480,9 +480,9 @@ func (ts *TaskService) GetTaskMemberList(ctx context.Context, req *task.GetTaskM
 	for _, taskMember := range taskMemberList {
 		memberIdList = append(memberIdList, taskMember.MemberCode)
 	}
-	memberIdToInfo, err := ts.userDomain.GetIdToMemberMap(ctx, memberIdList)
-	if err != nil {
-		zap.L().Error("get id to member map error", zap.Error(err))
+	memberIdToInfo, bErr := ts.userDomain.GetIdToMemberMap(ctx, memberIdList)
+	if bErr != nil {
+		zap.L().Error("get id to member map error", zap.Error(errs.GrpcError(bErr)))
 		return nil, errs.GrpcError(model.GetIdToMemberMapError)
 	}
 
@@ -527,9 +527,9 @@ func (ts *TaskService) GetTaskLogList(ctx context.Context, req *task.GetTaskLogL
 	for _, log := range logList {
 		memberIdList = append(memberIdList, log.MemberCode)
 	}
-	memberIdToInfo, err := ts.userDomain.GetIdToMemberMap(ctx, memberIdList)
-	if err != nil {
-		zap.L().Error("get id to member map error", zap.Error(err))
+	memberIdToInfo, bErr := ts.userDomain.GetIdToMemberMap(ctx, memberIdList)
+	if bErr != nil {
+		zap.L().Error("get id to member map error", zap.Error(errs.GrpcError(bErr)))
 		return nil, errs.GrpcError(model.GetIdToMemberMapError)
 	}
 
@@ -574,7 +574,7 @@ func (ts *TaskService) GetTaskWorkTimeList(ctx context.Context, req *task.GetTas
 	// 获取任务工时列表
 	taskWorkTimeDisplayList, err := ts.taskWorkTimeDomain.GetTaskWorkTimeList(ctx, taskCode)
 	if err != nil {
-		zap.L().Error("get task work time list error", zap.Error(err))
+		zap.L().Error("get task work time list error", zap.Error(errs.GrpcError(err)))
 		return nil, errs.GrpcError(model.GetTaskWorkTimeListError)
 	}
 	// 组织回复消息
