@@ -7,12 +7,14 @@ import (
 	"google.golang.org/grpc/resolver"
 	"test.com/project-api/config"
 	"test.com/project-common/service_discover"
+	"test.com/project-grpc/account"
 	"test.com/project-grpc/project"
 	"test.com/project-grpc/task"
 )
 
 var projectServiceClient project.ProjectServiceClient
 var TaskServiceClient task.TaskServiceClient
+var AccountServiceClient account.AccountServiceClient
 
 func InitProjectRpc() {
 	resolver.Register(service_discover.NewEtcdBuilder(config.AppConf.EtcdConf.Addrs))
@@ -22,4 +24,5 @@ func InitProjectRpc() {
 	}
 	projectServiceClient = project.NewProjectServiceClient(conn)
 	TaskServiceClient = task.NewTaskServiceClient(conn)
+	AccountServiceClient = account.NewAccountServiceClient(conn)
 }

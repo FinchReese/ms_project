@@ -64,3 +64,5 @@ var (
 	GetProjectAuthListError        = errs.NewError(2055, "获取项目权限列表出错")
 	GetMemberAccountListError      = errs.NewError(2056, "获取成员账号列表出错")
 	GetDepartmentByIdError         = errs.NewError(2057, "获取部门信息出错")
+	GetOrganizationListError       = errs.NewError(2058, "获取组织列表出错")
+)

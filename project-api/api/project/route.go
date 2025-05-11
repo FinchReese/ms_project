@@ -37,6 +37,7 @@ func (*ProjectRouter) Register(r *gin.Engine) {
 	projectGroup.POST("/task/taskSources", getTaskLinkFiles)
 	projectGroup.POST("/task/createComment", createComment)
 	projectGroup.POST("/project/getLogBySelfProject", getUserProjectLogList)
+	projectGroup.POST("/account", GetAccountList)
 }
 
 func init() {
