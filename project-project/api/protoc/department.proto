@@ -1,0 +1,30 @@
+syntax = "proto3";
+package department.service.v1;
+option go_package = "../../../../project-grpc/department";
+
+message GetDepartmentListReq {
+    int64 memberId = 1;
+    string pcode = 2;
+    int64 page = 3;
+    int64 pageSize = 4;
+}
+
+
+message DepartmentMessage{
+	int64 id = 1;
+	string code = 2;
+	string OrganizationCode = 3;
+	string Name = 4;
+	string createTime = 5;
+	string pcode = 6;
+	string path = 7;
+  }
+
+  message GetDepartmentListResp {
+    int64 total = 1;
+    repeated DepartmentMessage departments = 2;
+  }
+
+  service DepartmentService {
+	rpc GetDepartmentList(GetDepartmentListReq) returns (GetDepartmentListResp) {}
+  }

@@ -26,3 +26,16 @@ func (d *DepartmentDomain) GetDepartmentInfo(ctx context.Context, departmentCode
 	}
 	return department, nil
 }
+
+func (d *DepartmentDomain) GetDepartmentList(ctx context.Context, organizationCode int64, pcode int64, page int, pageSize int) ([]*data.DepartmentDisplay, int64, *errs.BError) {
+	departments, total, err := d.departmentRepo.GetDepartmentList(ctx, organizationCode, pcode, page, pageSize)
+	if err != nil {
+		zap.L().Error("get department list error", zap.Error(err))
+		return nil, 0, model.GetDepartmentListError
+	}
+	departmentDisplays := make([]*data.DepartmentDisplay, 0, total)
+	for _, department := range departments {
+		departmentDisplays = append(departmentDisplays, department.ToDisplay())
+	}
+	return departmentDisplays, total, nil
+}

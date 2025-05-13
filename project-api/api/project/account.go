@@ -11,7 +11,7 @@ import (
 	"test.com/project-grpc/account"
 )
 
-func GetAccountList(ctx *gin.Context) {
+func getAccountList(ctx *gin.Context) {
 	// 解析请求消息
 	result := &common.Result{}
 	//1. 获取参数

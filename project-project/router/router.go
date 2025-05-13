@@ -10,6 +10,7 @@ import (
 	interceptor "test.com/project-common/Interceptor"
 	"test.com/project-common/service_discover"
 	"test.com/project-grpc/account"
+	"test.com/project-grpc/department"
 	"test.com/project-grpc/project"
 	"test.com/project-grpc/task"
 	"test.com/project-project/config"
@@ -17,6 +18,7 @@ import (
 	"test.com/project-project/internal/database/trans"
 	"test.com/project-project/internal/domain"
 	"test.com/project-project/pkg/service/account_service_v1"
+	"test.com/project-project/pkg/service/department_service_v1"
 	"test.com/project-project/pkg/service/project_service_v1"
 	"test.com/project-project/pkg/service/task_service_v1"
 )
@@ -86,6 +88,12 @@ func RegisterGrpc() *grpc.Server {
 		domain.NewUserDomain(),
 	)
 	account.RegisterAccountServiceServer(s, accountService)
+	// 注册department服务
+	departmentService := department_service_v1.NewDepartmentService(
+		domain.NewDepartmentDomain(dao.NewDepartmentDAO()),
+		domain.NewUserDomain(),
+	)
+	department.RegisterDepartmentServiceServer(s, departmentService)
 	lis, err := net.Listen("tcp", config.AppConf.GrpcConf.Addr)
 	if err != nil {
 		log.Println("cannot listen")

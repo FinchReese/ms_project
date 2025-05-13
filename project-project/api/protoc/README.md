@@ -13,6 +13,11 @@ account服务命令：
 protoc --go_out=../../../project-grpc/account --go_opt=paths=source_relative --go-grpc_out=../../../project-grpc/account --go-grpc_opt=paths=source_relative  account_service.proto
 ```
 
+department服务命令：
+```
+protoc --go_out=../../../project-grpc/department --go_opt=paths=source_relative --go-grpc_out=../../../project-grpc/department --go-grpc_opt=paths=source_relative  department.proto
+```
+
 
 2、把gen目录生成的go文件拷贝到project-grpc\project的对应目录下，修改两个go文件的package（不修改package为gen），后续GRPC服务器和客户端都使用这个目录下的go文件。<br/>
 **补充**：为什么不直接把生成的go文件放在project-grpc\user目录下，而是先放在project-user\api\protoc\gen目录下，再拷贝？<br/>

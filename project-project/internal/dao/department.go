@@ -24,3 +24,24 @@ func (d *DepartmentDAO) GetDepartmentInfo(ctx context.Context, departmentCode in
 	err := session.Model(&data.Department{}).Where("id = ?", departmentCode).First(&department).Error
 	return &department, err
 }
+
+func (d *DepartmentDAO) GetDepartmentList(ctx context.Context, organizationCode int64, pcode int64, page int, pageSize int) ([]*data.Department, int64, error) {
+	session := d.conn.Db.Session(&gorm.Session{Context: ctx})
+	var departments []*data.Department
+	var total int64
+	var offset int = (page - 1) * pageSize
+
+	session = session.Model(&data.Department{}).Where("organization_code = ?", organizationCode)
+	if pcode > 0 {
+		session = session.Where("pcode = ?", pcode)
+	}
+	err := session.Limit(pageSize).Offset(offset).Find(&departments).Error
+	if err != nil {
+		return nil, 0, err
+	}
+	err = session.Count(&total).Error
+	if err != nil {
+		return nil, 0, err
+	}
+	return departments, total, nil
+}
