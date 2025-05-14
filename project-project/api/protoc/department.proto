@@ -10,7 +10,7 @@ message GetDepartmentListReq {
 }
 
 
-message DepartmentMessage{
+message DepartmentMessage {
 	int64 id = 1;
 	string code = 2;
 	string OrganizationCode = 3;
@@ -20,11 +20,24 @@ message DepartmentMessage{
 	string path = 7;
   }
 
-  message GetDepartmentListResp {
-    int64 total = 1;
-    repeated DepartmentMessage departments = 2;
-  }
+message GetDepartmentListResp {
+  int64 total = 1;
+  repeated DepartmentMessage departments = 2;
+}
 
-  service DepartmentService {
-	rpc GetDepartmentList(GetDepartmentListReq) returns (GetDepartmentListResp) {}
-  }
+message AddDepartmentReq {
+  int64 memberId = 1;
+  string pcode = 2;
+  string name = 3;
+  string departmentCode = 4;
+}
+
+message GetDepartmentByIdReq {
+  string departmentId = 1;
+}
+
+service DepartmentService {
+  rpc GetDepartmentList(GetDepartmentListReq) returns (GetDepartmentListResp) {}
+  rpc AddDepartment(AddDepartmentReq) returns (DepartmentMessage) {}
+  rpc GetDepartmentById(GetDepartmentByIdReq) returns (DepartmentMessage) {}
+}

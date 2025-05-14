@@ -23,6 +23,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DepartmentServiceClient interface {
 	GetDepartmentList(ctx context.Context, in *GetDepartmentListReq, opts ...grpc.CallOption) (*GetDepartmentListResp, error)
+	AddDepartment(ctx context.Context, in *AddDepartmentReq, opts ...grpc.CallOption) (*DepartmentMessage, error)
+	GetDepartmentById(ctx context.Context, in *GetDepartmentByIdReq, opts ...grpc.CallOption) (*DepartmentMessage, error)
 }
 
 type departmentServiceClient struct {
@@ -42,11 +44,31 @@ func (c *departmentServiceClient) GetDepartmentList(ctx context.Context, in *Get
 	return out, nil
 }
 
+func (c *departmentServiceClient) AddDepartment(ctx context.Context, in *AddDepartmentReq, opts ...grpc.CallOption) (*DepartmentMessage, error) {
+	out := new(DepartmentMessage)
+	err := c.cc.Invoke(ctx, "/department.service.v1.DepartmentService/AddDepartment", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *departmentServiceClient) GetDepartmentById(ctx context.Context, in *GetDepartmentByIdReq, opts ...grpc.CallOption) (*DepartmentMessage, error) {
+	out := new(DepartmentMessage)
+	err := c.cc.Invoke(ctx, "/department.service.v1.DepartmentService/GetDepartmentById", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DepartmentServiceServer is the server API for DepartmentService service.
 // All implementations must embed UnimplementedDepartmentServiceServer
 // for forward compatibility
 type DepartmentServiceServer interface {
 	GetDepartmentList(context.Context, *GetDepartmentListReq) (*GetDepartmentListResp, error)
+	AddDepartment(context.Context, *AddDepartmentReq) (*DepartmentMessage, error)
+	GetDepartmentById(context.Context, *GetDepartmentByIdReq) (*DepartmentMessage, error)
 	mustEmbedUnimplementedDepartmentServiceServer()
 }
 
@@ -56,6 +78,12 @@ type UnimplementedDepartmentServiceServer struct {
 
 func (UnimplementedDepartmentServiceServer) GetDepartmentList(context.Context, *GetDepartmentListReq) (*GetDepartmentListResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDepartmentList not implemented")
+}
+func (UnimplementedDepartmentServiceServer) AddDepartment(context.Context, *AddDepartmentReq) (*DepartmentMessage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddDepartment not implemented")
+}
+func (UnimplementedDepartmentServiceServer) GetDepartmentById(context.Context, *GetDepartmentByIdReq) (*DepartmentMessage, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDepartmentById not implemented")
 }
 func (UnimplementedDepartmentServiceServer) mustEmbedUnimplementedDepartmentServiceServer() {}
 
@@ -88,6 +116,42 @@ func _DepartmentService_GetDepartmentList_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DepartmentService_AddDepartment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddDepartmentReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DepartmentServiceServer).AddDepartment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/department.service.v1.DepartmentService/AddDepartment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DepartmentServiceServer).AddDepartment(ctx, req.(*AddDepartmentReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DepartmentService_GetDepartmentById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDepartmentByIdReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DepartmentServiceServer).GetDepartmentById(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/department.service.v1.DepartmentService/GetDepartmentById",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DepartmentServiceServer).GetDepartmentById(ctx, req.(*GetDepartmentByIdReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // DepartmentService_ServiceDesc is the grpc.ServiceDesc for DepartmentService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -98,6 +162,14 @@ var DepartmentService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetDepartmentList",
 			Handler:    _DepartmentService_GetDepartmentList_Handler,
+		},
+		{
+			MethodName: "AddDepartment",
+			Handler:    _DepartmentService_AddDepartment_Handler,
+		},
+		{
+			MethodName: "GetDepartmentById",
+			Handler:    _DepartmentService_GetDepartmentById_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

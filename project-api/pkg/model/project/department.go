@@ -24,3 +24,13 @@ type GetDepartmentListResp struct {
 	Page        int64         `json:"page"`
 	Departments []*Department `json:"departments"`
 }
+
+type AddDepartmentReq struct {
+	DepartmentCode       string `form:"departmentCode"`
+	ParentDepartmentCode string `form:"parentDepartmentCode"`
+	Name                 string `form:"name"`
+}
+
+type GetDepartmentById struct {
+	DepartmentCode string `form:"departmentCode"`
+}

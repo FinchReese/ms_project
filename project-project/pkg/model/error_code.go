@@ -67,4 +67,6 @@ var (
 	GetOrganizationListError       = errs.NewError(2058, "获取组织列表出错")
 	GetDepartmentListError         = errs.NewError(2059, "获取部门列表出错")
 	DecryptError                   = errs.NewError(2060, "解密出错")
+	SearchDepartmentListError      = errs.NewError(2061, "搜索部门列表出错")
+	AddDepartmentError             = errs.NewError(2062, "添加部门出错")
 )

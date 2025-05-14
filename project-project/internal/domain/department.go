@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"time"
 
 	"go.uber.org/zap"
 	"test.com/project-common/errs"
@@ -38,4 +39,39 @@ func (d *DepartmentDomain) GetDepartmentList(ctx context.Context, organizationCo
 		departmentDisplays = append(departmentDisplays, department.ToDisplay())
 	}
 	return departmentDisplays, total, nil
+}
+
+func (d *DepartmentDomain) AddDepartment(ctx context.Context, organizationCode int64, pcode int64, name string) (*data.DepartmentDisplay, *errs.BError) {
+	// 检查部门是否存在
+	departmentList, err := d.departmentRepo.SearchDepartmentList(ctx, organizationCode, pcode, name)
+	if err != nil {
+		zap.L().Error("search department list error", zap.Error(err))
+		return nil, model.SearchDepartmentListError
+	}
+	if len(departmentList) == 0 {
+		department := &data.Department{
+			OrganizationCode: organizationCode,
+			Name:             name,
+			CreateTime:       time.Now().UnixMilli(),
+		}
+		if pcode > 0 {
+			department.Pcode = pcode
+		}
+		err := d.departmentRepo.AddDepartment(ctx, department)
+		if err != nil {
+			zap.L().Error("add department error", zap.Error(err))
+			return nil, model.AddDepartmentError
+		}
+		return department.ToDisplay(), nil
+	}
+	return departmentList[0].ToDisplay(), nil
+}
+
+func (d *DepartmentDomain) GetDepartmentById(ctx context.Context, id int64) (*data.DepartmentDisplay, *errs.BError) {
+	department, err := d.departmentRepo.GetDepartmentById(ctx, id)
+	if err != nil {
+		zap.L().Error("get department by id error", zap.Error(err))
+		return nil, model.GetDepartmentByIdError
+	}
+	return department.ToDisplay(), nil
 }

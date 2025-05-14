@@ -53,3 +53,47 @@ func (ds *DepartmentService) GetDepartmentList(ctx context.Context, req *departm
 		Departments: departmentMessages,
 	}, nil
 }
+
+func (ds *DepartmentService) AddDepartment(ctx context.Context, req *department.AddDepartmentReq) (*department.DepartmentMessage, error) {
+	organizationCode, bErr := ds.user.GetOrganizationCodeByMemberId(ctx, req.MemberId)
+	if bErr != nil {
+		return nil, errs.GrpcError(bErr)
+	}
+	// 解密得到pcode
+	var pcode int64 = 0
+	var err error
+	if req.Pcode != "" {
+		pcode, err = encrypt.DecryptToInt64(req.Pcode, model.AESKey)
+		if err != nil {
+			return nil, errs.GrpcError(model.DecryptError)
+		}
+	}
+
+	departmentDisplay, bErr := ds.department.AddDepartment(ctx, organizationCode, pcode, req.Name)
+	if bErr != nil {
+		return nil, errs.GrpcError(bErr)
+	}
+
+	var departmentMessage = &department.DepartmentMessage{}
+	copier.Copy(departmentMessage, departmentDisplay)
+	return departmentMessage, nil
+}
+
+func (ds *DepartmentService) GetDepartmentById(ctx context.Context, req *department.GetDepartmentByIdReq) (*department.DepartmentMessage, error) {
+	// 解密得到departmentId
+	var departmentId int64 = 0
+	var err error
+	if req.DepartmentId != "" {
+		departmentId, err = encrypt.DecryptToInt64(req.DepartmentId, model.AESKey)
+		if err != nil {
+			return nil, errs.GrpcError(model.DecryptError)
+		}
+	}
+	departmentDisplay, bErr := ds.department.GetDepartmentById(ctx, departmentId)
+	if bErr != nil {
+		return nil, errs.GrpcError(bErr)
+	}
+	var departmentMessage = &department.DepartmentMessage{}
+	copier.Copy(departmentMessage, departmentDisplay)
+	return departmentMessage, nil
+}
