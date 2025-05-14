@@ -30,3 +30,16 @@ func (d *ProjectAuthDomain) GetProjectAuthList(ctx context.Context, organization
 	}
 	return proAuthDispList, nil
 }
+
+func (d *ProjectAuthDomain) GetProjectAuthListByOrganizationCode(ctx context.Context, organizationCode int64, page int, pageSize int) ([]*data.ProjectAuthDisplay, int64, *errs.BError) {
+	projectAuthList, total, err := d.projectAuthRepo.GetProjectAuthListByOrganizationCode(ctx, organizationCode, page, pageSize)
+	if err != nil {
+		zap.L().Error("get project auth list error", zap.Error(err))
+		return nil, 0, model.GetProjectAuthListError
+	}
+	var proAuthDispList []*data.ProjectAuthDisplay
+	for _, projectAuth := range projectAuthList {
+		proAuthDispList = append(proAuthDispList, projectAuth.ToDisplay())
+	}
+	return proAuthDispList, total, nil
+}

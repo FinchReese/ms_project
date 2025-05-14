@@ -1,0 +1,35 @@
+syntax = "proto3";
+package project_auth.service.v1;
+option go_package = "../../../../project-grpc/project_auth";
+
+message GetProjectAuthListReq {
+    int64 memberId = 1;
+    int64 page = 2;
+    int64 pageSize = 3;
+}
+
+message ProjectAuth{
+    int64 id = 1;
+    string OrganizationCode = 2;
+    string Title = 3;
+    string CreateAt = 4;
+    int32 Sort = 5;
+    int32 status = 6;
+    string desc = 7;
+    int64 CreateBy = 8;
+    int32 IsDefault = 9;
+    string Type = 10;
+    int32 CanDelete = 11;
+}
+
+
+message GetProjectAuthListResp{
+    repeated ProjectAuth list = 1;
+    int64  total = 2;
+}
+
+service ProjectAuthService {
+    rpc GetProjectAuthList(GetProjectAuthListReq) returns (GetProjectAuthListResp) {}
+}   
+
+

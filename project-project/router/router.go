@@ -12,6 +12,7 @@ import (
 	"test.com/project-grpc/account"
 	"test.com/project-grpc/department"
 	"test.com/project-grpc/project"
+	"test.com/project-grpc/project_auth"
 	"test.com/project-grpc/task"
 	"test.com/project-project/config"
 	"test.com/project-project/internal/dao"
@@ -19,6 +20,7 @@ import (
 	"test.com/project-project/internal/domain"
 	"test.com/project-project/pkg/service/account_service_v1"
 	"test.com/project-project/pkg/service/department_service_v1"
+	"test.com/project-project/pkg/service/project_auth_service_v1"
 	"test.com/project-project/pkg/service/project_service_v1"
 	"test.com/project-project/pkg/service/task_service_v1"
 )
@@ -98,6 +100,12 @@ func RegisterGrpc() *grpc.Server {
 	if err != nil {
 		log.Println("cannot listen")
 	}
+	// 注册project_auth服务
+	projectAuthService := project_auth_service_v1.NewProjectAuthService(
+		domain.NewProjectAuthDomain(dao.NewProjectAuthDAO()),
+		domain.NewUserDomain(),
+	)
+	project_auth.RegisterProjectAuthServiceServer(s, projectAuthService)
 	// 创建协程，让启动grpc服务器不会阻塞到其他模块工作
 	go func() {
 		err = s.Serve(lis)
