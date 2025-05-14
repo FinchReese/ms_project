@@ -9,6 +9,7 @@ import (
 	"test.com/project-common/service_discover"
 	"test.com/project-grpc/account"
 	"test.com/project-grpc/department"
+	"test.com/project-grpc/menu"
 	"test.com/project-grpc/project"
 	"test.com/project-grpc/project_auth"
 	"test.com/project-grpc/task"
@@ -19,6 +20,7 @@ var TaskServiceClient task.TaskServiceClient
 var AccountServiceClient account.AccountServiceClient
 var DepartmentServiceClient department.DepartmentServiceClient
 var ProjectAuthServiceClient project_auth.ProjectAuthServiceClient
+var MenuServiceClient menu.MenuServiceClient
 
 func InitProjectRpc() {
 	resolver.Register(service_discover.NewEtcdBuilder(config.AppConf.EtcdConf.Addrs))
@@ -31,4 +33,5 @@ func InitProjectRpc() {
 	AccountServiceClient = account.NewAccountServiceClient(conn)
 	DepartmentServiceClient = department.NewDepartmentServiceClient(conn)
 	ProjectAuthServiceClient = project_auth.NewProjectAuthServiceClient(conn)
+	MenuServiceClient = menu.NewMenuServiceClient(conn)
 }

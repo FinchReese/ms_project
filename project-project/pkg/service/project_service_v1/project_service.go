@@ -15,6 +15,7 @@ import (
 	"test.com/project-project/internal/data"
 	"test.com/project-project/internal/database/gorm"
 	"test.com/project-project/internal/database/trans"
+	"test.com/project-project/internal/domain"
 	"test.com/project-project/internal/repo"
 	"test.com/project-project/internal/rpc"
 	"test.com/project-project/pkg/model"
@@ -35,11 +36,12 @@ type ProjectService struct {
 	projectRepo           repo.ProjectRepo
 	projectCollectRepo    repo.ProjectCollectRepo
 	taskStageRepo         repo.TaskStageRepo
+	menuDomain            *domain.MenuDomain
 	tran                  *trans.TransactionImpl
 }
 
 func NewProjectService(mr repo.MenuRepo, pmr repo.ProjectMemberRepo, ptr repo.ProjectTemplateRepo, ttsr repo.TemplateTaskStageRepo, pr repo.ProjectRepo,
-	pcr repo.ProjectCollectRepo, tsp repo.TaskStageRepo, t *trans.TransactionImpl) *ProjectService {
+	pcr repo.ProjectCollectRepo, tsp repo.TaskStageRepo, md *domain.MenuDomain, t *trans.TransactionImpl) *ProjectService {
 	return &ProjectService{
 		menuRepo:              mr,
 		projectMemberRepo:     pmr,
@@ -48,17 +50,17 @@ func NewProjectService(mr repo.MenuRepo, pmr repo.ProjectMemberRepo, ptr repo.Pr
 		projectRepo:           pr,
 		projectCollectRepo:    pcr,
 		taskStageRepo:         tsp,
+		menuDomain:            md,
 		tran:                  t,
 	}
 }
 
 func (p *ProjectService) Index(ctx context.Context, req *project.IndexMessage) (resp *project.IndexResponse, err error) {
 	// 数据库查询所有菜单信息
-	menuList, err := p.menuRepo.GetAllMenus(context.TODO())
-	if err != nil {
-		return nil, errs.GrpcError(model.GetAllMenusError)
+	menuTree, bErr := p.menuDomain.GetMenuTree(ctx)
+	if bErr != nil {
+		return nil, errs.GrpcError(bErr)
 	}
-	menuTree := data.ConvertMenuListToTreeList(menuList)
 	var menus []*project.MenuMessage
 	copier.Copy(&menus, menuTree)
 	return &project.IndexResponse{Menus: menus}, nil

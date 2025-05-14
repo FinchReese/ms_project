@@ -11,6 +11,7 @@ import (
 	"test.com/project-common/service_discover"
 	"test.com/project-grpc/account"
 	"test.com/project-grpc/department"
+	"test.com/project-grpc/menu"
 	"test.com/project-grpc/project"
 	"test.com/project-grpc/project_auth"
 	"test.com/project-grpc/task"
@@ -20,6 +21,7 @@ import (
 	"test.com/project-project/internal/domain"
 	"test.com/project-project/pkg/service/account_service_v1"
 	"test.com/project-project/pkg/service/department_service_v1"
+	"test.com/project-project/pkg/service/menu_service_v1"
 	"test.com/project-project/pkg/service/project_auth_service_v1"
 	"test.com/project-project/pkg/service/project_service_v1"
 	"test.com/project-project/pkg/service/task_service_v1"
@@ -66,6 +68,7 @@ func RegisterGrpc() *grpc.Server {
 		dao.NewProjectDAO(),
 		dao.NewProjectCollectDao(),
 		dao.NewTaskStageDAO(),
+		domain.NewMenuDomain(dao.NewMenuDAO()),
 		trans.NewTransaction())
 	project.RegisterProjectServiceServer(s, projectService)
 	// 注册task服务
@@ -106,6 +109,11 @@ func RegisterGrpc() *grpc.Server {
 		domain.NewUserDomain(),
 	)
 	project_auth.RegisterProjectAuthServiceServer(s, projectAuthService)
+	// 注册menu服务
+	menuService := menu_service_v1.NewMenuService(
+		domain.NewMenuDomain(dao.NewMenuDAO()),
+	)
+	menu.RegisterMenuServiceServer(s, menuService)
 	// 创建协程，让启动grpc服务器不会阻塞到其他模块工作
 	go func() {
 		err = s.Serve(lis)
