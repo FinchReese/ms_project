@@ -31,6 +31,7 @@ message GetProjectAuthListResp{
 message ProjectAuthNodeApplyReq {
     int64 authId = 1;
     string action = 2;
+    repeated string nodeList = 3;
 }
 
 message ProjectNodeMessage{

@@ -109,6 +109,8 @@ func RegisterGrpc() *grpc.Server {
 		domain.NewProjectAuthDomain(dao.NewProjectAuthDAO()),
 		domain.NewUserDomain(),
 		domain.NewProjectNodeDomain(dao.NewProjectNodeDAO(), domain.NewProjectAuthNodeDomain(dao.NewProjectAuthNodeDAO())),
+		domain.NewProjectAuthNodeDomain(dao.NewProjectAuthNodeDAO()),
+		trans.NewTransaction(),
 	)
 	project_auth.RegisterProjectAuthServiceServer(s, projectAuthService)
 	// 注册menu服务

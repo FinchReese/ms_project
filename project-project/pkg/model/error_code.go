@@ -72,4 +72,6 @@ var (
 	GetProjectNodeListError        = errs.NewError(2063, "获取项目节点列表出错")
 	GetProjectAuthNodeListError    = errs.NewError(2064, "获取项目权限节点列表出错")
 	InvalidActionType              = errs.NewError(2065, "无效的action类型")
+	DeleteProjectAuthNodeError     = errs.NewError(2066, "删除项目权限节点出错")
+	AddProjectAuthNodeError        = errs.NewError(2067, "添加项目权限节点出错")
 )

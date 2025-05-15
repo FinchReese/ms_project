@@ -1,6 +1,7 @@
 package project
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -55,11 +56,20 @@ func getProjectNodeApply(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, result.Fail(http.StatusBadRequest, "参数传递有误"))
 		return
 	}
+	var nodes []string
+	if req.Nodes != "" {
+		err = json.Unmarshal([]byte(req.Nodes), &nodes)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, result.Fail(http.StatusBadRequest, "参数传递有误"))
+			return
+		}
+	}
 
 	// 调用RPC服务获取项目节点列表
 	projectNodeApply, err := ProjectAuthServiceClient.ProjectAuthNodeApply(ctx, &project_auth.ProjectAuthNodeApplyReq{
-		AuthId: req.Id,
-		Action: req.Action,
+		AuthId:   req.Id,
+		Action:   req.Action,
+		NodeList: nodes,
 	})
 	if err != nil {
 		code, msg := errs.ParseGrpcError(err)
@@ -68,9 +78,13 @@ func getProjectNodeApply(ctx *gin.Context) {
 	}
 
 	// 组织回复消息
-	resp := &model_project.ProjectNodeApplyResp{
-		CheckedList: projectNodeApply.CheckedList,
+	if req.Action == "getnode" {
+		resp := &model_project.ProjectNodeApplyResp{
+			CheckedList: projectNodeApply.CheckedList,
+		}
+		copier.Copy(&resp.List, projectNodeApply.List)
+		ctx.JSON(http.StatusOK, result.Success(resp))
+		return
 	}
-	copier.Copy(&resp.List, projectNodeApply.List)
-	ctx.JSON(http.StatusOK, result.Success(resp))
+	ctx.JSON(http.StatusOK, result.Success(""))
 }

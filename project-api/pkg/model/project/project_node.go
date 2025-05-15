@@ -14,6 +14,7 @@ type ProjectNodeTree struct {
 type ProjectNodeApplyReq struct {
 	Action string `form:"action"`
 	Id     int64  `form:"id"`
+	Nodes  string `form:"nodes"`
 }
 
 type ProjectNodeAuthTree struct {
