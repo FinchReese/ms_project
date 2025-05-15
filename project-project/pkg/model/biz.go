@@ -79,3 +79,10 @@ const (
 	QueryMemberAccountTypeDisableAccount     = 3 // 禁用
 	QueryMemberAccountTypeByDepartmentCode   = 4 // 使用中并根据部门id查询
 )
+
+// /project/auth/apply action字段取值
+const (
+	ProjectAuthApplyActionGetNode = "getnode"
+	ProjectAuthApplyActionSave    = "save"
+	ProjectAuthApplyActionFilter  = "filter"
+)

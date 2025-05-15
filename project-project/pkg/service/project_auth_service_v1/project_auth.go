@@ -7,26 +7,32 @@ import (
 	"test.com/project-common/errs"
 	project_auth "test.com/project-grpc/project_auth"
 	"test.com/project-project/internal/domain"
+	"test.com/project-project/pkg/model"
 )
 
 type ProjectAuthService struct {
 	project_auth.UnimplementedProjectAuthServiceServer
-	projectAuth *domain.ProjectAuthDomain
-	userDomain  *domain.UserDomain
+	projectAuth       *domain.ProjectAuthDomain
+	userDomain        *domain.UserDomain
+	projectNodeDomain *domain.ProjectNodeDomain
 }
 
-func NewProjectAuthService(projectAuth *domain.ProjectAuthDomain, userDomain *domain.UserDomain) *ProjectAuthService {
-	return &ProjectAuthService{projectAuth: projectAuth, userDomain: userDomain}
+func NewProjectAuthService(projectAuth *domain.ProjectAuthDomain, userDomain *domain.UserDomain, projectNodeDomain *domain.ProjectNodeDomain) *ProjectAuthService {
+	return &ProjectAuthService{
+		projectAuth:       projectAuth,
+		userDomain:        userDomain,
+		projectNodeDomain: projectNodeDomain,
+	}
 }
 
-func (s *ProjectAuthService) GetProjectAuthList(ctx context.Context, req *project_auth.GetProjectAuthListReq) (*project_auth.GetProjectAuthListResp, error) {
+func (pa *ProjectAuthService) GetProjectAuthList(ctx context.Context, req *project_auth.GetProjectAuthListReq) (*project_auth.GetProjectAuthListResp, error) {
 	// 根据memberId获取organizationCode
-	organizationCode, err := s.userDomain.GetOrganizationCodeByMemberId(ctx, req.MemberId)
+	organizationCode, err := pa.userDomain.GetOrganizationCodeByMemberId(ctx, req.MemberId)
 	if err != nil {
 		return nil, errs.GrpcError(err)
 	}
 	// 获取项目权限列表
-	projectAuthList, total, err := s.projectAuth.GetProjectAuthListByOrganizationCode(ctx, organizationCode,
+	projectAuthList, total, err := pa.projectAuth.GetProjectAuthListByOrganizationCode(ctx, organizationCode,
 		int(req.Page), int(req.PageSize))
 	if err != nil {
 		return nil, errs.GrpcError(err)
@@ -37,5 +43,37 @@ func (s *ProjectAuthService) GetProjectAuthList(ctx context.Context, req *projec
 	return &project_auth.GetProjectAuthListResp{
 		List:  projectAuthListResp,
 		Total: total,
+	}, nil
+}
+
+func (pa *ProjectAuthService) ProjectAuthNodeApply(ctx context.Context, req *project_auth.ProjectAuthNodeApplyReq) (*project_auth.ProjectAuthNodeApplyResp, error) {
+	switch req.Action {
+	case model.ProjectAuthApplyActionGetNode:
+		return pa.getNode(ctx, req.AuthId)
+	case model.ProjectAuthApplyActionSave:
+		return &project_auth.ProjectAuthNodeApplyResp{
+			List: []*project_auth.ProjectNodeMessage{},
+		}, nil
+	case model.ProjectAuthApplyActionFilter:
+		return &project_auth.ProjectAuthNodeApplyResp{
+			List: []*project_auth.ProjectNodeMessage{},
+		}, nil
+	default:
+		{
+			return nil, errs.GrpcError(model.InvalidActionType)
+		}
+	}
+}
+
+func (pa *ProjectAuthService) getNode(ctx context.Context, authId int64) (*project_auth.ProjectAuthNodeApplyResp, error) {
+	nodeTree, checkUrlList, err := pa.projectNodeDomain.GetProjectNodeListByAuthId(ctx, authId)
+	if err != nil {
+		return nil, errs.GrpcError(err)
+	}
+	var projectNodeMessageList []*project_auth.ProjectNodeMessage
+	copier.Copy(&projectNodeMessageList, nodeTree)
+	return &project_auth.ProjectAuthNodeApplyResp{
+		List:        projectNodeMessageList,
+		CheckedList: checkUrlList,
 	}, nil
 }

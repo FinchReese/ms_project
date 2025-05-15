@@ -45,3 +45,32 @@ func getProjectAuthList(ctx *gin.Context) {
 	copier.Copy(&resp.List, projectAuthList.List)
 	ctx.JSON(http.StatusOK, result.Success(resp))
 }
+
+func getProjectNodeApply(ctx *gin.Context) {
+	// 解析请求消息
+	result := &common.Result{}
+	var req model_project.ProjectNodeApplyReq
+	err := ctx.ShouldBind(&req)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, result.Fail(http.StatusBadRequest, "参数传递有误"))
+		return
+	}
+
+	// 调用RPC服务获取项目节点列表
+	projectNodeApply, err := ProjectAuthServiceClient.ProjectAuthNodeApply(ctx, &project_auth.ProjectAuthNodeApplyReq{
+		AuthId: req.Id,
+		Action: req.Action,
+	})
+	if err != nil {
+		code, msg := errs.ParseGrpcError(err)
+		ctx.JSON(http.StatusInternalServerError, result.Fail(code, msg))
+		return
+	}
+
+	// 组织回复消息
+	resp := &model_project.ProjectNodeApplyResp{
+		CheckedList: projectNodeApply.CheckedList,
+	}
+	copier.Copy(&resp.List, projectNodeApply.List)
+	ctx.JSON(http.StatusOK, result.Success(resp))
+}

@@ -22,14 +22,38 @@ message ProjectAuth{
     int32 CanDelete = 11;
 }
 
-
 message GetProjectAuthListResp{
     repeated ProjectAuth list = 1;
     int64  total = 2;
 }
 
+
+message ProjectAuthNodeApplyReq {
+    int64 authId = 1;
+    string action = 2;
+}
+
+message ProjectNodeMessage{
+    int64 id = 1;
+    string node = 2;
+    string title = 3;
+    string pnode = 4;
+    int32 isLogin = 5;
+    int32 isMenu = 6;
+    int32 isAuth = 7;
+    bool checked = 8;
+    string key = 9;
+    repeated ProjectNodeMessage children = 10;
+  }
+  
+  message ProjectAuthNodeApplyResp {
+    repeated ProjectNodeMessage list = 1;
+    repeated string checkedList = 2;
+  }
+
 service ProjectAuthService {
     rpc GetProjectAuthList(GetProjectAuthListReq) returns (GetProjectAuthListResp) {}
+    rpc ProjectAuthNodeApply(ProjectAuthNodeApplyReq) returns (ProjectAuthNodeApplyResp) {}
 }   
 
 

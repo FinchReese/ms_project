@@ -70,4 +70,6 @@ var (
 	SearchDepartmentListError      = errs.NewError(2061, "搜索部门列表出错")
 	AddDepartmentError             = errs.NewError(2062, "添加部门出错")
 	GetProjectNodeListError        = errs.NewError(2063, "获取项目节点列表出错")
+	GetProjectAuthNodeListError    = errs.NewError(2064, "获取项目权限节点列表出错")
+	InvalidActionType              = errs.NewError(2065, "无效的action类型")
 )

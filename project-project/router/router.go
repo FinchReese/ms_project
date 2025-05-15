@@ -108,6 +108,7 @@ func RegisterGrpc() *grpc.Server {
 	projectAuthService := project_auth_service_v1.NewProjectAuthService(
 		domain.NewProjectAuthDomain(dao.NewProjectAuthDAO()),
 		domain.NewUserDomain(),
+		domain.NewProjectNodeDomain(dao.NewProjectNodeDAO(), domain.NewProjectAuthNodeDomain(dao.NewProjectAuthNodeDAO())),
 	)
 	project_auth.RegisterProjectAuthServiceServer(s, projectAuthService)
 	// 注册menu服务
@@ -117,7 +118,7 @@ func RegisterGrpc() *grpc.Server {
 	menu.RegisterMenuServiceServer(s, menuService)
 	// 注册project_node服务
 	projectNodeService := project_service_v1.NewProjectNodeService(
-		domain.NewProjectNodeDomain(dao.NewProjectNodeDAO()),
+		domain.NewProjectNodeDomain(dao.NewProjectNodeDAO(), domain.NewProjectAuthNodeDomain(dao.NewProjectAuthNodeDAO())),
 	)
 	project_node.RegisterProjectNodeServiceServer(s, projectNodeService)
 	// 创建协程，让启动grpc服务器不会阻塞到其他模块工作
