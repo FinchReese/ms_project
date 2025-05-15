@@ -54,3 +54,12 @@ func (d *MemberAccountDAO) GetMemberAccountList(ctx context.Context, queryType i
 	}
 	return list, total, nil
 }
+
+func (d *MemberAccountDAO) GetMemberAccountByMemberCode(ctx context.Context, memberCode int64) (*data.MemberAccount, error) {
+	var memberAccount data.MemberAccount
+	err := d.conn.Db.WithContext(ctx).Where("member_code = ?", memberCode).First(&memberAccount).Error
+	if err != nil {
+		return nil, err
+	}
+	return &memberAccount, nil
+}

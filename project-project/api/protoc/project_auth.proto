@@ -45,16 +45,25 @@ message ProjectNodeMessage{
     bool checked = 8;
     string key = 9;
     repeated ProjectNodeMessage children = 10;
-  }
+}
   
-  message ProjectAuthNodeApplyResp {
+message ProjectAuthNodeApplyResp {
     repeated ProjectNodeMessage list = 1;
     repeated string checkedList = 2;
-  }
+}
+
+message GetAuthNodeUrlListReq {
+    int64 memberCode = 1;
+}
+
+message GetAuthNodeUrlListResp {
+    repeated string list = 1;
+}
 
 service ProjectAuthService {
     rpc GetProjectAuthList(GetProjectAuthListReq) returns (GetProjectAuthListResp) {}
     rpc ProjectAuthNodeApply(ProjectAuthNodeApplyReq) returns (ProjectAuthNodeApplyResp) {}
+    rpc GetAuthNodeUrlList(GetAuthNodeUrlListReq) returns (GetAuthNodeUrlListResp) {}
 }   
 
 

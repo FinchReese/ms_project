@@ -9,4 +9,6 @@ import (
 type MemberAccountRepo interface {
 	// 根据查询类型、组织id、部门id、页号、每页大小获取成员账号列表
 	GetMemberAccountList(ctx context.Context, queryType int, organizationCode int64, departmentCode int64, page int, pageSize int) ([]*data.MemberAccount, int64, error)
+	// 根据member code 获取成员账号
+	GetMemberAccountByMemberCode(ctx context.Context, memberCode int64) (*data.MemberAccount, error)
 }

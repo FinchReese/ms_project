@@ -90,7 +90,7 @@ func RegisterGrpc() *grpc.Server {
 	// 注册account服务
 	accountService := account_service_v1.NewAccountService(
 		domain.NewMemberAccountDomain(dao.NewMemberAccountDAO(), domain.NewUserDomain(), domain.NewDepartmentDomain(dao.NewDepartmentDAO())),
-		domain.NewProjectAuthDomain(dao.NewProjectAuthDAO()),
+		domain.NewProjectAuthDomain(dao.NewProjectAuthDAO(), dao.NewMemberAccountDAO(), domain.NewProjectAuthNodeDomain(dao.NewProjectAuthNodeDAO())),
 		domain.NewUserDomain(),
 	)
 	account.RegisterAccountServiceServer(s, accountService)
@@ -106,7 +106,7 @@ func RegisterGrpc() *grpc.Server {
 	}
 	// 注册project_auth服务
 	projectAuthService := project_auth_service_v1.NewProjectAuthService(
-		domain.NewProjectAuthDomain(dao.NewProjectAuthDAO()),
+		domain.NewProjectAuthDomain(dao.NewProjectAuthDAO(), dao.NewMemberAccountDAO(), domain.NewProjectAuthNodeDomain(dao.NewProjectAuthNodeDAO())),
 		domain.NewUserDomain(),
 		domain.NewProjectNodeDomain(dao.NewProjectNodeDAO(), domain.NewProjectAuthNodeDomain(dao.NewProjectAuthNodeDAO())),
 		domain.NewProjectAuthNodeDomain(dao.NewProjectAuthNodeDAO()),

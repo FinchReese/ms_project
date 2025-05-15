@@ -74,4 +74,6 @@ var (
 	InvalidActionType              = errs.NewError(2065, "无效的action类型")
 	DeleteProjectAuthNodeError     = errs.NewError(2066, "删除项目权限节点出错")
 	AddProjectAuthNodeError        = errs.NewError(2067, "添加项目权限节点出错")
+	GetMemberAccountError          = errs.NewError(2068, "获取成员账号出错")
+	ParseAuthIdError               = errs.NewError(2069, "解析权限id出错")
 )

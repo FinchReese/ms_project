@@ -94,3 +94,11 @@ func (pa *ProjectAuthService) saveNode(ctx context.Context, authId int64, nodeLi
 	})
 	return nil, err
 }
+
+func (pa *ProjectAuthService) GetAuthNodeUrlList(ctx context.Context, req *project_auth.GetAuthNodeUrlListReq) (*project_auth.GetAuthNodeUrlListResp, error) {
+	authNodeUrlList, err := pa.projectAuth.GetAuthNodeUrlList(ctx, req.MemberCode)
+	if err != nil {
+		return nil, errs.GrpcError(err)
+	}
+	return &project_auth.GetAuthNodeUrlListResp{List: authNodeUrlList}, nil
+}

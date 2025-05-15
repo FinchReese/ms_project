@@ -88,3 +88,15 @@ func getProjectNodeApply(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, result.Success(""))
 }
+
+func GetAuthNodeUrlList(ctx *gin.Context) ([]string, error) {
+	// 调用grpc服务获取member id有权限的节点URL列表
+	memberId := ctx.GetInt64("memberId")
+	authNodeUrlList, err := ProjectAuthServiceClient.GetAuthNodeUrlList(ctx, &project_auth.GetAuthNodeUrlListReq{
+		MemberCode: memberId,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return authNodeUrlList.List, nil
+}
