@@ -14,6 +14,7 @@ import (
 	"test.com/project-grpc/menu"
 	"test.com/project-grpc/project"
 	"test.com/project-grpc/project_auth"
+	"test.com/project-grpc/project_node"
 	"test.com/project-grpc/task"
 	"test.com/project-project/config"
 	"test.com/project-project/internal/dao"
@@ -114,6 +115,11 @@ func RegisterGrpc() *grpc.Server {
 		domain.NewMenuDomain(dao.NewMenuDAO()),
 	)
 	menu.RegisterMenuServiceServer(s, menuService)
+	// 注册project_node服务
+	projectNodeService := project_service_v1.NewProjectNodeService(
+		domain.NewProjectNodeDomain(dao.NewProjectNodeDAO()),
+	)
+	project_node.RegisterProjectNodeServiceServer(s, projectNodeService)
 	// 创建协程，让启动grpc服务器不会阻塞到其他模块工作
 	go func() {
 		err = s.Serve(lis)

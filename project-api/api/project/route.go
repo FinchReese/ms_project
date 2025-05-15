@@ -43,6 +43,7 @@ func (*ProjectRouter) Register(r *gin.Engine) {
 	projectGroup.POST("/department/read", getDepartmentById)
 	projectGroup.POST("/auth", getProjectAuthList)
 	projectGroup.POST("/menu/menu", getMenuTree)
+	projectGroup.POST("/node", getProjectNodeList)
 }
 
 func init() {

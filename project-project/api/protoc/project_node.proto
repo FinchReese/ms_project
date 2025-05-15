@@ -1,0 +1,27 @@
+syntax = "proto3";
+package project_node.service.v1;
+option go_package = "../../../../project-grpc/project_node";
+
+message GetProjectNodeListReq {
+}
+
+message GetProjectNodeListResp {
+    repeated ProjectNodeMessage nodes = 1;
+}
+
+message ProjectNodeMessage {
+    int64 id = 1;
+    string node = 2;
+    string title = 3;
+    string pnode = 4;
+    int32 isLogin = 5;
+    int32 isMenu = 6;
+    int32 isAuth = 7;
+    repeated ProjectNodeMessage children = 8;
+}
+
+service ProjectNodeService {
+    rpc GetProjectNodeList(GetProjectNodeListReq) returns (GetProjectNodeListResp) {}
+}
+
+

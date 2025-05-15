@@ -12,6 +12,7 @@ import (
 	"test.com/project-grpc/menu"
 	"test.com/project-grpc/project"
 	"test.com/project-grpc/project_auth"
+	"test.com/project-grpc/project_node"
 	"test.com/project-grpc/task"
 )
 
@@ -21,6 +22,7 @@ var AccountServiceClient account.AccountServiceClient
 var DepartmentServiceClient department.DepartmentServiceClient
 var ProjectAuthServiceClient project_auth.ProjectAuthServiceClient
 var MenuServiceClient menu.MenuServiceClient
+var ProjectNodeServiceClient project_node.ProjectNodeServiceClient
 
 func InitProjectRpc() {
 	resolver.Register(service_discover.NewEtcdBuilder(config.AppConf.EtcdConf.Addrs))
@@ -34,4 +36,5 @@ func InitProjectRpc() {
 	DepartmentServiceClient = department.NewDepartmentServiceClient(conn)
 	ProjectAuthServiceClient = project_auth.NewProjectAuthServiceClient(conn)
 	MenuServiceClient = menu.NewMenuServiceClient(conn)
+	ProjectNodeServiceClient = project_node.NewProjectNodeServiceClient(conn)
 }
