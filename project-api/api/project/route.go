@@ -13,6 +13,7 @@ func (*ProjectRouter) Register(r *gin.Engine) {
 	projectGroup := r.Group("/project")
 	projectGroup.Use(midd.VerifyToken())
 	projectGroup.Use(checkUriAuth())
+	projectGroup.Use(checkProjectAuth())
 	projectGroup.POST("/index", index)
 	projectGroup.POST("/project", selfList)
 	projectGroup.POST("/project/selfList", selfList)

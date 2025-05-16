@@ -36,6 +36,8 @@ type TaskRepo interface {
 	GetTasksByMemberIdAndDone(ctx context.Context, memberId int64, done int, page int, pageSize int) (list []*data.Task, total int64, err error)
 	// 指定create_by、done字段筛选任务，再根据指定的页号和页大小返回任务列表
 	GetTasksByCreateByAndDone(ctx context.Context, createBy int64, done int, page int, pageSize int) (list []*data.Task, total int64, err error)
+	// 获取指定任务id的project code
+	GetProjectCodeByTaskId(ctx context.Context, taskId int64) (int64, bool, error)
 }
 
 type TaskMemberRepo interface {

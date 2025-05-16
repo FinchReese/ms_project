@@ -102,3 +102,11 @@ func (pa *ProjectAuthService) GetAuthNodeUrlList(ctx context.Context, req *proje
 	}
 	return &project_auth.GetAuthNodeUrlListResp{List: authNodeUrlList}, nil
 }
+
+func (pa *ProjectAuthService) CheckProjectAuth(ctx context.Context, req *project_auth.CheckProjectAuthReq) (*project_auth.CheckProjectAuthResp, error) {
+	isMember, isOwner, isPrivateProject, err := pa.projectAuth.CheckProjectAuth(ctx, req.MemberId, req.ProjectCode, req.TaskCode)
+	if err != nil {
+		return nil, errs.GrpcError(err)
+	}
+	return &project_auth.CheckProjectAuthResp{IsMember: isMember, IsOwner: isOwner, IsPrivateProject: isPrivateProject}, nil
+}

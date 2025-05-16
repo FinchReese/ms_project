@@ -163,3 +163,17 @@ func (td *TaskDAO) GetTasksByCreateByAndDone(ctx context.Context, createBy int64
 	}
 	return list, total, nil
 }
+
+func (td *TaskDAO) GetProjectCodeByTaskId(ctx context.Context, taskId int64) (int64, bool, error) {
+	session := td.conn.Db.Session(&gorm.Session{Context: ctx})
+	var task *data.Task
+	// 根据task id 查询task
+	err := session.Model(&data.Task{}).Where("id = ?", taskId).First(&task).Error
+	if err != nil {
+		return 0, false, err
+	}
+	if task == nil {
+		return 0, false, nil
+	}
+	return task.ProjectCode, true, nil
+}

@@ -60,10 +60,24 @@ message GetAuthNodeUrlListResp {
     repeated string list = 1;
 }
 
+message CheckProjectAuthReq {
+    int64 memberId = 1;
+    string projectCode = 2;
+    string taskCode = 3;
+}
+
+message CheckProjectAuthResp {
+    bool isMember = 1;
+    bool isOwner = 2;
+    bool isPrivateProject = 3;
+}
+
+
 service ProjectAuthService {
     rpc GetProjectAuthList(GetProjectAuthListReq) returns (GetProjectAuthListResp) {}
     rpc ProjectAuthNodeApply(ProjectAuthNodeApplyReq) returns (ProjectAuthNodeApplyResp) {}
     rpc GetAuthNodeUrlList(GetAuthNodeUrlListReq) returns (GetAuthNodeUrlListResp) {}
+    rpc CheckProjectAuth(CheckProjectAuthReq) returns (CheckProjectAuthResp) {}
 }   
 
 

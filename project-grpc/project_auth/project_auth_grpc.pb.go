@@ -25,6 +25,7 @@ type ProjectAuthServiceClient interface {
 	GetProjectAuthList(ctx context.Context, in *GetProjectAuthListReq, opts ...grpc.CallOption) (*GetProjectAuthListResp, error)
 	ProjectAuthNodeApply(ctx context.Context, in *ProjectAuthNodeApplyReq, opts ...grpc.CallOption) (*ProjectAuthNodeApplyResp, error)
 	GetAuthNodeUrlList(ctx context.Context, in *GetAuthNodeUrlListReq, opts ...grpc.CallOption) (*GetAuthNodeUrlListResp, error)
+	CheckProjectAuth(ctx context.Context, in *CheckProjectAuthReq, opts ...grpc.CallOption) (*CheckProjectAuthResp, error)
 }
 
 type projectAuthServiceClient struct {
@@ -62,6 +63,15 @@ func (c *projectAuthServiceClient) GetAuthNodeUrlList(ctx context.Context, in *G
 	return out, nil
 }
 
+func (c *projectAuthServiceClient) CheckProjectAuth(ctx context.Context, in *CheckProjectAuthReq, opts ...grpc.CallOption) (*CheckProjectAuthResp, error) {
+	out := new(CheckProjectAuthResp)
+	err := c.cc.Invoke(ctx, "/project_auth.service.v1.ProjectAuthService/CheckProjectAuth", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProjectAuthServiceServer is the server API for ProjectAuthService service.
 // All implementations must embed UnimplementedProjectAuthServiceServer
 // for forward compatibility
@@ -69,6 +79,7 @@ type ProjectAuthServiceServer interface {
 	GetProjectAuthList(context.Context, *GetProjectAuthListReq) (*GetProjectAuthListResp, error)
 	ProjectAuthNodeApply(context.Context, *ProjectAuthNodeApplyReq) (*ProjectAuthNodeApplyResp, error)
 	GetAuthNodeUrlList(context.Context, *GetAuthNodeUrlListReq) (*GetAuthNodeUrlListResp, error)
+	CheckProjectAuth(context.Context, *CheckProjectAuthReq) (*CheckProjectAuthResp, error)
 	mustEmbedUnimplementedProjectAuthServiceServer()
 }
 
@@ -84,6 +95,9 @@ func (UnimplementedProjectAuthServiceServer) ProjectAuthNodeApply(context.Contex
 }
 func (UnimplementedProjectAuthServiceServer) GetAuthNodeUrlList(context.Context, *GetAuthNodeUrlListReq) (*GetAuthNodeUrlListResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAuthNodeUrlList not implemented")
+}
+func (UnimplementedProjectAuthServiceServer) CheckProjectAuth(context.Context, *CheckProjectAuthReq) (*CheckProjectAuthResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CheckProjectAuth not implemented")
 }
 func (UnimplementedProjectAuthServiceServer) mustEmbedUnimplementedProjectAuthServiceServer() {}
 
@@ -152,6 +166,24 @@ func _ProjectAuthService_GetAuthNodeUrlList_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProjectAuthService_CheckProjectAuth_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CheckProjectAuthReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectAuthServiceServer).CheckProjectAuth(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/project_auth.service.v1.ProjectAuthService/CheckProjectAuth",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectAuthServiceServer).CheckProjectAuth(ctx, req.(*CheckProjectAuthReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ProjectAuthService_ServiceDesc is the grpc.ServiceDesc for ProjectAuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -170,6 +202,10 @@ var ProjectAuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAuthNodeUrlList",
 			Handler:    _ProjectAuthService_GetAuthNodeUrlList_Handler,
+		},
+		{
+			MethodName: "CheckProjectAuth",
+			Handler:    _ProjectAuthService_CheckProjectAuth_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
