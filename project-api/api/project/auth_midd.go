@@ -30,7 +30,7 @@ func checkUriAuth() gin.HandlerFunc {
 		// 根据memberId获取有权限的节点URL列表
 		authNodeUrlList, err := GetAuthNodeUrlList(c)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, result.Fail(http.StatusUnauthorized, "权限校验失败"))
+			c.JSON(http.StatusForbidden, result.Fail(http.StatusForbidden, "权限校验失败"))
 			c.Abort()
 			return
 		}
@@ -42,7 +42,8 @@ func checkUriAuth() gin.HandlerFunc {
 			}
 		}
 		// 如果当前请求的URI不在有权限的节点URL列表中，则返回401
-		c.JSON(http.StatusUnauthorized, result.Fail(http.StatusUnauthorized, "权限校验失败"))
+		c.JSON(http.StatusForbidden, result.Fail(http.StatusForbidden, "权限校验失败"))
 		c.Abort()
+		return
 	}
 }

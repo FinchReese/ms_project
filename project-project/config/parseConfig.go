@@ -26,11 +26,16 @@ type EtcdConfig struct {
 }
 
 type MysqlConfig struct {
-	UserName string
-	Password string
-	Host     string
-	Port     int64
-	Db       string
+	Master    *DbConfig   `mapstructure:"master"`
+	SlaveList []*DbConfig `mapstructure:"slaveList"`
+}
+
+type DbConfig struct {
+	UserName string `mapstructure:"username"`
+	Password string `mapstructure:"password"`
+	Host     string `mapstructure:"host"`
+	Port     int64  `mapstructure:"port"`
+	Db       string `mapstructure:"db"`
 }
 
 type Config struct {
@@ -116,10 +121,9 @@ func (c *Config) ReadEtcdConfig() {
 
 func (c *Config) ReadMysqlConfig() {
 	mc := &MysqlConfig{}
-	mc.UserName = c.viper.GetString("mysql.username")
-	mc.Password = c.viper.GetString("mysql.password")
-	mc.Host = c.viper.GetString("mysql.host")
-	mc.Port = c.viper.GetInt64("mysql.port")
-	mc.Db = c.viper.GetString("mysql.db")
+	err := c.viper.UnmarshalKey("mysql", &mc)
+	if err != nil {
+		log.Fatalln(err)
+	}
 	c.MysqlConf = mc
 }
