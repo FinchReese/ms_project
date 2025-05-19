@@ -4,5 +4,8 @@ WORKDIR /app
 COPY ./target/project-project .
 COPY ./config/app-docker.yaml .
 RUN  mkdir config && mv app-docker.yaml config/app.yaml
+RUN mkdir -p /logs/debug
+RUN mkdir -p /logs/info
+RUN mkdir -p /logs/error
 EXPOSE 8082 8882
 ENTRYPOINT ["./project-project"]
