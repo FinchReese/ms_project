@@ -71,9 +71,10 @@ func init() {
 		}
 		if err = sqlDB.Ping(); err == nil {
 			zap.L().Info("数据库连接成功")
-			break
+			return
 		}
 		zap.L().Error("Ping 数据库失败", zap.Error(err))
 		time.Sleep(ReconnectInterval * time.Second)
 	}
+	panic("连接数据库失败")
 }
