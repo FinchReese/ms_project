@@ -213,10 +213,8 @@ func (ls *LoginService) Login(ctx context.Context, msg *login.LoginMessage) (*lo
 		TokenType:      tokenType,
 	}
 	// 缓存成员信息到redis
-	go func() {
-		marshal, _ := json.Marshal(member)
-		ls.Cache.Put(ctx, model.MemberKeyPrefix+"::"+strconv.FormatInt(member.Id, 10), string(marshal), exp)
-	}()
+	marshal, _ := json.Marshal(member)
+	ls.Cache.Put(ctx, model.MemberKeyPrefix+"::"+strconv.FormatInt(member.Id, 10), string(marshal), exp)
 
 	resp := &login.LoginResponse{
 		Member:           memMsg,
