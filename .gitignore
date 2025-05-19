@@ -2,3 +2,4 @@ project_data/
 ./*/log_dir/
 log_dir/
 ./*/upload
+./*/target
