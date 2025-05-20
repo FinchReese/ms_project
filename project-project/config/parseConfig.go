@@ -1,12 +1,18 @@
 package config
 
 import (
+	"bytes"
 	"log"
 	"os"
 
 	"github.com/go-redis/redis/v8"
+	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 	"github.com/spf13/viper"
 	"test.com/project-common/logs"
+)
+
+const (
+	AppConfigDataId = "app.yaml"
 )
 
 type ServerConfig struct {
@@ -46,21 +52,69 @@ var AppConf = initConfig()
 func initConfig() *Config {
 	v := viper.New()
 	conf := &Config{viper: v}
-	workDir, _ := os.Getwd()
-	conf.viper.SetConfigName("app")
 	conf.viper.SetConfigType("yaml")
-	conf.viper.AddConfigPath(workDir + "/config")
-
-	err := conf.viper.ReadInConfig()
+	var getNacosConfig bool = true
+	// 先尝试从nacos读取配置
+	// 创建nacos客户端
+	nacosClient := InitNacosClient()
+	// 读取nacos配置
+	configContent, err := nacosClient.confClient.GetConfig(vo.ConfigParam{
+		DataId: AppConfigDataId,
+		Group:  nacosClient.group,
+	})
 	if err != nil {
 		log.Fatalln(err)
-		return nil
+		getNacosConfig = false
+	} else {
+		log.Printf("Get config from nacos success, config content: %s\n", configContent)
+		// 将读取到的配置信息传给viper
+		err := conf.viper.ReadConfig(bytes.NewBuffer([]byte(configContent)))
+		if err != nil {
+			log.Fatalln(err)
+			getNacosConfig = false
+		}
 	}
-	conf.ReadGrpcConfig()
-	conf.ReadServerConfig()
-	conf.ReadEtcdConfig()
-	conf.ReadMysqlConfig()
+	// 监听nacos配置文件变化
+	err = nacosClient.confClient.ListenConfig(vo.ConfigParam{
+		DataId: AppConfigDataId,
+		Group:  nacosClient.group,
+		OnChange: func(namespace, group, dataId, data string) {
+			log.Printf("load nacos config changed %s \n", data)
+			err := conf.viper.ReadConfig(bytes.NewBuffer([]byte(data)))
+			if err != nil {
+				log.Printf("load nacos config changed err : %s \n", err.Error())
+				return
+			}
+			//所有的配置应该重新读取
+			conf.ReLoadAllConfig()
+		},
+	})
+	if err != nil {
+		log.Fatalln(err)
+		getNacosConfig = false
+	}
+	// 如果从nacos读取配置失败，则尝试从本地配置文件读取
+	if !getNacosConfig {
+		workDir, _ := os.Getwd()
+		conf.viper.SetConfigName("app")
+		conf.viper.AddConfigPath(workDir + "/config")
+		err := conf.viper.ReadInConfig()
+		if err != nil {
+			log.Fatalln(err)
+			return nil
+		}
+	}
+	conf.ReLoadAllConfig()
 	return conf
+}
+
+func (c *Config) ReLoadAllConfig() {
+	c.ReadGrpcConfig()
+	c.ReadServerConfig()
+	c.ReadEtcdConfig()
+	c.ReadMysqlConfig()
+	InitRedisClient(c.InitRedisOptions())
+	InitMysqlClient(c.MysqlConf)
 }
 
 func (c *Config) InitZapLog() {
