@@ -44,30 +44,30 @@ services:
     ports:
       - ${ETCD_PORT}:2379
       - 2380:2380
-  Project-User:
-    container_name: project-user
-    image: project-user:latest
-    ports:
-      - 8080:8080
-      - 8881:8881
-    depends_on:
-      - Mysql
-      - Redis
-      - Etcd
-  Project-api:
-    container_name: project-api
-    image: project-api:latest
-    ports:
-      - 80:80
-    depends_on:
-      - Etcd
-  project-project:
-    container_name: project-project
-    image: project-project:latest
-    ports:
-      - 8082:8082
-      - 8882:8882
-    depends_on:
-      - Mysql
-      - Redis
-      - Etcd
+  # Project-User:
+  #   container_name: project-user
+  #   image: project-user:latest
+  #   ports:
+  #     - 8080:8080
+  #     - 8881:8881
+  #   depends_on:
+  #     - Mysql
+  #     - Redis
+  #     - Etcd
+  # Project-api:
+  #   container_name: project-api
+  #   image: project-api:latest
+  #   ports:
+  #     - 80:80
+  #   depends_on:
+  #     - Etcd
+  # project-project:
+  #   container_name: project-project
+  #   image: project-project:latest
+  #   ports:
+  #     - 8082:8082
+  #     - 8882:8882
+  #   depends_on:
+  #     - Mysql
+  #     - Redis
+  #     - Etcd

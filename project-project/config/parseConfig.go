@@ -63,14 +63,14 @@ func initConfig() *Config {
 		Group:  nacosClient.group,
 	})
 	if err != nil {
-		log.Fatalln(err)
+		log.Println("nacos get config err, err msg: ", err)
 		getNacosConfig = false
 	} else {
 		log.Printf("Get config from nacos success, config content: %s\n", configContent)
 		// 将读取到的配置信息传给viper
 		err := conf.viper.ReadConfig(bytes.NewBuffer([]byte(configContent)))
 		if err != nil {
-			log.Fatalln(err)
+			log.Println(err)
 			getNacosConfig = false
 		}
 	}
@@ -90,7 +90,7 @@ func initConfig() *Config {
 		},
 	})
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 		getNacosConfig = false
 	}
 	// 如果从nacos读取配置失败，则尝试从本地配置文件读取
@@ -100,7 +100,7 @@ func initConfig() *Config {
 		conf.viper.AddConfigPath(workDir + "/config")
 		err := conf.viper.ReadInConfig()
 		if err != nil {
-			log.Fatalln(err)
+			log.Println(err)
 			return nil
 		}
 	}

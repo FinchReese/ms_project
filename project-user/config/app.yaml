@@ -23,9 +23,9 @@ etcd:
     - "127.0.0.1:2379"
 mysql:
   username: root
-  password: Test_1234
+  password: root
   host: 127.0.0.1
-  port: 3306
+  port: 3309
   db: msproject
 jwt:
   accessExp: 7
