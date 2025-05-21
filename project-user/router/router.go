@@ -5,6 +5,8 @@ import (
 	"net"
 
 	"github.com/gin-gonic/gin"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"test.com/project-common/service_discover"
 	"test.com/project-grpc/user/login"
@@ -35,7 +37,11 @@ func InitRouter(r *gin.Engine) {
 }
 
 func RegisterGrpc() *grpc.Server {
-	s := grpc.NewServer()
+	s := grpc.NewServer(grpc.UnaryInterceptor(
+		grpc_middleware.ChainUnaryServer(
+			otelgrpc.UnaryServerInterceptor(),
+		),
+	))
 	login.RegisterLoginServiceServer(s, &login_service_v1.LoginService{
 		Cache:            dao.Rc,
 		MemberRepo:       dao.MDao,

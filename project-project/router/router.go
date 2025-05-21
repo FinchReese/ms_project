@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	interceptor "test.com/project-common/Interceptor"
 	"test.com/project-common/service_discover"
@@ -59,7 +61,12 @@ func RegisterGrpc() *grpc.Server {
 	}
 	interceptor := interceptor.NewServiceInterceptor(methodToConfigMap, dao.Rc)
 	// 创建GRPC服务器时注册拦截器
-	s := grpc.NewServer(grpc.UnaryInterceptor(interceptor.Intercept))
+	s := grpc.NewServer(grpc.UnaryInterceptor(
+		grpc_middleware.ChainUnaryServer(
+			otelgrpc.UnaryServerInterceptor(),
+			interceptor.Intercept,
+		),
+	))
 	// 注册project服务
 	projectService := project_service_v1.NewProjectService(
 		dao.NewMenuDAO(),
