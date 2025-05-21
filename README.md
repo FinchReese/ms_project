@@ -36,5 +36,8 @@ docker run -d -p 80:80 project-api:latest
 docker run -d -p 8080:8080 -p 8881:8881 project-user:latest
 ```
 
+nacos上传配置文件：http://localhost:8848/nacos/index.html
+账号和密码默认都是nacos
+
 查看链路追踪访问：http://localhost:16686/search
 

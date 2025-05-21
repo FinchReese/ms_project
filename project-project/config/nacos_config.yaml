@@ -1,5 +1,5 @@
 nacos:
-  namespaceId: 230ff904-f07d-43ef-803a-ef7914301758
+  namespaceId: c3b1cc6c-3adc-4e88-9c23-a6fb33f72bbc
   group: dev
   ipAddr: 127.0.0.1
   port: 8848

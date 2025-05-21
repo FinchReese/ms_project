@@ -65,6 +65,9 @@ func initConfig() *Config {
 	if err != nil {
 		log.Println("nacos get config err, err msg: ", err)
 		getNacosConfig = false
+	} else if configContent == "" {
+		log.Printf("nacos not found config, DataId : %s, Group: %s\n", AppConfigDataId, nacosClient.group)
+		getNacosConfig = false
 	} else {
 		log.Printf("Get config from nacos success, config content: %s\n", configContent)
 		// 将读取到的配置信息传给viper
