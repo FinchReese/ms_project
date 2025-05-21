@@ -36,3 +36,5 @@ docker run -d -p 80:80 project-api:latest
 docker run -d -p 8080:8080 -p 8881:8881 project-user:latest
 ```
 
+查看链路追踪访问：http://localhost:16686/search
+
