@@ -39,12 +39,18 @@ type MysqlConfig struct {
 	Db       string
 }
 
+type KafkaConfig struct {
+	Addr  string
+	Topic string
+}
+
 type Config struct {
 	viper      *viper.Viper
 	ServerConf *ServerConfig
 	GrpcConf   *GrpcConfig
 	EtcdConf   *EtcdConfig
 	MysqlConf  *MysqlConfig
+	KafkaConf  *KafkaConfig
 }
 
 var AppConf = initConfig()
@@ -116,6 +122,7 @@ func (c *Config) ReLoadAllConfig() {
 	c.ReadServerConfig()
 	c.ReadEtcdConfig()
 	c.ReadMysqlConfig()
+	c.ReadKafkaConfig()
 	InitRedisClient(c.InitRedisOptions())
 	InitMysqlClient(c.MysqlConf)
 }
@@ -179,4 +186,13 @@ func (c *Config) ReadMysqlConfig() {
 	mc.Port = c.viper.GetInt64("mysql.port")
 	mc.Db = c.viper.GetString("mysql.db")
 	c.MysqlConf = mc
+}
+
+func (c *Config) ReadKafkaConfig() {
+	kafkaConf := &KafkaConfig{}
+	err := c.viper.UnmarshalKey("kafka", &kafkaConf)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	c.KafkaConf = kafkaConf
 }

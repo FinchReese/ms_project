@@ -13,6 +13,7 @@ services:
       - ${MYSQL_DIR}/data:/var/lib/mysql
       - ${MYSQL_DIR}/conf:/etc/mysql/conf.d/
       - ${MYSQL_DIR}/logs:/logs
+      - ${MYSQL_DIR}/conf/init.sql:/docker-entrypoint-initdb.d/init.sql
     command:
       --default-authentication-plugin=mysql_native_password
       --character-set-server=utf8mb4
@@ -53,13 +54,23 @@ services:
       - JVM_XMS=512m
       - JVM_MAX=512m
       - JVM_XMN=256m
+      - SPRING_DATASOURCE_PLATFORM=mysql
+      - MYSQL_SERVICE_HOST=mysql8
+      - MYSQL_SERVICE_DB_NAME=nacos
+      - MYSQL_SERVICE_PORT=3306
+      - MYSQL_SERVICE_USER=root
+      - MYSQL_SERVICE_PASSWORD=root
     privileged: true
     volumes:
       - ${NACOS_DIR}/data:/home/nacos/data
+      - ${NACOS_DIR}/logs:/home/nacos/logs
+      - nacos-conf:/home/nacos/conf
     ports:
       - 8848:8848
       - 9848:9848
       - 9849:9849
+    depends_on:
+      - Mysql
   Jaeger:
     container_name: jaeger
     image: jaegertracing/all-in-one:1.41
@@ -109,7 +120,54 @@ services:
       KAFKA_RESTART_ATTEMPTS: "10"
       KAFKA_RESTART_DELAY: "5"
       ZOOKEEPER_AUTOPURGE_PURGE_INTERVAL: "0"
-
+  es:
+    container_name: es
+    image: elasticsearch:8.6.0
+    volumes:
+      - ${ES_DIR}/data:/usr/share/elasticsearch/data
+      - ${ES_DIR}/logs:/usr/share/elasticsearch/logs
+      - ${ES_DIR}/plugins:/usr/share/elasticsearch/plugins
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      - node.name=es
+      - cluster.name=elasticsearch
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+    privileged: true
+  kibana:
+    image: kibana:8.6.0
+    container_name: kibana
+    depends_on:
+      - es
+    environment:
+      SERVER_NAME: kibana
+      SERVER_HOST: "0.0.0.0"
+      ELASTICSEARCH_HOSTS: http://es:9200
+    ports:
+      - 5601:5601
+  logstash:
+    image: logstash:8.6.0
+    container_name: logstash
+    volumes:
+      - ${LOGSTASH_DIR}/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ${LOGSTASH_DIR}/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ${LOGSTASH_DIR}/log/:/home/public/
+    ports:
+      - '5044:5044'
+      - '50000:50000/tcp'
+      - '50000:50000/udp'
+      - '9600:9600'
+    environment:
+      LS_JAVA_OPTS: -Xms1024m -Xmx1024m
+      TZ: Asia/Shanghai
+      MONITORING_ENABLED: false
+    depends_on:
+      - es
   # Project-User:
   #   container_name: project-user
   #   image: project-user:latest
@@ -137,3 +195,10 @@ services:
   #     - Mysql
   #     - Redis
   #     - Etcd
+volumes:
+  nacos-conf:
+    driver: local
+    driver_opts:
+      type: 'none'
+      device: '${NACOS_DIR}/conf'
+      o: 'bind'

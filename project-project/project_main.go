@@ -10,6 +10,7 @@ import (
 	common "test.com/project-common"
 	"test.com/project-common/trace"
 	"test.com/project-project/config"
+	"test.com/project-project/internal/kafka_log"
 	"test.com/project-project/router"
 )
 
@@ -31,8 +32,11 @@ func main() {
 	router.RegisterGrpcAddrConf()
 	// 启动grpc服务器
 	grpcServer := router.RegisterGrpc()
+	// 初始化kafka日志写入器
+	writerStopFunc := kafka_log.InitKafkaWriter()
 	stop := func() {
 		grpcServer.Stop()
+		writerStopFunc()
 	}
 	common.Run(r, config.AppConf.ServerConf.Name, config.AppConf.ServerConf.Addr, stop)
 }

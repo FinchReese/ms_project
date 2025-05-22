@@ -9,6 +9,7 @@ import (
 	"go.uber.org/zap"
 	"test.com/project-common/encrypt"
 	"test.com/project-common/errs"
+	"test.com/project-common/kk"
 	"test.com/project-common/time_format"
 	"test.com/project-grpc/project"
 	"test.com/project-grpc/user/login"
@@ -16,6 +17,7 @@ import (
 	"test.com/project-project/internal/database/gorm"
 	"test.com/project-project/internal/database/trans"
 	"test.com/project-project/internal/domain"
+	"test.com/project-project/internal/kafka_log"
 	"test.com/project-project/internal/repo"
 	"test.com/project-project/internal/rpc"
 	"test.com/project-project/pkg/model"
@@ -78,6 +80,11 @@ func (p *ProjectService) GetProjectList(ctx context.Context, req *project.GetPro
 		project.OwnerName = req.MemberName
 	}
 	resp.Total = total
+	kafka_log.SendLog(kk.Info("Get Project List succ", "ProjectService.GetProjectList", kk.FieldMap{
+		"member id":    req.GetMemberId(),
+		"selectby":     req.GetSelectBy(),
+		"project list": projectList,
+	}))
 	return resp, nil
 }
 

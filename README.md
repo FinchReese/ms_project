@@ -41,3 +41,7 @@ nacos上传配置文件：http://localhost:8848/nacos/index.html
 
 查看链路追踪访问：http://localhost:16686/search
 
+ES安装ik分词器命令：
+```
+docker-compose exec es elasticsearch-plugin install https://get.infini.cloud/elasticsearch/analysis-ik/8.6.0
+```
