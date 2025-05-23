@@ -691,8 +691,14 @@ func (ts *TaskService) GetTaskLinkFiles(ctx context.Context, req *task.GetTaskLi
 	// 整理展示的文件信息
 	var sourceLinkDisplayList []*data.SourceLinkDisplay
 	for _, sourceLink := range sourceLinkList {
-		sourceLinkDisplay := sourceLink.ToDisplay(fileIdToFile[sourceLink.SourceCode])
-		sourceLinkDisplayList = append(sourceLinkDisplayList, sourceLinkDisplay)
+		if fileInfo, ok := fileIdToFile[sourceLink.SourceCode]; ok {
+			sourceLinkDisplay := sourceLink.ToDisplay(fileInfo)
+			sourceLinkDisplayList = append(sourceLinkDisplayList, sourceLinkDisplay)
+		} else {
+			zap.L().Error("file data Lost", zap.Int64("sourceCode", sourceLink.SourceCode))
+			return nil, errs.GrpcError(model.FileDataLost)
+		}
+
 	}
 	// 组织回复消息
 	var taskLinkFiles []*task.TaskLinkFile
