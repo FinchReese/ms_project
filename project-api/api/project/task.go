@@ -1,21 +1,23 @@
 package project
 
 import (
+	"bytes"
 	"context"
 	"io"
 	"net/http"
-	"os"
 	"path"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
-	"go.uber.org/zap"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
+	"test.com/project-api/config"
 	"test.com/project-api/pkg/model/project"
 	model_project "test.com/project-api/pkg/model/project"
 	common "test.com/project-common"
 	"test.com/project-common/errs"
-	"test.com/project-common/fs"
 	"test.com/project-common/time_format"
 	"test.com/project-grpc/task"
 )
@@ -431,31 +433,74 @@ func uploadFile(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, result.Fail(http.StatusBadRequest, "打开文件内容失败"))
 		return
 	}
-	saveDir := "upload/" + req.ProjectCode + "/" + req.TaskCode + "/" + time_format.ConvertTimeToDate(time.Now())
-	// 如果文件夹不存在，则创建文件夹
-	if !fs.FileExists(saveDir) {
-		os.MkdirAll(saveDir, os.ModePerm)
-	}
-	savePath := saveDir + "/" + file.Filename
-	// 将上传文件的内容追加到保存文件
-	saveFile, err := os.OpenFile(savePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, os.ModePerm)
-	if err != nil {
-		zap.L().Error("打开文件错误", zap.Error(err))
-		ctx.JSON(http.StatusInternalServerError, result.Fail(http.StatusBadRequest, "打开文件错误"))
-		return
-	}
-	defer saveFile.Close()
+	defer fileContent.Close()
 	buf := make([]byte, req.CurrentChunkSize)
 	_, err = io.ReadFull(fileContent, buf)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, result.Fail(http.StatusBadRequest, "读取上传文件内容失败"))
 		return
 	}
-	_, err = saveFile.Write(buf)
+	// 初始化 MinIO 客户端
+	minioClient, err := minio.New(config.AppConf.MinIOConf.Endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(config.AppConf.MinIOConf.AccessKey, config.AppConf.MinIOConf.SecretKey, ""),
+		Secure: config.AppConf.MinIOConf.UseSSL,
+	})
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, result.Fail(http.StatusBadRequest, "保存文件内容失败"))
+		ctx.JSON(http.StatusInternalServerError, result.Fail(http.StatusBadRequest, "初始化minIO客户端失败"))
 		return
 	}
+	// 文件只有一个分别直接上传到minIO服务器即可
+	if req.TotalChunks == 1 {
+		_, err := minioClient.PutObject(
+			context.TODO(),
+			config.AppConf.MinIOConf.Bucket,
+			req.Filename,
+			bytes.NewReader(buf),
+			int64(len(buf)),
+			minio.PutObjectOptions{ContentType: file.Header.Get("Content-Type")},
+		)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, result.Fail(http.StatusBadRequest, "上传文件失败"))
+			return
+		}
+	} else if req.TotalChunks > 1 { // 文件有多个分片需要合并
+		// 每次先把文件分片上传到minIO服务器
+		_, err := minioClient.PutObject(
+			context.TODO(),
+			config.AppConf.MinIOConf.Bucket,
+			req.Filename+"/"+strconv.Itoa(req.ChunkNumber),
+			bytes.NewReader(buf),
+			int64(len(buf)),
+			minio.PutObjectOptions{ContentType: file.Header.Get("Content-Type")},
+		)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, result.Fail(http.StatusBadRequest, "上传文件失败"))
+			return
+		}
+		// 最后一个文件分片上传完成把所有文件分片合并
+		if req.ChunkNumber == req.TotalChunks {
+			// 创建源对象列表
+			sourceList := make([]minio.CopySrcOptions, req.TotalChunks)
+			for i := 1; i <= req.TotalChunks; i++ {
+				sourceList[i-1] = minio.CopySrcOptions{
+					Bucket: config.AppConf.MinIOConf.Bucket,
+					Object: req.Filename + "/" + strconv.Itoa(i),
+				}
+			}
+			// 创建目标对象
+			dst := minio.CopyDestOptions{
+				Bucket: config.AppConf.MinIOConf.Bucket,
+				Object: req.Filename,
+			}
+			// 合并文件
+			_, err = minioClient.ComposeObject(context.TODO(), dst, sourceList...)
+			if err != nil {
+				ctx.JSON(http.StatusInternalServerError, result.Fail(http.StatusBadRequest, "合并文件失败"))
+				return
+			}
+		}
+	}
+	savePath := "ms-project/" + req.Filename
 	// 最后一个文件分片处理完成需要记录文件信息
 	if req.ChunkNumber == req.TotalChunks {
 		// 调用GRPC服务存储文件信息
@@ -485,7 +530,7 @@ func uploadFile(ctx *gin.Context) {
 		File:        savePath,
 		Hash:        "",
 		Key:         savePath,
-		Url:         "http://localhost/" + savePath,
+		Url:         "http://localhost:9009/" + savePath,
 		ProjectName: req.ProjectName,
 	}
 	ctx.JSON(http.StatusOK, result.Success(resp))

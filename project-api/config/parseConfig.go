@@ -17,10 +17,19 @@ type EtcdConfig struct {
 	Addrs []string
 }
 
+type MinIOConfig struct {
+	Endpoint  string
+	AccessKey string
+	SecretKey string
+	UseSSL    bool
+	Bucket    string
+}
+
 type Config struct {
 	viper      *viper.Viper
 	ServerConf *ServerConfig
 	EtcdConf   *EtcdConfig
+	MinIOConf  *MinIOConfig
 }
 
 var AppConf = initConfig()
@@ -40,6 +49,7 @@ func initConfig() *Config {
 	}
 	conf.ReadServerConfig()
 	conf.ReadEtcdConfig()
+	conf.ReadMinIOConfig()
 	return conf
 }
 
@@ -75,4 +85,13 @@ func (c *Config) ReadEtcdConfig() {
 	}
 	ec.Addrs = addrs
 	c.EtcdConf = ec
+}
+
+func (c *Config) ReadMinIOConfig() {
+	minIOConf := &MinIOConfig{}
+	err := c.viper.UnmarshalKey("minIO", &minIOConf)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	c.MinIOConf = minIOConf
 }

@@ -79,4 +79,5 @@ var (
 	ParseTaskIdError               = errs.NewError(2070, "解析任务id出错")
 	InvalidProjectCodeOrTaskCode   = errs.NewError(2071, "无效的项目编码或任务编码")
 	GetProjectCodeByTaskIdError    = errs.NewError(2072, "根据任务id获取项目编码出错")
+	FileDataLost                   = errs.NewError(2073, "文件数据丢失")
 )

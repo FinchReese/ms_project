@@ -11,3 +11,9 @@ zap:
 etcd:
   addrs:
     - "127.0.0.1:2379"
+minIO:
+  endpoint: "127.0.0.1:9009"
+  accessKey: "eZANw0jSInaeJ4cW5BXd"
+  secretKey: "OhSSkVEZXpvrsqAvRreTVblqZBQ5jjKTD6KAGgLW"
+  useSSL: false
+  bucket: "ms-project"
