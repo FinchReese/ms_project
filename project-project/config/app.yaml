@@ -29,4 +29,3 @@ mysql:
   db: msproject
 kafka:
   addr: "localhost:9092"
-  topic: "msproject_log"

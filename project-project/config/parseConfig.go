@@ -40,8 +40,7 @@ type MysqlConfig struct {
 }
 
 type KafkaConfig struct {
-	Addr  string
-	Topic string
+	Addr string
 }
 
 type Config struct {

@@ -58,6 +58,10 @@ func RegisterGrpc() *grpc.Server {
 			Resp:   &project.GetProjectListResp{},
 			Expire: time.Duration(cacheExpire) * time.Minute,
 		},
+		"/task.service.v1.TaskService/GetTasksByStageCode": {
+			Resp:   &task.GetTasksByStageCodeResp{},
+			Expire: time.Duration(cacheExpire) * time.Minute,
+		},
 	}
 	interceptor := interceptor.NewServiceInterceptor(methodToConfigMap, dao.Rc)
 	// 创建GRPC服务器时注册拦截器

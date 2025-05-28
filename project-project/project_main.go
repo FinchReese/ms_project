@@ -34,9 +34,13 @@ func main() {
 	grpcServer := router.RegisterGrpc()
 	// 初始化kafka日志写入器
 	writerStopFunc := kafka_log.InitKafkaWriter()
+	// 初始化kafka缓存读取器
+	cacheReader := kafka_log.NewKafkaCache()
+	go cacheReader.DeleteCache()
 	stop := func() {
 		grpcServer.Stop()
 		writerStopFunc()
+		cacheReader.Close()
 	}
 	common.Run(r, config.AppConf.ServerConf.Name, config.AppConf.ServerConf.Addr, stop)
 }

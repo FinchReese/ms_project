@@ -15,6 +15,7 @@ import (
 	"test.com/project-project/internal/database/gorm"
 	"test.com/project-project/internal/database/trans"
 	"test.com/project-project/internal/domain"
+	"test.com/project-project/internal/kafka_log"
 	"test.com/project-project/internal/repo"
 	"test.com/project-project/internal/rpc"
 	"test.com/project-project/pkg/model"
@@ -274,7 +275,7 @@ func (ts *TaskService) SaveTask(ctx context.Context, req *task.SaveTaskReq) (*ta
 			}
 		}
 	}
-
+	kafka_log.SendCache([]byte("task"))
 	return resp, nil
 }
 

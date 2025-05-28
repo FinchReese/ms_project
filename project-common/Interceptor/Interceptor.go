@@ -3,6 +3,7 @@ package interceptor
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"time"
 
 	"go.uber.org/zap"
@@ -13,6 +14,8 @@ import (
 type Cache interface {
 	Put(ctx context.Context, key, value string, expire time.Duration) error
 	Get(ctx context.Context, key string) (string, error)
+	// 添加元素到指定集合
+	SetAdd(ctx context.Context, key string, value string) error
 }
 
 type RespCacheConfig struct {
@@ -43,16 +46,32 @@ func (s *ServiceInterceptor) Intercept(ctx context.Context, req any, info *grpc.
 	cacheCtx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 	marshal, _ := json.Marshal(req)
-	cacheKey := encrypt.Md5(string(marshal))
-	respJson, _ := s.cache.Get(cacheCtx, info.FullMethod+"::"+cacheKey)
+	reqJson := encrypt.Md5(string(marshal))
+	cacheKey := info.FullMethod + "::" + reqJson
+	respJson, _ := s.cache.Get(cacheCtx, cacheKey)
 	if respJson != "" { // 有缓存直接回复缓存
 		json.Unmarshal([]byte(respJson), respCacheConfig.Resp)
 		zap.L().Info(info.FullMethod + "应用缓存")
 		return respCacheConfig.Resp, nil
 	}
 	resp, err := handler(ctx, req)
-	bytes, _ := json.Marshal(resp)
-	s.cache.Put(cacheCtx, info.FullMethod+"::"+cacheKey, string(bytes), respCacheConfig.Expire)
-	zap.L().Info(info.FullMethod + " 放入缓存")
+	if err != nil {
+		return resp, err
+	}
+	bytes, err := json.Marshal(resp)
+	if err != nil {
+		zap.L().Error(info.FullMethod+" 放入缓存失败", zap.Error(err))
+		return nil, err
+	}
+	err = s.cache.Put(cacheCtx, cacheKey, string(bytes), respCacheConfig.Expire)
+	if err != nil {
+		zap.L().Error(info.FullMethod+" 放入缓存失败", zap.Error(err))
+		return nil, err
+	}
+	zap.L().Info(info.FullMethod + " 放入缓存成功")
+	// 将缓存key存入task集合
+	if strings.HasPrefix(info.FullMethod, "/task.service.v1") {
+		s.cache.SetAdd(cacheCtx, "task", cacheKey)
+	}
 	return resp, err
 }
