@@ -7,3 +7,8 @@ curl -o nacos-mysql.sql https://raw.githubusercontent.com/alibaba/nacos/2.2.0/di
 ```shell
 kubectl create configmap nacos-mysql-structure --from-file=nacos-mysql.sql -n ms-project
 ```
+
+# 测试nacos
+```shell
+kubectl port-forward --address 0.0.0.0 svc/nacos-service -n ms-project 8848:8848
+```
