@@ -12,4 +12,5 @@ kubectl create configmap mysql-structure --from-file=msproject.sql -n ms-project
 # 进入pod执行命令
 ```shell
 kubectl exec -it mysql-master-0 -n ms-project -- bash
+kubectl exec -it mysql-slave-0 -n ms-project -- bash
 ```
