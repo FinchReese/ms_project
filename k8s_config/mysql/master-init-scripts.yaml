@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-master-init-scripts
+  namespace: ms-project
+data:
+  init-master.sh: |
+    #!/bin/bash
+    # 等待 MySQL 服务启动
+    until mysql -uroot -p${MYSQL_ROOT_PASSWORD} -e "SELECT 1" >/dev/null 2>&1; do
+      echo "Waiting for MySQL to be ready..."
+      sleep 2
+    done
+    # 登录
+    mysql -uroot -p${MYSQL_ROOT_PASSWORD} << EOF
+    # 创建用于主从复制的用户
+    CREATE USER 'repl'@'%' IDENTIFIED BY 'repl_password';
+    GRANT REPLICATION SLAVE ON *.* TO 'repl'@'%';
+    FLUSH PRIVILEGES;
+    EOF

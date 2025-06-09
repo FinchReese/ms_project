@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-slave-init-scripts
+  namespace: ms-project
+data:
+  init-slave.sh: |
+    #!/bin/bash
+    # 等待 MySQL 服务启动
+    until mysql -uroot -p${MYSQL_ROOT_PASSWORD} -e "SELECT 1" >/dev/null 2>&1; do
+      echo "Waiting for MySQL to be ready..."
+      sleep 2
+    done
+
+    # 等待主库就绪
+    until mysql -h mysql-master -uroot -p${MYSQL_ROOT_PASSWORD} -e "SELECT 1" >/dev/null 2>&1; do
+      echo "Waiting for master to be ready..."
+      sleep 2
+    done
+
+    # 获取主库状态
+    MASTER_STATUS=$(mysql -h mysql-master -uroot -p${MYSQL_ROOT_PASSWORD} -e "SHOW MASTER STATUS\G")
+    MASTER_LOG_FILE=$(echo "$MASTER_STATUS" | grep File | awk '{print $2}')
+    MASTER_LOG_POS=$(echo "$MASTER_STATUS" | grep Position | awk '{print $2}')
+    echo "==hzy== ls -l /docker-entrypoint-initdb.d: $(ls -l /docker-entrypoint-initdb.d)"
+
+    mysql -uroot -p${MYSQL_ROOT_PASSWORD} << EOF
+    SELECT '==hzy== 111' as message;
+    STOP SLAVE;
+    CHANGE MASTER TO
+      MASTER_HOST='mysql-master',
+      MASTER_USER='repl',
+      MASTER_PASSWORD='repl_password',
+      MASTER_LOG_FILE='$MASTER_LOG_FILE',
+      MASTER_LOG_POS=$MASTER_LOG_POS;
+    START SLAVE;
+    SELECT '==hzy== 222' as message;
+    EOF

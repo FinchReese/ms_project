@@ -1,0 +1,79 @@
+# k8s_config/mysql/slave-statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql-slave
+  namespace: ms-project
+spec:
+  serviceName: mysql-slave
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mysql-slave
+  template:
+    metadata:
+      labels:
+        app: mysql-slave
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8.0.20
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-root-password
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-user
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-password
+        - name: MYSQL_DATABASE
+          value: "msproject"
+        volumeMounts:
+        - name: mysql-data
+          mountPath: /var/lib/mysql
+        - name: mysql-config
+          mountPath: /etc/mysql/conf.d/my.cnf
+          subPath: my.cnf
+        - name: time-zone
+          mountPath: /etc/localtime
+        - name: mysql-structure
+          mountPath: /docker-entrypoint-initdb.d/msproject.sql
+          subPath: msproject.sql
+        - name: mysql-init-scripts
+          mountPath: /docker-entrypoint-initdb.d/init-slave.sh
+          subPath: init-slave.sh
+      volumes:
+      - name: mysql-config
+        configMap:
+          name: mysql-slave-config
+      - name: time-zone
+        hostPath:
+          path: /etc/localtime
+      - name: mysql-structure
+        configMap:
+          name: mysql-structure
+          items:
+          - key: msproject.sql
+            path: msproject.sql
+      - name: mysql-init-scripts
+        configMap:
+          name: mysql-slave-init-scripts
+  volumeClaimTemplates:
+  - metadata:
+      name: mysql-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: cbs
+      resources:
+        requests:
+          storage: 10Gi
