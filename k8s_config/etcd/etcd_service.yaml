@@ -1,0 +1,12 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: etcd3
+  namespace: ms-project
+spec:
+  selector:
+    app: etcd
+  ports:
+  - port: 2379
+    name: etcd-client
+    targetPort: 2379
