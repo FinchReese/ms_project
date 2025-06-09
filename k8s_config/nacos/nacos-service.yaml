@@ -1,0 +1,19 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: nacos-service
+  namespace: ms-project
+spec:
+  clusterIP: None  # Headless Service
+  selector:
+    app: nacos
+  ports:
+  - port: 8848
+    name: server
+    targetPort: 8848
+  - port: 9848
+    name: client-rpc
+    targetPort: 9848
+  - port: 9849
+    name: raft-rpc
+    targetPort: 9849
