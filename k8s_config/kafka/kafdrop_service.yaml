@@ -1,0 +1,14 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: kafdrop
+  namespace: ms-project
+spec:
+  type: NodePort
+  selector:
+    app: kafdrop
+  ports:
+  - port: 9000
+    name: kafdrop
+    targetPort: 9000
+    nodePort: 31094

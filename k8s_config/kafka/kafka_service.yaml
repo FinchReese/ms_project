@@ -1,0 +1,18 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: kafka
+  namespace: ms-project
+spec:
+  selector:
+    app: kafka
+  ports:
+  - port: 2181
+    name: zk
+    targetPort: 2181
+  - port: 9092
+    name: kafka-server
+    targetPort: 9092
+  - port: 29092
+    name: kafka-internal
+    targetPort: 29092
