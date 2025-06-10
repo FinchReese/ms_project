@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: logstash
+  namespace: ms-project
+spec:
+  type: ClusterIP
+  selector:
+    app: logstash
+  ports:
+  - port: 5044
+    name: web
+    targetPort: 5044

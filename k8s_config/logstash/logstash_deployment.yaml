@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logstash
+  namespace: ms-project
+  labels:
+    app: logstash
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: logstash
+  template:
+    metadata:
+      labels:
+        app: logstash
+    spec:
+      containers:
+      - name: logstash
+        image: logstash:8.6.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5044
+          protocol: TCP
+        - containerPort: 50000
+          protocol: TCP
+        - containerPort: 50000
+          protocol: UDP
+        - containerPort: 9600
+          protocol: TCP
+        securityContext:
+          privileged: true
+        env:
+        - name: LS_JAVA_OPTS
+          value: "-Xms1024m -Xmx1024m"
+        - name: TZ
+          value: "Asia/Shanghai"
+        - name: MONITORING_ENABLED
+          value: "false"
+        volumeMounts:
+        - name: logstash-config
+          mountPath: /usr/share/logstash/pipeline/logstash.conf
+          subPath: logstash.conf
+        - name: logstash-yml
+          mountPath: /usr/share/logstash/config/logstash.yml
+          subPath: logstash.yml
+      volumes:
+      - name: logstash-config
+        configMap:
+          name: logstash-configmap
+      - name: logstash-yml
+        configMap:
+          name: logstash-yml

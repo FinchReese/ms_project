@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logstash-configmap
+  namespace: ms-project
+data:
+  logstash.conf: |-
+    input {
+      kafka {
+        topics => "msproject_log"
+        bootstrap_servers => ["kafka:29092"]
+        codec => "json"
+      }
+    }
+    output {
+      elasticsearch {
+        hosts => ["es:9200"]
+        index => "msproject_log-%{+YYYY.MM.dd}"
+      }
+    }
