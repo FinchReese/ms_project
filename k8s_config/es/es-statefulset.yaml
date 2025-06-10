@@ -1,0 +1,85 @@
+# k8s_config/es/es-statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: es
+  namespace: ms-project
+spec:
+  serviceName: es
+  replicas: 2
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      securityContext:
+        fsGroup: 1000
+      initContainers:
+      - name: fix-permissions
+        image: busybox
+        command: ["sh", "-c", "chown -R 1000:1000 /usr/share/elasticsearch/data"]
+        securityContext:
+          runAsUser: 0
+        volumeMounts:
+        - name: es-data
+          mountPath: /usr/share/elasticsearch/data
+      containers:
+      - name: elasticsearch
+        image: elasticsearch:7.17.9
+        ports:
+        - containerPort: 9200
+          name: http
+        - containerPort: 9300
+          name: transport
+        env:
+        - name: ES_JAVA_OPTS
+          value: "-Xms512m -Xmx512m"
+        - name: node.name
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: cluster.name
+          value: "msproject-es"
+        - name: discovery.seed_hosts
+          value: "es-0.es.ms-project.svc.cluster.local:9300,es-1.es.ms-project.svc.cluster.local:9300"
+        - name: cluster.initial_master_nodes
+          value: "es-0,es-1"
+        - name: xpack.security.enabled
+          value: "false"
+        - name: node.master
+          value: "true"
+        - name: node.data
+          value: "true"
+        - name: node.ingest
+          value: "true"
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+        volumeMounts:
+        - name: es-data
+          mountPath: /usr/share/elasticsearch/data
+        - name: es-config
+          mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
+          subPath: elasticsearch.yml
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: es-config
+        configMap:
+          name: es-config
+  volumeClaimTemplates:
+  - metadata:
+      name: es-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi

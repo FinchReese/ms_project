@@ -1,0 +1,18 @@
+# k8s_config/es/es-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: es-config
+  namespace: ms-project
+data:
+  elasticsearch.yml: |
+    cluster.name: "msproject-es"
+    network.host: 0.0.0.0
+    discovery.seed_hosts: ["es-0.es.ms-project.svc.cluster.local:9300", "es-1.es.ms-project.svc.cluster.local:9300"]
+    cluster.initial_master_nodes: ["es-0", "es-1"]
+    xpack.security.enabled: false
+    http.cors.enabled: true
+    http.cors.allow-origin: "*"
+    node.master: true
+    node.data: true
+    node.ingest: true
