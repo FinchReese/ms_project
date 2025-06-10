@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: minio
+  namespace: ms-project
+  labels:
+    app: minio
+spec:
+  serviceName: "minio"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minio
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      securityContext:
+        fsGroup: 1001
+        runAsUser: 1001
+        runAsGroup: 1001
+      initContainers:
+      - name: fix-permissions
+        image: busybox:1.35
+        command: ['sh', '-c']
+        args:
+        - |
+          chown -R 1001:1001 /bitnami/minio/data
+          chmod -R 755 /bitnami/minio/data
+        volumeMounts:
+        - name: minio-data
+          mountPath: /bitnami/minio/data
+        securityContext:
+          runAsUser: 0
+      containers:
+      - name: minio
+        image: bitnami/minio:2023
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9000
+          protocol: TCP
+        - containerPort: 9001
+          protocol: TCP
+        env:
+        - name: MINIO_ROOT_USER
+          value: "admin"
+        - name: MINIO_ROOT_PASSWORD
+          value: "admin123456"
+        - name: MINIO_DEFAULT_BUCKETS
+          value: "ms-project"
+        volumeMounts:
+        - name: minio-data
+          mountPath: /bitnami/minio/data
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+  volumeClaimTemplates:
+  - metadata:
+      name: minio-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: cbs
+      resources:
+        requests:
+          storage: 10Gi
