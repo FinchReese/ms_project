@@ -7,17 +7,17 @@ GOOS=linux GOARCH=amd64 go build -o project-user/target/project-user project-use
 ```
 切换到project-api目录下，执行以下命令创建project-api镜像
 ```shell
-docker build -t project-api:latest .
+docker build -t project-api:v1.0.1 .
 ```
 
 切换到project-user目录下，执行以下命令创建project-user镜像
 ```shell
-docker build -t project-user:latest .
+docker build -t project-user:v1.0.1 .
 ```
 
 切换到project-project目录下，执行以下命令创建project-project镜像
 ```shell
-docker build -t project-project:latest .
+docker build -t project-project:v1.0.1 .
 ```
 
 回到根目录，执行以下命令启动容器
