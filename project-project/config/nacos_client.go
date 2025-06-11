@@ -16,6 +16,10 @@ type NacosClient struct {
 
 func InitNacosClient() *NacosClient {
 	bootConf := InitBootConfig()
+	if bootConf == nil {
+		log.Println("get boot conf err")
+		return nil
+	}
 	clientConfig := constant.ClientConfig{
 		NamespaceId:         bootConf.NacosConfig.NamespaceId,
 		NotLoadCacheAtStart: true,
@@ -38,7 +42,8 @@ func InitNacosClient() *NacosClient {
 		},
 	)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println("NewConfigClient err:", err)
+		return nil
 	}
 	nc := &NacosClient{
 		confClient: configClient,
