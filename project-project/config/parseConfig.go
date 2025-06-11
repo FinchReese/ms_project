@@ -2,6 +2,8 @@ package config
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"log"
 	"os"
 
@@ -54,33 +56,29 @@ type Config struct {
 
 var AppConf = initConfig()
 
-func initConfig() *Config {
-	v := viper.New()
-	conf := &Config{viper: v}
-	conf.viper.SetConfigType("yaml")
-	var getNacosConfig bool = true
-	// 先尝试从nacos读取配置
+// 从nacos读取配置
+func getConfigFromNacos(conf *Config) error {
 	// 创建nacos客户端
 	nacosClient := InitNacosClient()
+	if nacosClient == nil {
+		return errors.New("Init nacos client err.")
+	}
 	// 读取nacos配置
 	configContent, err := nacosClient.confClient.GetConfig(vo.ConfigParam{
 		DataId: AppConfigDataId,
 		Group:  nacosClient.group,
 	})
 	if err != nil {
-		log.Println("nacos get config err, err msg: ", err)
-		getNacosConfig = false
-	} else if configContent == "" {
-		log.Printf("nacos not found config, DataId : %s, Group: %s\n", AppConfigDataId, nacosClient.group)
-		getNacosConfig = false
-	} else {
-		log.Printf("Get config from nacos success, config content: %s\n", configContent)
-		// 将读取到的配置信息传给viper
-		err := conf.viper.ReadConfig(bytes.NewBuffer([]byte(configContent)))
-		if err != nil {
-			log.Println(err)
-			getNacosConfig = false
-		}
+		return fmt.Errorf("nacos get config err, err msg: %v", err)
+	}
+	if configContent == "" {
+		return fmt.Errorf("nacos not found config, DataId : %s, Group: %s", AppConfigDataId, nacosClient.group)
+	}
+	log.Printf("Get config from nacos success, config content: %s\n", configContent)
+	// 将读取到的配置信息传给viper
+	err = conf.viper.ReadConfig(bytes.NewBuffer([]byte(configContent)))
+	if err != nil {
+		return err
 	}
 	// 监听nacos配置文件变化
 	err = nacosClient.confClient.ListenConfig(vo.ConfigParam{
@@ -98,15 +96,28 @@ func initConfig() *Config {
 		},
 	})
 	if err != nil {
-		log.Println(err)
-		getNacosConfig = false
+		return err
 	}
+	return nil
+}
+
+func getConfigFromLocalFile(conf *Config) error {
+	workDir, _ := os.Getwd()
+	conf.viper.SetConfigName("app")
+	conf.viper.AddConfigPath(workDir + "/config")
+	err := conf.viper.ReadInConfig()
+	return err
+}
+
+func initConfig() *Config {
+	v := viper.New()
+	conf := &Config{viper: v}
+	conf.viper.SetConfigType("yaml")
+	err := getConfigFromNacos(conf)
 	// 如果从nacos读取配置失败，则尝试从本地配置文件读取
-	if !getNacosConfig {
-		workDir, _ := os.Getwd()
-		conf.viper.SetConfigName("app")
-		conf.viper.AddConfigPath(workDir + "/config")
-		err := conf.viper.ReadInConfig()
+	if err != nil {
+		log.Println(err)
+		err = getConfigFromLocalFile(conf)
 		if err != nil {
 			log.Println(err)
 			return nil
