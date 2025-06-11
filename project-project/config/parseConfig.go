@@ -61,7 +61,7 @@ func getConfigFromNacos(conf *Config) error {
 	// 创建nacos客户端
 	nacosClient := InitNacosClient()
 	if nacosClient == nil {
-		return errors.New("Init nacos client err.")
+		return errors.New("Init nacos client err")
 	}
 	// 读取nacos配置
 	configContent, err := nacosClient.confClient.GetConfig(vo.ConfigParam{
@@ -72,9 +72,9 @@ func getConfigFromNacos(conf *Config) error {
 		return fmt.Errorf("nacos get config err, err msg: %v", err)
 	}
 	if configContent == "" {
-		return fmt.Errorf("nacos not found config, DataId : %s, Group: %s", AppConfigDataId, nacosClient.group)
+		return fmt.Errorf("nacos not found config")
 	}
-	log.Printf("Get config from nacos success, config content: %s\n", configContent)
+	log.Printf("Get config from nacos success, config content:\n%s\n", configContent)
 	// 将读取到的配置信息传给viper
 	err = conf.viper.ReadConfig(bytes.NewBuffer([]byte(configContent)))
 	if err != nil {
@@ -119,10 +119,11 @@ func initConfig() *Config {
 		log.Println(err)
 		err = getConfigFromLocalFile(conf)
 		if err != nil {
-			log.Println(err)
+			log.Printf("Get config from local file err: %v\n", err)
 			return nil
 		}
 	}
+	log.Println("Get config from local file success")
 	conf.ReLoadAllConfig()
 	return conf
 }
