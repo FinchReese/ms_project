@@ -15,7 +15,7 @@ redis:
   db: 0
 grpc:
   addr: "project-project:8882"
-  name: "login"
+  name: "project"
   version: "1.0.0"
   weight: 2
 etcd:
@@ -27,3 +27,5 @@ mysql:
   host: mysql8
   port: 3306
   db: msproject
+kafka:
+  addr: "kafka:9092"
