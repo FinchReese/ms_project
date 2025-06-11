@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: project-user
+  namespace: ms-project
+  labels:
+    app: project-user
+spec:
+  selector:
+    app: project-user
+  ports:
+    - name: project-user-port
+      protocol: TCP
+      port: 8881
+      targetPort: 8881

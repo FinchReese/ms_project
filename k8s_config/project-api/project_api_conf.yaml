@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: project-api
+  namespace: ms-project
+data:
+  config.yaml: |-
+    server:
+      name: "project-api"
+      addr: "0.0.0.0:80"
+    zap:
+      debugFileName: "/logs/debug/project-debug.log"
+      infoFileName: "/logs/info/project-info.log"
+      warnFileName: "/logs/error/project-error.log"
+      maxSize: 500,
+      maxAge: 28,
+      MaxBackups: 3
+    etcd:
+      addrs:
+        - "etcd3:2379"
+    minIO:
+      endpoint: "minio:9009"
+      accessKey: "admin"
+      secretKey: "admin123456"
+      useSSL: false
+      bucket: "ms-project"

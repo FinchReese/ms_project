@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: project-user
+  namespace: ms-project
+data:
+  app.yaml: |-
+    server:
+      name: "project-user"
+      addr: "0.0.0.0:8080"
+    zap:
+      debugFileName: "/logs/debug/project-debug.log"
+      infoFileName: "/logs/info/project-info.log"
+      warnFileName: "/logs/error/project-error.log"
+      maxSize: 500,
+      maxAge: 28,
+      MaxBackups: 3
+    redis:
+      host: "redis-service"
+      port: 6379
+      password: ""
+      db: 0
+    grpc:
+      addr: "0.0.0.0:8881"
+      name: "login"
+      version: "1.0.0"
+      weight: 2
+    etcd:
+      addrs:
+        - "etcd3:2379"
+    mysql:
+      username: "${MYSQL_USERNAME}"
+      password: "${MYSQL_PASSWORD}"
+      host: mysql-master
+      port: 3306
+      db: msproject
+    jwt:
+      accessExp: 7
+      refreshExp: 14
+      accessSecret: msproject
+      refreshSecret: ms_project

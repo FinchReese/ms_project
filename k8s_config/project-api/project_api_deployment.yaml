@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: project-api
+  namespace: ms-project
+  labels:
+    app: project-api
+spec:
+  selector:
+    matchLabels:
+      app: project-api
+  replicas: 3
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: project-api
+    spec:
+      containers:
+        - image: hkccr.ccs.tencentyun.com/ms-project/project-api:v1.0.1
+          name: project-api
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              protocol: TCP
+          volumeMounts:
+          - name: api-config
+            mountPath: /app/config/app.yaml
+            subPath: app.yaml
+      volumes:
+      - name: api-config
+        configMap:
+          name: project-api    

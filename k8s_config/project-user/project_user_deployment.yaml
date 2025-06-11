@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: project-user
+  namespace: ms-project
+  labels:
+    app: project-user
+spec:
+  selector:
+    matchLabels:
+      app: project-user
+  replicas: 3
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: project-user
+    spec:
+      containers:
+        - image: hkccr.ccs.tencentyun.com/ms-project/project-user:v1.0.0
+          name: project-user
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MYSQL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: mysql-user
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: mysql-password
+          ports:
+            - containerPort: 8881
+              protocol: TCP
+          volumeMounts:
+          - name: user-config
+            mountPath: /app/config/app.yaml
+            subPath: app.yaml
+      volumes:
+      - name: user-config
+        configMap:
+          name: project-user
