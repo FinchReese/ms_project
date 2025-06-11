@@ -7,7 +7,7 @@ RUN mkdir -p /logs/debug
 RUN mkdir -p /logs/info
 RUN mkdir -p /logs/error
 RUN  mkdir config
-RUN  mv app-docker.yaml config/app.yaml
+RUN  mv app-docker.yaml ./config/app.yaml
 RUN chmod +x project-api
 EXPOSE 80
 ENTRYPOINT ["./project-api"]

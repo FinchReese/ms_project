@@ -11,3 +11,9 @@ zap:
 etcd:
   addrs:
     - "etcd3:2379"
+minIO:
+  endpoint: "minio:9009"
+  accessKey: "admin"
+  secretKey: "admin123456"
+  useSSL: false
+  bucket: "ms-project"
