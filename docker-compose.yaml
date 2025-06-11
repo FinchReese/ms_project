@@ -179,6 +179,13 @@ services:
       - MINIO_ROOT_PASSWORD=admin123456
     volumes:
       - '${MINIO_DIR}/data:/data'
+  project-api:
+    container_name: project-api
+    image: project-api:v1.0.1
+    restart: always
+    network_mode: "host"
+    volumes:
+      - ${PROJECT_API_DIR}/logs:/logs
 volumes:
   nacos-conf:
     driver: local
