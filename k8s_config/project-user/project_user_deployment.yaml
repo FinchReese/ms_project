@@ -22,7 +22,7 @@ spec:
         app: project-user
     spec:
       containers:
-        - image: hkccr.ccs.tencentyun.com/ms-project/project-user:v1.0.0
+        - image: hkccr.ccs.tencentyun.com/ms-project/project-user:v1.0.1
           name: project-user
           imagePullPolicy: IfNotPresent
           env:
