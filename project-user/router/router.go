@@ -48,7 +48,7 @@ func RegisterGrpc() *grpc.Server {
 		OrganizationRepo: dao.ODao,
 		Tran:             tran.NewTransaction(),
 	})
-	lis, err := net.Listen("tcp", config.AppConf.GrpcConf.Addr)
+	lis, err := net.Listen("tcp", config.AppConf.GrpcConf.ListenAddr)
 	if err != nil {
 		log.Println("cannot listen")
 	}
@@ -64,5 +64,5 @@ func RegisterGrpc() *grpc.Server {
 }
 
 func RegisterGrpcAddrConf() {
-	service_discover.RegisterService(config.AppConf.EtcdConf.Addrs, config.AppConf.GrpcConf.Name, config.AppConf.GrpcConf.Addr, grpcServiceTTL)
+	service_discover.RegisterService(config.AppConf.EtcdConf.Addrs, config.AppConf.GrpcConf.Name, config.AppConf.GrpcConf.ConnectAddr, grpcServiceTTL)
 }

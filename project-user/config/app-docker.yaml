@@ -14,7 +14,8 @@ redis:
   password: ""
   db: 0
 grpc:
-  addr: "project-user:8881"
+  listenAddr: "project-user:8881"
+  connectAddr: "project-user:8881"
   name: "login"
   version: "1.0.0"
   weight: 2
