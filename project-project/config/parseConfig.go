@@ -23,10 +23,11 @@ type ServerConfig struct {
 }
 
 type GrpcConfig struct {
-	Name    string
-	Addr    string
-	Version string
-	Weight  int64
+	Name        string
+	ListenAddr  string
+	ConnectAddr string
+	Version     string
+	Weight      int64
 }
 
 type EtcdConfig struct {
@@ -172,7 +173,8 @@ func (c *Config) ReadServerConfig() {
 func (c *Config) ReadGrpcConfig() {
 	gc := &GrpcConfig{}
 	gc.Name = c.viper.GetString("grpc.name")
-	gc.Addr = c.viper.GetString("grpc.addr")
+	gc.ListenAddr = c.viper.GetString("grpc.listenAddr")
+	gc.ConnectAddr = c.viper.GetString("grpc.connectAddr")
 	gc.Version = c.viper.GetString("grpc.version")
 	gc.Weight = c.viper.GetInt64("grpc.weight")
 	c.GrpcConf = gc
