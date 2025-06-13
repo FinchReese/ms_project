@@ -21,21 +21,12 @@ spec:
       labels:
         app: project-user
     spec:
+      imagePullSecrets:
+        - name: tencent-ccr-secret
       containers:
-        - image: hkccr.ccs.tencentyun.com/ms-project/project-user:v1.0.1
+        - image: hkccr.ccs.tencentyun.com/ms-project/project-user:v1.0.2
           name: project-user
           imagePullPolicy: IfNotPresent
-          env:
-            - name: MYSQL_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: mysql-secret
-                  key: mysql-user
-            - name: MYSQL_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mysql-secret
-                  key: mysql-password
           ports:
             - containerPort: 8881
               protocol: TCP

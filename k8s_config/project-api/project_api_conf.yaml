@@ -4,7 +4,7 @@ metadata:
   name: project-api
   namespace: ms-project
 data:
-  config.yaml: |-
+  app.yaml: |-
     server:
       name: "project-api"
       addr: "0.0.0.0:80"
@@ -19,7 +19,7 @@ data:
       addrs:
         - "etcd3:2379"
     minIO:
-      endpoint: "minio:9009"
+      endpoint: "minio:9000"
       accessKey: "admin"
       secretKey: "admin123456"
       useSSL: false

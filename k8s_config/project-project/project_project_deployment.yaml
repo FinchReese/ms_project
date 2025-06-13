@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: project-api
+  name: project-project
   namespace: ms-project
   labels:
-    app: project-api
+    app: project-project
 spec:
   selector:
     matchLabels:
-      app: project-api
+      app: project-project
   replicas: 3
   minReadySeconds: 5
   strategy:
@@ -19,22 +19,28 @@ spec:
   template:
     metadata:
       labels:
-        app: project-api
+        app: project-project
     spec:
       imagePullSecrets:
         - name: tencent-ccr-secret
       containers:
-        - image: hkccr.ccs.tencentyun.com/ms-project/project-api:v1.0.1
-          name: project-api
+        - image: hkccr.ccs.tencentyun.com/ms-project/project-project:v1.0.2
+          name: project-project
           imagePullPolicy: Always
           ports:
-            - containerPort: 80
+            - containerPort: 8882
               protocol: TCP
           volumeMounts:
-          - name: api-config
+          - name: project-config
             mountPath: /app/config/app.yaml
             subPath: app.yaml
+          - name: project-nacos-config
+            mountPath: /app/config/nacos_config.yaml
+            subPath: nacos_config.yaml
       volumes:
-      - name: api-config
+      - name: project-config
         configMap:
-          name: project-api    
+          name: project-project-app-conf
+      - name: project-nacos-config
+        configMap:
+          name: project-project-nacos-conf
