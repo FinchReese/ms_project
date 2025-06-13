@@ -3,10 +3,8 @@ kind: StatefulSet
 metadata:
   name: minio
   namespace: ms-project
-  labels:
-    app: minio
 spec:
-  serviceName: "minio"
+  serviceName: minio
   replicas: 1
   selector:
     matchLabels:
@@ -16,55 +14,48 @@ spec:
       labels:
         app: minio
     spec:
-      securityContext:
-        fsGroup: 1001
-        runAsUser: 1001
-        runAsGroup: 1001
-      initContainers:
-      - name: fix-permissions
-        image: busybox:1.35
-        command: ['sh', '-c']
-        args:
-        - |
-          chown -R 1001:1001 /bitnami/minio/data
-          chmod -R 755 /bitnami/minio/data
-        volumeMounts:
-        - name: minio-data
-          mountPath: /bitnami/minio/data
-        securityContext:
-          runAsUser: 0
       containers:
       - name: minio
-        image: bitnami/minio:2023
-        imagePullPolicy: IfNotPresent
+        image: bitnami/minio:latest
         ports:
         - containerPort: 9000
-          protocol: TCP
         - containerPort: 9001
-          protocol: TCP
         env:
         - name: MINIO_ROOT_USER
-          value: "admin"
+          valueFrom:
+            secretKeyRef:
+              name: minio-secret
+              key: root-user
         - name: MINIO_ROOT_PASSWORD
-          value: "admin123456"
+          valueFrom:
+            secretKeyRef:
+              name: minio-secret
+              key: root-password
+        - name: MINIO_ENABLE_HTTPS
+          value: "no"
+        - name: MINIO_BROWSER
+          value: "on"
         - name: MINIO_DEFAULT_BUCKETS
-          value: "ms-project"
+          value: "default-bucket"
+        - name: ALLOW_EMPTY_PASSWORD
+          value: "no"
+        - name: MKDIR_INITDIR_PERMISSION
+          value: "755"
         volumeMounts:
         - name: minio-data
-          mountPath: /bitnami/minio/data
+          mountPath: /data
         resources:
           requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
             memory: "512Mi"
             cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1"
   volumeClaimTemplates:
   - metadata:
       name: minio-data
     spec:
       accessModes: [ "ReadWriteOnce" ]
-      storageClassName: cbs
       resources:
         requests:
           storage: 10Gi
