@@ -13,6 +13,7 @@ import (
 	"github.com/jinzhu/copier"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"go.uber.org/zap"
 	"test.com/project-api/config"
 	"test.com/project-api/pkg/model/project"
 	model_project "test.com/project-api/pkg/model/project"
@@ -460,6 +461,7 @@ func uploadFile(ctx *gin.Context) {
 			minio.PutObjectOptions{ContentType: file.Header.Get("Content-Type")},
 		)
 		if err != nil {
+			zap.L().Error("上传文件失败", zap.Error(err))
 			ctx.JSON(http.StatusInternalServerError, result.Fail(http.StatusBadRequest, "上传文件失败"))
 			return
 		}
@@ -474,6 +476,7 @@ func uploadFile(ctx *gin.Context) {
 			minio.PutObjectOptions{ContentType: file.Header.Get("Content-Type")},
 		)
 		if err != nil {
+			zap.L().Error("上传文件失败", zap.Error(err))
 			ctx.JSON(http.StatusInternalServerError, result.Fail(http.StatusBadRequest, "上传文件失败"))
 			return
 		}
