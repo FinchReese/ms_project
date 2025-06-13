@@ -189,7 +189,7 @@ services:
       - ${PROJECT_API_DIR}/logs:/logs
   project-project:
     container_name: project-project
-    image: project-project:v1.0.1
+    image: project-project:v1.0.2
     restart: always
     ports:
       - 8082:8082
@@ -198,7 +198,7 @@ services:
       - ${PROJECT_PROJECT_DIR}/logs:/logs
   project-user:
     container_name: project-user
-    image: project-user:v1.0.1
+    image: project-user:v1.0.2
     restart: always
     ports:
       - 8080:8080

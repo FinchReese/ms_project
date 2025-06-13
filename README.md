@@ -12,12 +12,12 @@ docker build -t project-api:v1.0.1 .
 
 切换到project-user目录下，执行以下命令创建project-user镜像
 ```shell
-docker build -t project-user:v1.0.1 .
+docker build -t project-user:v1.0.2 .
 ```
 
 切换到project-project目录下，执行以下命令创建project-project镜像
 ```shell
-docker build -t project-project:v1.0.1 .
+docker build -t project-project:v1.0.2 .
 ```
 
 回到根目录，执行以下命令启动容器
