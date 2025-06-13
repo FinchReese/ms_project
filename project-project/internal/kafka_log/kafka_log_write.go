@@ -64,7 +64,7 @@ func (c *KafkaCache) Close() {
 }
 
 func NewKafkaCache() *KafkaCache {
-	reader := kk.GetReader([]string{"localhost:9092"}, "cache_group", "msproject_cache")
+	reader := kk.GetReader([]string{config.AppConf.KafkaConf.Addr}, "cache_group", "msproject_cache")
 	return &KafkaCache{
 		reader: reader,
 		cache:  dao.Rc,
