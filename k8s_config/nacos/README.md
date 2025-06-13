@@ -9,6 +9,9 @@ kubectl create configmap nacos-mysql-structure --from-file=nacos-mysql.sql -n ms
 ```
 
 # 测试nacos
+选择任意工作节点执行以下命令：
 ```shell
 kubectl port-forward --address 0.0.0.0 svc/nacos-service -n ms-project 8848:8848
 ```
+访问http://节点ip:8848/nacos/
+账号密码都是nacos
