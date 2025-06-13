@@ -52,6 +52,7 @@ func (c *KafkaCache) DeleteCache() {
 			}
 			for _, field := range fields {
 				c.cache.Delete(context.Background(), field)
+				zap.L().Info("删除缓存", zap.String("field", field))
 			}
 			c.cache.ClearSet(context.Background(), "task")
 		}
