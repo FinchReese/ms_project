@@ -41,6 +41,10 @@ type JwtConfig struct {
 	RefreshSecret string
 }
 
+type JaegerConfig struct {
+	CollectorAddr string
+}
+
 type Config struct {
 	viper      *viper.Viper
 	ServerConf *ServerConfig
@@ -48,6 +52,7 @@ type Config struct {
 	EtcdConf   *EtcdConfig
 	MysqlConf  *MysqlConfig
 	JwtConf    *JwtConfig
+	JaegerConf *JaegerConfig
 }
 
 var AppConf = initConfig()
@@ -70,6 +75,7 @@ func initConfig() *Config {
 	conf.ReadEtcdConfig()
 	conf.ReadMysqlConfig()
 	conf.ReadJwtConfig()
+	conf.ReadJaegerConfig()
 	return conf
 }
 
@@ -142,4 +148,13 @@ func (c *Config) ReadJwtConfig() {
 	jwtConf.RefreshExp = c.viper.GetInt("jwt.refreshExp")
 	jwtConf.RefreshSecret = c.viper.GetString("jwt.refreshSecret")
 	c.JwtConf = jwtConf
+}
+
+func (c *Config) ReadJaegerConfig() {
+	jaegerConf := &JaegerConfig{}
+	err := c.viper.UnmarshalKey("jaeger", &jaegerConf)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	c.JaegerConf = jaegerConf
 }

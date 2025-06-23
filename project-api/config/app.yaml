@@ -17,3 +17,5 @@ minIO:
   secretKey: "1iy3ZYOOwQaKAumkxkm0Utma5TpF6rZrYyEgKHoA"
   useSSL: false
   bucket: "ms-project"
+jaeger:
+  collectorAddr: "127.0.0.1:14268"

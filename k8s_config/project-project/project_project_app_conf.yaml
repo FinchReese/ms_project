@@ -37,3 +37,5 @@ data:
       db: msproject
     kafka:
       addr: "kafka:9092"
+    jaeger:
+      collectorAddr: "jaeger:14268"

@@ -25,11 +25,16 @@ type MinIOConfig struct {
 	Bucket    string
 }
 
+type JaegerConfig struct {
+	CollectorAddr string
+}
+
 type Config struct {
 	viper      *viper.Viper
 	ServerConf *ServerConfig
 	EtcdConf   *EtcdConfig
 	MinIOConf  *MinIOConfig
+	JaegerConf *JaegerConfig
 }
 
 var AppConf = initConfig()
@@ -50,6 +55,7 @@ func initConfig() *Config {
 	conf.ReadServerConfig()
 	conf.ReadEtcdConfig()
 	conf.ReadMinIOConfig()
+	conf.ReadJaegerConfig()
 	return conf
 }
 
@@ -94,4 +100,13 @@ func (c *Config) ReadMinIOConfig() {
 		log.Fatalln(err)
 	}
 	c.MinIOConf = minIOConf
+}
+
+func (c *Config) ReadJaegerConfig() {
+	jaegerConf := &JaegerConfig{}
+	err := c.viper.UnmarshalKey("jaeger", &jaegerConf)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	c.JaegerConf = jaegerConf
 }

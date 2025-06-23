@@ -30,3 +30,5 @@ mysql:
   db: msproject
 kafka:
   addr: "localhost:9092"
+jaeger:
+  collectorAddr: "127.0.0.1:14268"

@@ -21,6 +21,8 @@ data:
     minIO:
       endpoint: "minio:9000"
       accessKey: "admin"
-      secretKey: "admin123456"
+      secretKey: "password123"
       useSSL: false
       bucket: "ms-project"
+    jaeger:
+      collectorAddr: "jaeger:14268"

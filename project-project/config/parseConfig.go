@@ -46,6 +46,10 @@ type KafkaConfig struct {
 	Addr string
 }
 
+type JaegerConfig struct {
+	CollectorAddr string
+}
+
 type Config struct {
 	viper      *viper.Viper
 	ServerConf *ServerConfig
@@ -53,6 +57,7 @@ type Config struct {
 	EtcdConf   *EtcdConfig
 	MysqlConf  *MysqlConfig
 	KafkaConf  *KafkaConfig
+	JaegerConf *JaegerConfig
 }
 
 var AppConf = initConfig()
@@ -135,6 +140,7 @@ func (c *Config) ReLoadAllConfig() {
 	c.ReadEtcdConfig()
 	c.ReadMysqlConfig()
 	c.ReadKafkaConfig()
+	c.ReadJaegerConfig()
 	InitRedisClient(c.InitRedisOptions())
 	InitMysqlClient(c.MysqlConf)
 }
@@ -208,4 +214,13 @@ func (c *Config) ReadKafkaConfig() {
 		log.Fatalln(err)
 	}
 	c.KafkaConf = kafkaConf
+}
+
+func (c *Config) ReadJaegerConfig() {
+	jaegerConf := &JaegerConfig{}
+	err := c.viper.UnmarshalKey("jaeger", &jaegerConf)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	c.JaegerConf = jaegerConf
 }

@@ -17,3 +17,5 @@ minIO:
   secretKey: "admin123456"
   useSSL: false
   bucket: "ms-project"
+jaeger:
+  collectorAddr: "jaeger:14268"

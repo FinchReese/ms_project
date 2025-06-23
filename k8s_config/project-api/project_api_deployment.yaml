@@ -24,7 +24,7 @@ spec:
       imagePullSecrets:
         - name: tencent-ccr-secret
       containers:
-        - image: hkccr.ccs.tencentyun.com/ms-project/project-api:v1.0.1
+        - image: hkccr.ccs.tencentyun.com/ms-project/project-api:v1.0.3
           name: project-api
           imagePullPolicy: Always
           ports:

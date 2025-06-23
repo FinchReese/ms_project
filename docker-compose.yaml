@@ -179,32 +179,32 @@ services:
       - MINIO_ROOT_PASSWORD=admin123456
     volumes:
       - '${MINIO_DIR}/data:/data'
-  project-api:
-    container_name: project-api
-    image: project-api:v1.0.1
-    restart: always
-    ports:
-      - 80:80
-    volumes:
-      - ${PROJECT_API_DIR}/logs:/logs
-  project-project:
-    container_name: project-project
-    image: project-project:v1.0.2
-    restart: always
-    ports:
-      - 8082:8082
-      - 8882:8882
-    volumes:
-      - ${PROJECT_PROJECT_DIR}/logs:/logs
-  project-user:
-    container_name: project-user
-    image: project-user:v1.0.2
-    restart: always
-    ports:
-      - 8080:8080
-      - 8881:8881
-    volumes:
-      - ${PROJECT_USER_DIR}/logs:/logs
+#  project-api:
+#    container_name: project-api
+#    image: project-api:v1.0.3
+#    restart: always
+#    ports:
+#      - 80:80
+#    volumes:
+#      - ${PROJECT_API_DIR}/logs:/logs
+#  project-project:
+#    container_name: project-project
+#    image: project-project:v1.0.3
+#    restart: always
+#    ports:
+#      - 8082:8082
+#      - 8882:8882
+#    volumes:
+#      - ${PROJECT_PROJECT_DIR}/logs:/logs
+#  project-user:
+#    container_name: project-user
+#    image: project-user:v1.0.3
+#    restart: always
+#    ports:
+#      - 8080:8080
+#      - 8881:8881
+#    volumes:
+#      - ${PROJECT_USER_DIR}/logs:/logs
 volumes:
   nacos-conf:
     driver: local

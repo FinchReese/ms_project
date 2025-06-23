@@ -7,8 +7,8 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
 
-func JaegerTraceProvider(serviceName string, env string) (*sdktrace.TracerProvider, error) {
-	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint("http://localhost:14268/api/traces")))
+func JaegerTraceProvider(collecttorAddr string, serviceName string, env string) (*sdktrace.TracerProvider, error) {
+	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint("http://" + collecttorAddr + "/api/traces")))
 	if err != nil {
 		return nil, err
 	}

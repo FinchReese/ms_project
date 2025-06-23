@@ -18,7 +18,7 @@ func main() {
 	config.AppConf.InitZapLog()
 	r := gin.Default()
 	// 初始化jaeger追踪器
-	tp, err := trace.JaegerTraceProvider(config.AppConf.ServerConf.Name, "dev")
+	tp, err := trace.JaegerTraceProvider(config.AppConf.JaegerConf.CollectorAddr, config.AppConf.ServerConf.Name, "dev")
 	if err != nil {
 		log.Fatal(err)
 	}

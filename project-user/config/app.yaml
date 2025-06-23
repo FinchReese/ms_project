@@ -33,3 +33,5 @@ jwt:
   refreshExp: 14
   accessSecret: msproject
   refreshSecret: ms_project
+jaeger:
+  collectorAddr: "127.0.0.1:14268"
